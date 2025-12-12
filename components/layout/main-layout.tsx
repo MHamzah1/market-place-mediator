@@ -31,6 +31,11 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
       href: "/inspeksi",
       icon: <AiOutlineCheckCircle className="inline mr-1" />,
     },
+    {
+      name: "Master Data",
+      href: "/MasterData",
+      icon: <AiOutlineCheckCircle className="inline mr-1" />,
+    },
   ];
 
   return (
