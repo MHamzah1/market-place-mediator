@@ -34,7 +34,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     {
       icon: BsCarFrontFill,
       label: "Brand",
-      href: "/master-data-brand",
+      href: "/MasterData/Brand/Table",
       active: false,
     },
     {

@@ -1,14 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import instanceAxios from "@/lib/axiosInstance/instanceAxios";
 import { getHeaders } from "@/lib/headers/headers";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
 // Types
-interface Brand {
-  id: string | number;
-  [key: string]: any;
+export interface Brand {
+  id: string;
+  name: string;
+  description: string;
+  logo: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
-
 interface Pagination {
   totalRecords?: number;
   totalPages?: number;
@@ -78,7 +83,7 @@ export const getAllBrands = createAsyncThunk<
         console.log("data already loaded for page brand", page);
         return null;
       }
-      const response = await instanceAxios.get(`/api/brand`, {
+      const response = await instanceAxios.get(`/brand`, {
         params: { page, perPage },
         headers: getHeaders(),
       });
@@ -112,7 +117,7 @@ export const getBrandsWithFilters = createAsyncThunk<
     { rejectWithValue }
   ) => {
     try {
-      const response = await instanceAxios.get(`/api/brand/paged`, {
+      const response = await instanceAxios.get(`/brand/paged`, {
         params: { page, perPage, ...filters },
         headers: getHeaders(),
       });
@@ -143,7 +148,7 @@ export const getBrandsForTable = createAsyncThunk<
   "brand/getBrandsForTable",
   async ({ isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/api/brand/paged`, {
+      const response = await instanceAxios.get(`/brand/paged`, {
         params: filters,
         headers: getHeaders(),
       });
@@ -185,7 +190,7 @@ export const getBrandsForSelect = createAsyncThunk<
   "brand/getBrandsForSelect",
   async ({ isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/api/brand/paged`, {
+      const response = await instanceAxios.get(`/brand/paged`, {
         params: filters,
         headers: getHeaders(),
       });
@@ -225,7 +230,7 @@ export const getBrandById = createAsyncThunk<
   { rejectValue: string }
 >("brand/getBrandById", async (id, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.get(`/api/brand/${id}`, {
+    const response = await instanceAxios.get(`/brand/${id}`, {
       headers: getHeaders(),
     });
     return response.data;
@@ -246,7 +251,7 @@ export const createBrand = createAsyncThunk<
   { rejectValue: string }
 >("brand/createBrand", async (brandData, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.post("/api/brand", brandData, {
+    const response = await instanceAxios.post("/brand", brandData, {
       headers: getHeaders(),
     });
     return response.data;
@@ -267,7 +272,7 @@ export const updateBrand = createAsyncThunk<
   { rejectValue: string }
 >("brand/updateBrand", async ({ id, brandData }, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.put(`/api/brand/${id}`, brandData, {
+    const response = await instanceAxios.put(`/brand/${id}`, brandData, {
       headers: getHeaders(),
     });
     return response.data;
@@ -288,7 +293,7 @@ export const deleteBrand = createAsyncThunk<
   { rejectValue: string }
 >("brand/deleteBrand", async (id, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.delete(`/api/brand/${id}`, {
+    const response = await instanceAxios.delete(`/brand/${id}`, {
       headers: getHeaders(),
     });
     return { id, ...response.data };
