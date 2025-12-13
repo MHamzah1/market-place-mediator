@@ -27,6 +27,7 @@ interface AuthState {
 interface LoginPayload {
   email: string;
   password: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -50,6 +51,7 @@ interface ErrorResponse {
   data?: {
     message?: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
