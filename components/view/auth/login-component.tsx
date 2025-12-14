@@ -11,6 +11,7 @@ import { Eye, EyeOff, Mail, Lock, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { LoginUser } from "@/lib/state/slice/authSlice";
 import { AppDispatch, RootState } from "@/lib/state/store";
+import { useTheme } from "@/app/context/ThemeContext";
 
 // Schema validasi dengan Zod
 const loginSchema = z.object({
@@ -22,12 +23,15 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, error, isLoggedIn } = useSelector(
     (state: RootState) => state.auth
   );
+
+  // Gunakan useTheme hook dari context
+  const { theme, toggleTheme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const {
     register,
@@ -36,25 +40,6 @@ const LoginComponent = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
-
-  // Theme management
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark";
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-  };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -74,32 +59,46 @@ const LoginComponent = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300 p-4">
+    <div
+      className={`min-h-screen flex items-center justify-center transition-colors duration-300 p-4 ${
+        isDarkMode
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+          : "bg-gradient-to-br from-blue-50 via-white to-purple-50"
+      }`}
+    >
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className="fixed top-6 right-6 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+        className={`fixed top-6 right-6 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 ${
+          isDarkMode
+            ? "bg-gray-800 hover:bg-gray-700"
+            : "bg-white hover:bg-gray-50"
+        }`}
         aria-label="Toggle theme"
       >
-        {theme === "light" ? (
-          <Moon className="w-5 h-5 text-gray-700" />
-        ) : (
+        {isDarkMode ? (
           <Sun className="w-5 h-5 text-yellow-400" />
+        ) : (
+          <Moon className="w-5 h-5 text-gray-700" />
         )}
       </button>
 
       <div className="w-full max-w-md">
         {/* Card Container */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 space-y-6 transform transition-all duration-300 hover:shadow-3xl">
+        <div
+          className={`rounded-2xl shadow-2xl p-8 space-y-6 transform transition-all duration-300 hover:shadow-3xl ${
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          }`}
+        >
           {/* Logo & Title */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-br from-blue-500 to-purple-600 shadow-lg mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg mb-4">
               <Lock className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Selamat Datang
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               Masuk ke akun Anda untuk melanjutkan
             </p>
           </div>
@@ -110,7 +109,9 @@ const LoginComponent = () => {
             <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
               >
                 Email
               </label>
@@ -122,11 +123,11 @@ const LoginComponent = () => {
                   id="email"
                   type="email"
                   {...register("email")}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.email
-                      ? "border-red-500 dark:border-red-500"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    isDarkMode
+                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                      : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
+                  } ${errors.email ? "border-red-500" : ""}`}
                   placeholder="nama@email.com"
                 />
               </div>
@@ -141,7 +142,9 @@ const LoginComponent = () => {
             <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
               >
                 Password
               </label>
@@ -153,11 +156,11 @@ const LoginComponent = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.password
-                      ? "border-red-500 dark:border-red-500"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    isDarkMode
+                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                      : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
+                  } ${errors.password ? "border-red-500" : ""}`}
                   placeholder="••••••••"
                 />
                 <button
@@ -166,9 +169,21 @@ const LoginComponent = () => {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                    <EyeOff
+                      className={`h-5 w-5 ${
+                        isDarkMode
+                          ? "text-gray-400 hover:text-gray-300"
+                          : "text-gray-400 hover:text-gray-600"
+                      }`}
+                    />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                    <Eye
+                      className={`h-5 w-5 ${
+                        isDarkMode
+                          ? "text-gray-400 hover:text-gray-300"
+                          : "text-gray-400 hover:text-gray-600"
+                      }`}
+                    />
                   )}
                 </button>
               </div>
@@ -186,13 +201,21 @@ const LoginComponent = () => {
                   type="checkbox"
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                <span
+                  className={`ml-2 text-sm ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   Ingat saya
                 </span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                className={`text-sm font-medium ${
+                  isDarkMode
+                    ? "text-blue-400 hover:text-blue-300"
+                    : "text-blue-600 hover:text-blue-700"
+                }`}
               >
                 Lupa password?
               </Link>
@@ -202,7 +225,7 @@ const LoginComponent = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -236,10 +259,20 @@ const LoginComponent = () => {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+              <div
+                className={`w-full border-t ${
+                  isDarkMode ? "border-gray-600" : "border-gray-300"
+                }`}
+              ></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              <span
+                className={`px-2 ${
+                  isDarkMode
+                    ? "bg-gray-800 text-gray-400"
+                    : "bg-white text-gray-500"
+                }`}
+              >
                 Atau
               </span>
             </div>
@@ -247,11 +280,15 @@ const LoginComponent = () => {
 
           {/* Register Link */}
           <div className="text-center">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
               Belum punya akun?{" "}
               <Link
                 href="/auth/register"
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+                className={`font-semibold ${
+                  isDarkMode
+                    ? "text-blue-400 hover:text-blue-300"
+                    : "text-blue-600 hover:text-blue-700"
+                }`}
               >
                 Daftar sekarang
               </Link>
@@ -260,7 +297,11 @@ const LoginComponent = () => {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+        <p
+          className={`text-center text-sm mt-6 ${
+            isDarkMode ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
           © 2024 Market Place Mediator. All rights reserved.
         </p>
       </div>
