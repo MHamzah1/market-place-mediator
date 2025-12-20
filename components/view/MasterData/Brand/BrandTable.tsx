@@ -3,7 +3,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import Button from "@/components/ui/button";
 import { Edit, Trash2, Eye, Plus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,30 +17,15 @@ import {
   getBrandsForTable,
 } from "@/lib/state/slice/brand/brandSlice";
 import TableSearch from "@/components/feature/table/table-search";
+import { useTheme } from "@/app/context/ThemeContext";
 
 export default function BrandTable() {
   const dispatch = useDispatch<AppDispatch>();
   const { data, loading, error, totalItems, totalPages, currentPage, success } =
     useSelector((state: RootState) => state.brand);
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Sync with theme from localStorage
-  useEffect(() => {
-    const updateTheme = () => {
-      if (typeof window !== "undefined") {
-        const theme = localStorage.getItem("theme");
-        setIsDarkMode(theme === "dark");
-      }
-    };
-
-    updateTheme();
-
-    // Poll for theme changes
-    const interval = setInterval(updateTheme, 100);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   // Filter states
   const [filters, setFilters] = useState({

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Search, X, Filter, Calendar } from "lucide-react";
+import { Search, X, Filter } from "lucide-react";
 import { Button, DatePicker, SelectField } from "@/components/ui";
+import { useTheme } from "@/app/context/ThemeContext";
 
 export interface PeriodOption {
   value: string;
@@ -93,6 +94,9 @@ export default function TableSearch({
   className,
   layout = "vertical",
 }: TableSearchProps) {
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+
   const [localSearch, setLocalSearch] = useState(searchValue);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -145,7 +149,12 @@ export default function TableSearch({
       {/* Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <div
+            className={cn(
+              "absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300",
+              isDarkMode ? "text-slate-500" : "text-gray-400"
+            )}
+          >
             <Search size={20} />
           </div>
           <input
@@ -155,15 +164,22 @@ export default function TableSearch({
             onKeyPress={handleKeyPress}
             placeholder={searchPlaceholder}
             className={cn(
-              "w-full pl-10 pr-10 py-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-              "placeholder:text-gray-400"
+              "w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border transition-all duration-300",
+              "focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent",
+              isDarkMode
+                ? "bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                : "bg-white border-slate-300 text-slate-900 placeholder:text-gray-400"
             )}
           />
           {localSearch && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className={cn(
+                "absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-300",
+                isDarkMode
+                  ? "text-slate-500 hover:text-slate-300"
+                  : "text-gray-400 hover:text-gray-600"
+              )}
             >
               <X size={18} />
             </button>
@@ -171,49 +187,71 @@ export default function TableSearch({
         </div>
 
         <div className="flex gap-2">
-          <Button
+          <button
             type="button"
-            variant="primary"
             onClick={handleSearch}
-            leftIcon={Search}
+            className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
           >
+            <Search size={18} />
             Cari
-          </Button>
+          </button>
 
           {(showDateRange ||
             showPeriod ||
             showOrderBy ||
             showSortDirection ||
             showActiveFilter) && (
-            <Button
+            <button
               type="button"
-              variant={hasActiveFilters ? "primary" : "outline"}
               onClick={() => setShowFilters(!showFilters)}
-              leftIcon={Filter}
+              className={cn(
+                "px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200",
+                hasActiveFilters
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
+                  : isDarkMode
+                  ? "bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600/50"
+                  : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-300"
+              )}
             >
+              <Filter size={18} />
               Filter
               {hasActiveFilters && (
-                <span className="ml-2 px-2 py-0.5 bg-white text-blue-600 rounded-full text-xs font-semibold">
-                  •
-                </span>
+                <span
+                  className={cn(
+                    "ml-1 w-2 h-2 rounded-full",
+                    hasActiveFilters ? "bg-white" : ""
+                  )}
+                />
               )}
-            </Button>
+            </button>
           )}
         </div>
       </div>
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              <Filter size={16} />
+        <div
+          className={cn(
+            "border rounded-2xl p-6 backdrop-blur-sm transition-colors duration-300",
+            isDarkMode
+              ? "bg-slate-800/50 border-slate-700/50"
+              : "bg-slate-50 border-slate-200"
+          )}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3
+              className={cn(
+                "text-sm font-bold flex items-center gap-2 transition-colors duration-300",
+                isDarkMode ? "text-white" : "text-slate-900"
+              )}
+            >
+              <Filter size={16} className="text-cyan-400" />
               Filter Pencarian
             </h3>
             {hasActiveFilters && (
               <button
                 onClick={handleReset}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-cyan-400 hover:text-cyan-300 font-semibold transition-colors duration-200"
               >
                 Reset Filter
               </button>
@@ -308,17 +346,26 @@ export default function TableSearch({
           </div>
 
           {/* Apply Filters Button */}
-          <div className="mt-4 flex justify-end gap-2">
-            <Button
+          <div className="mt-6 flex justify-end gap-3">
+            <button
               type="button"
-              variant="outline"
               onClick={() => setShowFilters(false)}
+              className={cn(
+                "px-6 py-2.5 rounded-lg font-semibold transition-all duration-200",
+                isDarkMode
+                  ? "bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600/50"
+                  : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-300"
+              )}
             >
               Tutup
-            </Button>
-            <Button type="button" variant="primary" onClick={handleSearch}>
+            </button>
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
+            >
               Terapkan Filter
-            </Button>
+            </button>
           </div>
         </div>
       )}

@@ -12,6 +12,7 @@ import {
   ArrowDown,
   Loader2,
 } from "lucide-react";
+import { useTheme } from "@/app/context/ThemeContext";
 
 export interface Column<T> {
   key: string;
@@ -65,14 +66,22 @@ export default function DataTable<T extends Record<string, any>>({
   emptyMessage = "Tidak ada data tersedia",
   actions,
 }: DataTableProps<T>) {
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+
   const getSortIcon = (columnKey: string) => {
     if (orderBy !== columnKey) {
-      return <ArrowUpDown size={16} className="text-gray-400" />;
+      return (
+        <ArrowUpDown
+          size={16}
+          className={isDarkMode ? "text-slate-500" : "text-gray-400"}
+        />
+      );
     }
     return sortDirection === "ASC" ? (
-      <ArrowUp size={16} className="text-blue-600" />
+      <ArrowUp size={16} className="text-cyan-400" />
     ) : (
-      <ArrowDown size={16} className="text-blue-600" />
+      <ArrowDown size={16} className="text-cyan-400" />
     );
   };
 
@@ -99,11 +108,13 @@ export default function DataTable<T extends Record<string, any>>({
           onClick={() => onPageChange(i)}
           disabled={loading}
           className={cn(
-            "min-w-[40px] h-10 px-3 text-sm font-medium rounded-lg transition-colors",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "min-w-[40px] h-10 px-3 text-sm font-medium rounded-lg transition-all duration-200",
+            "focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
             i === currentPage
-              ? "bg-blue-600 text-white"
-              : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300",
+              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30"
+              : isDarkMode
+              ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
+              : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-300",
             loading && "opacity-50 cursor-not-allowed"
           )}
         >
@@ -121,16 +132,31 @@ export default function DataTable<T extends Record<string, any>>({
   return (
     <div className={cn("w-full", className)}>
       {/* Table Container */}
-      <div className="relative bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      <div
+        className={cn(
+          "relative rounded-2xl border backdrop-blur-sm overflow-hidden shadow-lg transition-colors duration-300",
+          isDarkMode
+            ? "bg-slate-800/50 border-slate-700/50"
+            : "bg-white border-slate-200"
+        )}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead
+              className={cn(
+                "border-b transition-colors duration-300",
+                isDarkMode
+                  ? "bg-slate-900/50 border-slate-700/50"
+                  : "bg-slate-50 border-slate-200"
+              )}
+            >
               <tr>
-                {columns.map((column, index) => (
+                {columns.map((column) => (
                   <th
                     key={column.key}
                     className={cn(
-                      "px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider",
+                      "px-6 py-4 text-left text-xs font-bold uppercase tracking-wider transition-colors duration-300",
+                      isDarkMode ? "text-slate-400" : "text-slate-600",
                       column.headerClassName
                     )}
                   >
@@ -138,7 +164,12 @@ export default function DataTable<T extends Record<string, any>>({
                       <button
                         onClick={() => handleSort(column.key)}
                         disabled={loading}
-                        className="flex items-center gap-2 hover:text-blue-600 transition-colors disabled:cursor-not-allowed"
+                        className={cn(
+                          "flex items-center gap-2 transition-colors disabled:cursor-not-allowed",
+                          isDarkMode
+                            ? "hover:text-cyan-400"
+                            : "hover:text-blue-600"
+                        )}
                       >
                         {column.header}
                         {getSortIcon(column.key)}
@@ -149,13 +180,23 @@ export default function DataTable<T extends Record<string, any>>({
                   </th>
                 ))}
                 {actions && (
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th
+                    className={cn(
+                      "px-6 py-4 text-left text-xs font-bold uppercase tracking-wider transition-colors duration-300",
+                      isDarkMode ? "text-slate-400" : "text-slate-600"
+                    )}
+                  >
                     Aksi
                   </th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody
+              className={cn(
+                "divide-y transition-colors duration-300",
+                isDarkMode ? "divide-slate-700/50" : "divide-slate-200"
+              )}
+            >
               {loading ? (
                 <tr>
                   <td
@@ -163,8 +204,15 @@ export default function DataTable<T extends Record<string, any>>({
                     className="px-6 py-12 text-center"
                   >
                     <div className="flex flex-col items-center justify-center gap-3">
-                      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                      <p className="text-sm text-gray-500">Memuat data...</p>
+                      <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+                      <p
+                        className={cn(
+                          "text-sm transition-colors duration-300",
+                          isDarkMode ? "text-slate-400" : "text-slate-500"
+                        )}
+                      >
+                        Memuat data...
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -175,7 +223,7 @@ export default function DataTable<T extends Record<string, any>>({
                     className="px-6 py-12 text-center"
                   >
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <p className="text-sm text-red-600">{error}</p>
+                      <p className="text-sm text-red-400">{error}</p>
                     </div>
                   </td>
                 </tr>
@@ -185,20 +233,31 @@ export default function DataTable<T extends Record<string, any>>({
                     colSpan={columns.length + (actions ? 1 : 0)}
                     className="px-6 py-12 text-center"
                   >
-                    <p className="text-sm text-gray-500">{emptyMessage}</p>
+                    <p
+                      className={cn(
+                        "text-sm transition-colors duration-300",
+                        isDarkMode ? "text-slate-400" : "text-slate-500"
+                      )}
+                    >
+                      {emptyMessage}
+                    </p>
                   </td>
                 </tr>
               ) : (
                 data.map((item, rowIndex) => (
                   <tr
                     key={rowIndex}
-                    className="hover:bg-gray-50 transition-colors"
+                    className={cn(
+                      "transition-colors duration-200 group",
+                      isDarkMode ? "hover:bg-slate-700/30" : "hover:bg-slate-50"
+                    )}
                   >
                     {columns.map((column) => (
                       <td
                         key={column.key}
                         className={cn(
-                          "px-6 py-4 text-sm text-gray-900",
+                          "px-6 py-4 text-sm transition-colors duration-300",
+                          isDarkMode ? "text-slate-300" : "text-slate-900",
                           column.className
                         )}
                       >
@@ -221,13 +280,50 @@ export default function DataTable<T extends Record<string, any>>({
 
         {/* Pagination */}
         {!loading && !error && data.length > 0 && (
-          <div className="bg-white border-t border-gray-200 px-6 py-4">
+          <div
+            className={cn(
+              "border-t px-6 py-4 transition-colors duration-300",
+              isDarkMode
+                ? "bg-slate-800/30 border-slate-700/50"
+                : "bg-white border-slate-200"
+            )}
+          >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Info */}
-              <div className="text-sm text-gray-700">
-                Menampilkan <span className="font-medium">{startItem}</span> -{" "}
-                <span className="font-medium">{endItem}</span> dari{" "}
-                <span className="font-medium">{totalItems}</span> data
+              <div
+                className={cn(
+                  "text-sm transition-colors duration-300",
+                  isDarkMode ? "text-slate-400" : "text-slate-700"
+                )}
+              >
+                Menampilkan{" "}
+                <span
+                  className={cn(
+                    "font-semibold",
+                    isDarkMode ? "text-white" : "text-slate-900"
+                  )}
+                >
+                  {startItem}
+                </span>{" "}
+                -{" "}
+                <span
+                  className={cn(
+                    "font-semibold",
+                    isDarkMode ? "text-white" : "text-slate-900"
+                  )}
+                >
+                  {endItem}
+                </span>{" "}
+                dari{" "}
+                <span
+                  className={cn(
+                    "font-semibold",
+                    isDarkMode ? "text-white" : "text-slate-900"
+                  )}
+                >
+                  {totalItems}
+                </span>{" "}
+                data
               </div>
 
               {/* Pagination Controls */}
@@ -237,9 +333,12 @@ export default function DataTable<T extends Record<string, any>>({
                   onClick={() => onPageChange(1)}
                   disabled={currentPage === 1 || loading}
                   className={cn(
-                    "p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                    "p-2 rounded-lg border transition-all duration-200",
+                    "focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    isDarkMode
+                      ? "border-slate-600/50 bg-slate-700/50 hover:bg-slate-700 text-slate-300"
+                      : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
                   )}
                   title="Halaman pertama"
                 >
@@ -251,9 +350,12 @@ export default function DataTable<T extends Record<string, any>>({
                   onClick={() => onPageChange(currentPage - 1)}
                   disabled={currentPage === 1 || loading}
                   className={cn(
-                    "p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                    "p-2 rounded-lg border transition-all duration-200",
+                    "focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    isDarkMode
+                      ? "border-slate-600/50 bg-slate-700/50 hover:bg-slate-700 text-slate-300"
+                      : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
                   )}
                   title="Halaman sebelumnya"
                 >
@@ -266,7 +368,12 @@ export default function DataTable<T extends Record<string, any>>({
                 </div>
 
                 {/* Mobile: Current Page Info */}
-                <div className="sm:hidden px-4 py-2 text-sm font-medium text-gray-700">
+                <div
+                  className={cn(
+                    "sm:hidden px-4 py-2 text-sm font-medium transition-colors duration-300",
+                    isDarkMode ? "text-slate-300" : "text-slate-700"
+                  )}
+                >
                   {currentPage} / {totalPages}
                 </div>
 
@@ -275,9 +382,12 @@ export default function DataTable<T extends Record<string, any>>({
                   onClick={() => onPageChange(currentPage + 1)}
                   disabled={currentPage === totalPages || loading}
                   className={cn(
-                    "p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                    "p-2 rounded-lg border transition-all duration-200",
+                    "focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    isDarkMode
+                      ? "border-slate-600/50 bg-slate-700/50 hover:bg-slate-700 text-slate-300"
+                      : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
                   )}
                   title="Halaman selanjutnya"
                 >
@@ -289,9 +399,12 @@ export default function DataTable<T extends Record<string, any>>({
                   onClick={() => onPageChange(totalPages)}
                   disabled={currentPage === totalPages || loading}
                   className={cn(
-                    "p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                    "p-2 rounded-lg border transition-all duration-200",
+                    "focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    isDarkMode
+                      ? "border-slate-600/50 bg-slate-700/50 hover:bg-slate-700 text-slate-300"
+                      : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700"
                   )}
                   title="Halaman terakhir"
                 >
