@@ -3,6 +3,7 @@ import authSlice from "./slice/authSlice";
 import brandSlice from "./slice/brand/brandSlice";
 import userSlice from "./slice/user/userSlice";
 import CarModelsSlice from "./slice/car-models/CarModelsSlice";
+import specificationSlice from "./slice/Specifications/SpecificationsSlice";
 const store = configureStore({
   reducer: {
     // Tambahkan slice reducer di sini
@@ -10,6 +11,7 @@ const store = configureStore({
     brand: brandSlice,
     Users: userSlice,
     CarModels: CarModelsSlice,
+    Specifications: specificationSlice,
   },
 });
 
