@@ -98,7 +98,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
     },
     {
       name: "Kalkulator",
-      href: "/kalkulator",
+      href: "/Kalkulator",
       icon: <AiOutlineCalculator className="inline mr-1" />,
     },
     {
