@@ -38,15 +38,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       active: false,
     },
     {
-      icon: FiUsers,
+      icon: BsCarFrontFill,
       label: "Car Model",
       href: "/master-data-customer",
       active: false,
     },
     {
-      icon: FiShoppingCart,
+      icon: FiUsers,
       label: "User",
-      href: "/transactions",
+      href: "/MasterData/User/Table",
       active: false,
     },
     { icon: FiBarChart2, label: "Laporan", href: "/reports", active: false },
@@ -103,7 +103,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     isDarkMode ? "text-white" : "text-slate-900"
                   }`}
                 >
-                  AutoHub
+                  Mediator
                 </h1>
                 <p
                   className={`text-xs ${

@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Filter } from "lucide-react";
-import { Button, DatePicker, SelectField } from "@/components/ui";
+import { DatePicker, SelectField } from "@/components/ui";
 import { useTheme } from "@/context/ThemeContext";
 
 export interface PeriodOption {
+  value: string;
+  label: string;
+}
+
+export interface SelectOption {
   value: string;
   label: string;
 }
@@ -31,7 +36,7 @@ export interface TableSearchProps {
   // Order By
   orderBy?: string;
   onOrderByChange?: (field: string) => void;
-  orderByOptions?: { value: string; label: string }[];
+  orderByOptions?: SelectOption[];
   showOrderBy?: boolean;
 
   // Sort Direction
@@ -43,6 +48,33 @@ export interface TableSearchProps {
   isActive?: boolean | null;
   onIsActiveChange?: (isActive: boolean | null) => void;
   showActiveFilter?: boolean;
+
+  // Role Filter
+  role?: string;
+  onRoleChange?: (role: string) => void;
+  roleOptions?: SelectOption[];
+  showRoleFilter?: boolean;
+
+  // Status Filter (Generic)
+  status?: string;
+  onStatusChange?: (status: string) => void;
+  statusOptions?: SelectOption[];
+  showStatusFilter?: boolean;
+
+  // Category Filter (Generic)
+  category?: string;
+  onCategoryChange?: (category: string) => void;
+  categoryOptions?: SelectOption[];
+  showCategoryFilter?: boolean;
+
+  // Custom Filters (untuk filter tambahan yang fleksibel)
+  customFilters?: {
+    key: string;
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    options: SelectOption[];
+  }[];
 
   // Actions
   onSearch?: () => void;
@@ -64,6 +96,13 @@ const defaultPeriodOptions: PeriodOption[] = [
   { value: "LastYear", label: "Tahun Lalu" },
   { value: "Last3Months", label: "3 Bulan Terakhir" },
   { value: "Last6Months", label: "6 Bulan Terakhir" },
+];
+
+const defaultRoleOptions: SelectOption[] = [
+  { value: "", label: "Semua Role" },
+  { value: "admin", label: "Admin" },
+  { value: "salesman", label: "Salesman" },
+  { value: "customer", label: "Customer" },
 ];
 
 export default function TableSearch({
@@ -89,6 +128,19 @@ export default function TableSearch({
   isActive,
   onIsActiveChange,
   showActiveFilter = false,
+  role = "",
+  onRoleChange,
+  roleOptions = defaultRoleOptions,
+  showRoleFilter = false,
+  status = "",
+  onStatusChange,
+  statusOptions = [],
+  showStatusFilter = false,
+  category = "",
+  onCategoryChange,
+  categoryOptions = [],
+  showCategoryFilter = false,
+  customFilters = [],
   onSearch,
   onReset,
   className,
@@ -142,7 +194,22 @@ export default function TableSearch({
     (showDateRange && (startDate || endDate)) ||
     (showPeriod && period) ||
     (showOrderBy && orderBy) ||
-    (showActiveFilter && isActive !== null);
+    (showActiveFilter && isActive !== null) ||
+    (showRoleFilter && role) ||
+    (showStatusFilter && status) ||
+    (showCategoryFilter && category) ||
+    customFilters.some((filter) => filter.value);
+
+  // Hitung jumlah filter yang aktif
+  const activeFilterCount = [
+    showDateRange && (startDate || endDate),
+    showPeriod && period,
+    showRoleFilter && role,
+    showStatusFilter && status,
+    showCategoryFilter && category,
+    showActiveFilter && isActive !== null,
+    ...customFilters.map((filter) => filter.value),
+  ].filter(Boolean).length;
 
   return (
     <div className={cn("w-full space-y-4", className)}>
@@ -200,7 +267,11 @@ export default function TableSearch({
             showPeriod ||
             showOrderBy ||
             showSortDirection ||
-            showActiveFilter) && (
+            showActiveFilter ||
+            showRoleFilter ||
+            showStatusFilter ||
+            showCategoryFilter ||
+            customFilters.length > 0) && (
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
@@ -215,13 +286,10 @@ export default function TableSearch({
             >
               <Filter size={18} />
               Filter
-              {hasActiveFilters && (
-                <span
-                  className={cn(
-                    "ml-1 w-2 h-2 rounded-full",
-                    hasActiveFilters ? "bg-white" : ""
-                  )}
-                />
+              {activeFilterCount > 0 && (
+                <span className="ml-1 px-2 py-0.5 text-xs font-bold bg-white/20 rounded-full">
+                  {activeFilterCount}
+                </span>
               )}
             </button>
           )}
@@ -263,7 +331,7 @@ export default function TableSearch({
               "grid gap-4",
               layout === "horizontal"
                 ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-                : "grid-cols-1 md:grid-cols-2"
+                : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
             )}
           >
             {/* Period Filter */}
@@ -295,6 +363,62 @@ export default function TableSearch({
               </>
             )}
 
+            {/* Role Filter */}
+            {showRoleFilter && (
+              <SelectField
+                label="Role"
+                value={role}
+                onChange={(e) => onRoleChange?.(e.target.value)}
+                options={roleOptions}
+                placeholder="Pilih role"
+              />
+            )}
+
+            {/* Status Filter */}
+            {showStatusFilter && statusOptions.length > 0 && (
+              <SelectField
+                label="Status"
+                value={status}
+                onChange={(e) => onStatusChange?.(e.target.value)}
+                options={statusOptions}
+                placeholder="Pilih status"
+              />
+            )}
+
+            {/* Category Filter */}
+            {showCategoryFilter && categoryOptions.length > 0 && (
+              <SelectField
+                label="Kategori"
+                value={category}
+                onChange={(e) => onCategoryChange?.(e.target.value)}
+                options={categoryOptions}
+                placeholder="Pilih kategori"
+              />
+            )}
+
+            {/* Active Filter */}
+            {showActiveFilter && (
+              <SelectField
+                label="Status Aktif"
+                value={
+                  isActive === null ? "" : isActive === true ? "true" : "false"
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    onIsActiveChange?.(null);
+                  } else {
+                    onIsActiveChange?.(value === "true");
+                  }
+                }}
+                options={[
+                  { value: "", label: "Semua Status" },
+                  { value: "true", label: "Aktif" },
+                  { value: "false", label: "Tidak Aktif" },
+                ]}
+              />
+            )}
+
             {/* Order By */}
             {showOrderBy && orderByOptions.length > 0 && (
               <SelectField
@@ -321,28 +445,17 @@ export default function TableSearch({
               />
             )}
 
-            {/* Active Filter */}
-            {showActiveFilter && (
+            {/* Custom Filters */}
+            {customFilters.map((filter) => (
               <SelectField
-                label="Status Aktif"
-                value={
-                  isActive === null ? "" : isActive === true ? "true" : "false"
-                }
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "") {
-                    onIsActiveChange?.(null);
-                  } else {
-                    onIsActiveChange?.(value === "true");
-                  }
-                }}
-                options={[
-                  { value: "", label: "Semua Status" },
-                  { value: "true", label: "Aktif" },
-                  { value: "false", label: "Tidak Aktif" },
-                ]}
+                key={filter.key}
+                label={filter.label}
+                value={filter.value}
+                onChange={(e) => filter.onChange(e.target.value)}
+                options={filter.options}
+                placeholder={`Pilih ${filter.label.toLowerCase()}`}
               />
-            )}
+            ))}
           </div>
 
           {/* Apply Filters Button */}

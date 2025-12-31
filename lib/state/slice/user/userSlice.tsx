@@ -4,7 +4,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
 // Types
-interface Users {
+export interface Users {
   id: string | number;
   email?: string;
   fullName?: string;
