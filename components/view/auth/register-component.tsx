@@ -84,7 +84,7 @@ const RegisterComponent = () => {
     if (success) {
       toast.success("Registrasi berhasil! Silakan login");
       setTimeout(() => {
-        router.push("/login");
+        router.push("/auth/login");
       }, 2000);
     }
   }, [success, router]);
@@ -664,7 +664,7 @@ const RegisterComponent = () => {
           {/* Login Link */}
           <div className="text-center">
             <Link
-              href="/login"
+              href="/auth/login"
               className={`font-semibold ${
                 isDarkMode
                   ? "text-purple-400 hover:text-purple-300"

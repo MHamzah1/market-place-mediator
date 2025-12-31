@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Cookies from "js-cookie";
 import {
   FiHome,
   FiGrid,
@@ -16,6 +17,7 @@ import {
   FiMoon,
   FiChevronDown,
   FiChevronRight,
+  FiLogOut,
 } from "react-icons/fi";
 import { BsCarFrontFill } from "react-icons/bs";
 import { HiOutlineTag, HiOutlineCog } from "react-icons/hi";
@@ -34,11 +36,40 @@ interface MenuItem {
   subItems?: SubMenuItem[];
 }
 
+// User Data Type from Cookies
+interface UserData {
+  fullName: string;
+  email: string;
+  role: string;
+  userId: string;
+}
+
 const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+  const [userData, setUserData] = useState<UserData>({
+    fullName: "Guest User",
+    email: "guest@example.com",
+    role: "guest",
+    userId: "",
+  });
+
+  // Load user data from cookies on mount
+  useEffect(() => {
+    const fullName = Cookies.get("fullName") || "Guest User";
+    const email = Cookies.get("email") || "guest@example.com";
+    const role = Cookies.get("role") || "guest";
+    const userId = Cookies.get("userId") || "";
+
+    setUserData({
+      fullName: decodeURIComponent(fullName),
+      email: decodeURIComponent(email),
+      role: decodeURIComponent(role),
+      userId: decodeURIComponent(userId),
+    });
+  }, []);
 
   // Load theme from localStorage on mount
   useEffect(() => {
@@ -81,6 +112,48 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
+  // Get initials from full name
+  const getInitials = (name: string): string => {
+    return name
+      .split(" ")
+      .map((n) => n.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Get role badge color
+  const getRoleBadgeColor = (role: string): string => {
+    switch (role.toLowerCase()) {
+      case "admin":
+        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+      case "salesman":
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "customer":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      default:
+        return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    // Clear all user cookies
+    Cookies.remove("accessToken");
+    Cookies.remove("fullName");
+    Cookies.remove("email");
+    Cookies.remove("role");
+    Cookies.remove("userId");
+    Cookies.remove("phoneNumber");
+    Cookies.remove("whatsappNumber");
+    Cookies.remove("location");
+    Cookies.remove("createdAt");
+    Cookies.remove("updatedAt");
+
+    // Redirect to login page
+    window.location.href = "/login";
+  };
+
   // Check if menu item is active
   const isMenuActive = (href?: string, subItems?: SubMenuItem[]): boolean => {
     if (href && pathname === href) return true;
@@ -99,7 +172,6 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Check if submenu item is active
   const isSubMenuActive = (href: string): boolean => {
-    // Extract base path (e.g., /MasterData/Brand from /MasterData/Brand/Table)
     const basePath = href.replace("/Table", "").replace("/Add", "");
     return pathname?.startsWith(basePath) || false;
   };
@@ -214,7 +286,7 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-180px)]">
+        <nav className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-220px)]">
           {menuItems.map((item, index) => {
             const isActive = isMenuActive(item.href, item.subItems);
             const isExpanded = expandedMenus.includes(item.label);
@@ -330,42 +402,85 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
           })}
         </nav>
 
-        {/* User Profile */}
-        {sidebarOpen && (
-          <div
-            className={`absolute bottom-0 left-0 right-0 p-4 border-t ${
-              isDarkMode ? "border-slate-800/50" : "border-slate-200"
-            }`}
-          >
-            <div
-              className={`flex items-center gap-3 p-3 rounded-xl transition-colors cursor-pointer ${
-                isDarkMode
-                  ? "bg-slate-800/50 hover:bg-slate-800"
-                  : "bg-slate-100 hover:bg-slate-200"
-              }`}
-            >
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-white">
-                A
-              </div>
-              <div className="flex-1">
-                <p
-                  className={`text-sm font-semibold ${
-                    isDarkMode ? "text-white" : "text-slate-900"
-                  }`}
+        {/* User Profile - Data from Cookies */}
+        <div
+          className={`absolute bottom-0 left-0 right-0 p-4 border-t ${
+            isDarkMode ? "border-slate-800/50" : "border-slate-200"
+          }`}
+        >
+          {sidebarOpen ? (
+            <div className="space-y-3">
+              {/* User Info Card */}
+              <div
+                className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                  isDarkMode ? "bg-slate-800/50" : "bg-slate-100"
+                }`}
+              >
+                {/* Avatar with Initials */}
+                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-sm">
+                  {getInitials(userData.fullName)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  {/* Full Name */}
+                  <p
+                    className={`text-sm font-semibold truncate ${
+                      isDarkMode ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    {userData.fullName}
+                  </p>
+                  {/* Email */}
+                  <p
+                    className={`text-xs truncate ${
+                      isDarkMode ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
+                    {userData.email}
+                  </p>
+                </div>
+                {/* Role Badge */}
+                <span
+                  className={`px-2 py-0.5 text-xs font-semibold rounded-full border capitalize ${getRoleBadgeColor(
+                    userData.role
+                  )}`}
                 >
-                  Admin User
-                </p>
-                <p
-                  className={`text-xs ${
-                    isDarkMode ? "text-slate-400" : "text-slate-600"
-                  }`}
-                >
-                  admin@autohub.com
-                </p>
+                  {userData.role}
+                </span>
               </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all duration-200 ${
+                  isDarkMode
+                    ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                    : "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                }`}
+              >
+                <FiLogOut className="text-lg" />
+                <span>Logout</span>
+              </button>
             </div>
-          </div>
-        )}
+          ) : (
+            /* Collapsed Sidebar - Only Avatar */
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-sm">
+                {getInitials(userData.fullName)}
+              </div>
+              <button
+                onClick={handleLogout}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkMode
+                    ? "text-red-400 hover:bg-red-500/20"
+                    : "text-red-600 hover:bg-red-100"
+                }`}
+                title="Logout"
+              >
+                <FiLogOut className="text-lg" />
+              </button>
+            </div>
+          )}
+        </div>
       </aside>
 
       {/* Main Content */}
