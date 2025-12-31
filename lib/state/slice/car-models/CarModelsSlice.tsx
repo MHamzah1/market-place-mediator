@@ -79,45 +79,6 @@ interface RootState {
   CarModels: CarModelstate;
 }
 
-// GET All CarModels (basic)
-export const getAllCarModels = createAsyncThunk<
-  CarModelsResponse | null,
-  GetCarModelsParams,
-  { rejectValue: ErrorResponse; state: RootState }
->(
-  "CarModels/getAllCarModels",
-  async (
-    { page = 1, perPage = 10, isInfiniteScroll = false },
-    { rejectWithValue, getState }
-  ) => {
-    try {
-      const currentState = getState().CarModels;
-      if (currentState.loadedPages.includes(page)) {
-        console.log("data already loaded for page CarModels", page);
-        return null;
-      }
-      const response = await instanceAxios.get(`/CarModels`, {
-        params: { page, perPage },
-        headers: getHeaders(),
-      });
-      return {
-        data: response.data.data,
-        pagination: response.data.pagination,
-        page,
-        meta: { arg: { page, isInfiniteScroll } },
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<ErrorResponse>;
-      console.log("error fetching data", error);
-      return rejectWithValue(
-        axiosError.response?.data || {
-          message: "Terjadi kesalahan saat mengambil data",
-        }
-      );
-    }
-  }
-);
-
 // GET CarModels with Filters
 export const getCarModelsWithFilters = createAsyncThunk<
   CarModelsResponse,
@@ -130,7 +91,7 @@ export const getCarModelsWithFilters = createAsyncThunk<
     { rejectWithValue }
   ) => {
     try {
-      const response = await instanceAxios.get(`/CarModels/paged`, {
+      const response = await instanceAxios.get(`/CarModels`, {
         params: { page, perPage, ...filters },
         headers: getHeaders(),
       });
@@ -161,7 +122,7 @@ export const getCarModelsForTable = createAsyncThunk<
   "CarModels/getCarModelsForTable",
   async ({ isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/CarModels/paged`, {
+      const response = await instanceAxios.get(`/CarModels`, {
         params: filters,
         headers: getHeaders(),
       });
@@ -203,7 +164,7 @@ export const getCarModelsForSelect = createAsyncThunk<
   "CarModels/getCarModelsForSelect",
   async ({ isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/CarModels/paged`, {
+      const response = await instanceAxios.get(`/CarModels`, {
         params: filters,
         headers: getHeaders(),
       });
@@ -360,30 +321,6 @@ const CarModelslice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // GET All CarModels
-      .addCase(getAllCarModels.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        getAllCarModels.fulfilled,
-        (state, action: PayloadAction<CarModelsResponse | null>) => {
-          if (action.payload === null) return;
-          state.loading = false;
-          state.data = action.payload.data;
-          state.totalItems = action.payload.pagination?.totalRecords || 0;
-          state.totalPages = action.payload.pagination?.totalPages || 1;
-          state.currentPage = action.payload.page || 1;
-          state.loadedPages = action.payload.meta?.arg?.isInfiniteScroll
-            ? state.loadedPages.concat(action.payload.page || 1)
-            : [action.payload.page || 1];
-          state.error = null;
-        }
-      )
-      .addCase(getAllCarModels.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload?.message || "Terjadi kesalahan";
-      })
 
       // GET CarModels with Filters
       .addCase(getCarModelsWithFilters.pending, (state) => {
