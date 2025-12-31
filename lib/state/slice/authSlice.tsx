@@ -10,6 +10,8 @@ interface UserInfo {
   email: string | null;
   fullName: string | null;
   phoneNumber: string | null;
+  whatsappNumber: string | null;
+  location: string | null;
   role: "customer" | "admin" | "salesman" | null;
   createdAt: string | null;
   updatedAt: string | null;
@@ -41,6 +43,8 @@ interface ProfileResponse {
   email: string;
   fullName: string;
   phoneNumber: string;
+  whatsappNumber: string | null;
+  location: string | null;
   role: "customer" | "admin" | "salesman";
   createdAt: string;
   updatedAt: string;
@@ -76,6 +80,8 @@ const setUserInfo = (userInfo: UserInfo): void => {
   Cookies.set("email", userInfo.email || "");
   Cookies.set("fullName", userInfo.fullName || "");
   Cookies.set("phoneNumber", userInfo.phoneNumber || "");
+  Cookies.set("whatsappNumber", userInfo.whatsappNumber || "");
+  Cookies.set("location", userInfo.location || "");
   Cookies.set("role", userInfo.role || "");
   Cookies.set("createdAt", userInfo.createdAt || "");
   Cookies.set("updatedAt", userInfo.updatedAt || "");
@@ -87,6 +93,8 @@ const removeUserInfo = (): void => {
   Cookies.remove("email");
   Cookies.remove("fullName");
   Cookies.remove("phoneNumber");
+  Cookies.remove("whatsappNumber");
+  Cookies.remove("location");
   Cookies.remove("role");
   Cookies.remove("createdAt");
   Cookies.remove("updatedAt");
@@ -110,6 +118,8 @@ export const fetchUserProfile = createAsyncThunk<
       email: data.email,
       fullName: data.fullName,
       phoneNumber: data.phoneNumber,
+      whatsappNumber: data.whatsappNumber,
+      location: data.location,
       role: data.role,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
@@ -196,6 +206,12 @@ const initialState: AuthState = {
       typeof window !== "undefined" ? Cookies.get("fullName") || null : null,
     phoneNumber:
       typeof window !== "undefined" ? Cookies.get("phoneNumber") || null : null,
+    whatsappNumber:
+      typeof window !== "undefined"
+        ? Cookies.get("whatsappNumber") || null
+        : null,
+    location:
+      typeof window !== "undefined" ? Cookies.get("location") || null : null,
     role:
       typeof window !== "undefined"
         ? (Cookies.get("role") as "customer" | "admin" | "salesman" | null)
@@ -221,6 +237,8 @@ const authSlice = createSlice({
         email: null,
         fullName: null,
         phoneNumber: null,
+        whatsappNumber: null,
+        location: null,
         role: null,
         createdAt: null,
         updatedAt: null,
@@ -289,6 +307,8 @@ const authSlice = createSlice({
           email: null,
           fullName: null,
           phoneNumber: null,
+          whatsappNumber: null,
+          location: null,
           role: null,
           createdAt: null,
           updatedAt: null,
@@ -305,6 +325,8 @@ const authSlice = createSlice({
           email: null,
           fullName: null,
           phoneNumber: null,
+          whatsappNumber: null,
+          location: null,
           role: null,
           createdAt: null,
           updatedAt: null,

@@ -6,6 +6,14 @@ import { AxiosError } from "axios";
 // Types
 interface Users {
   id: string | number;
+  email?: string;
+  fullName?: string;
+  phoneNumber?: string;
+  whatsappNumber?: string | null;
+  location?: string | null;
+  role?: "customer" | "admin" | "salesman";
+  createdAt?: string;
+  updatedAt?: string;
   [key: string]: any;
 }
 
@@ -78,7 +86,7 @@ export const getAllUsers = createAsyncThunk<
         console.log("data already loaded for page Users", page);
         return null;
       }
-      const response = await instanceAxios.get(`/api/users`, {
+      const response = await instanceAxios.get(`/users`, {
         params: { page, perPage },
         headers: getHeaders(),
       });
@@ -112,7 +120,7 @@ export const getUsersWithFilters = createAsyncThunk<
     { rejectWithValue }
   ) => {
     try {
-      const response = await instanceAxios.get(`/api/users/paged`, {
+      const response = await instanceAxios.get(`/users/paged`, {
         params: { page, perPage, ...filters },
         headers: getHeaders(),
       });
@@ -143,7 +151,7 @@ export const getUsersForTable = createAsyncThunk<
   "Users/getUsersForTable",
   async ({ isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/api/users/paged`, {
+      const response = await instanceAxios.get(`/users/paged`, {
         params: filters,
         headers: getHeaders(),
       });
@@ -185,7 +193,7 @@ export const getUsersForSelect = createAsyncThunk<
   "Users/getUsersForSelect",
   async ({ isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/api/users/paged`, {
+      const response = await instanceAxios.get(`/users/paged`, {
         params: filters,
         headers: getHeaders(),
       });
@@ -225,7 +233,7 @@ export const getUsersById = createAsyncThunk<
   { rejectValue: string }
 >("Users/getUsersById", async (id, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.get(`/api/users/${id}`, {
+    const response = await instanceAxios.get(`/users/${id}`, {
       headers: getHeaders(),
     });
     return response.data;
@@ -246,13 +254,9 @@ export const createUsers = createAsyncThunk<
   { rejectValue: string }
 >("Users/createUsers", async (UsersData, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.post(
-      "/api/users/register",
-      UsersData,
-      {
-        headers: getHeaders(),
-      }
-    );
+    const response = await instanceAxios.post("/users/register", UsersData, {
+      headers: getHeaders(),
+    });
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
@@ -271,7 +275,7 @@ export const updateUsers = createAsyncThunk<
   { rejectValue: string }
 >("Users/updateUsers", async ({ id, UsersData }, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.put(`/api/users/${id}`, UsersData, {
+    const response = await instanceAxios.put(`/users/${id}`, UsersData, {
       headers: getHeaders(),
     });
     return response.data;
@@ -292,7 +296,7 @@ export const deleteUsers = createAsyncThunk<
   { rejectValue: string }
 >("Users/deleteUsers", async (id, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.delete(`/api/users/${id}`, {
+    const response = await instanceAxios.delete(`/users/${id}`, {
       headers: getHeaders(),
     });
     return { id, ...response.data };

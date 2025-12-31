@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { createUsers } from "@/lib/state/slice/user/userSlice";
 import { AppDispatch, RootState } from "@/lib/state/store";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 // Schema validasi dengan Zod
 const registerSchema = z

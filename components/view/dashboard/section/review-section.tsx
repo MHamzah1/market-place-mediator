@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 import React, { useState } from "react";
 import { FiStar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 

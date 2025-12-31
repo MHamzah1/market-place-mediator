@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 import ReduxProvider from "@/lib/state/redux-provider";
 import RouteGuardWrapper from "@/components/guards/RouteGuardWrapper";
 import { RoleGuardWrapper } from "@/components/guards/RoleGuard";
-import { ThemeProvider } from "./context/ThemeContext";
+import { ThemeProvider } from "../context/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

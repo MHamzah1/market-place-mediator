@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Filter } from "lucide-react";
 import { Button, DatePicker, SelectField } from "@/components/ui";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export interface PeriodOption {
   value: string;

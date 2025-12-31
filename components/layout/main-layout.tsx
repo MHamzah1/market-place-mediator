@@ -24,7 +24,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/state/store";
 import toast from "react-hot-toast";
 import { LogoutUser } from "@/lib/state/slice/authSlice";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const MainLayout = ({ children }: { children: ReactNode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

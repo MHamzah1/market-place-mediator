@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { FiHeart, FiMapPin, FiCalendar } from "react-icons/fi";
 import { AiOutlineCar } from "react-icons/ai";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const SuperiorCarSection = () => {
   const { theme } = useTheme();

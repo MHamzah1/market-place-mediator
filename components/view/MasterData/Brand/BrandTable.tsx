@@ -17,7 +17,7 @@ import {
   getBrandsForTable,
 } from "@/lib/state/slice/brand/brandSlice";
 import TableSearch from "@/components/feature/table/table-search";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function BrandTable() {
   const dispatch = useDispatch<AppDispatch>();

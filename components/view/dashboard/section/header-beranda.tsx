@@ -3,7 +3,7 @@
 import React from "react";
 import { FiSearch, FiMapPin, FiTrendingUp } from "react-icons/fi";
 import { AiOutlineCar } from "react-icons/ai";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const HeaderBeranda = () => {
   const { theme } = useTheme();

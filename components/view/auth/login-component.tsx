@@ -11,7 +11,7 @@ import { Eye, EyeOff, Mail, Lock, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { LoginUser } from "@/lib/state/slice/authSlice";
 import { AppDispatch, RootState } from "@/lib/state/store";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 // Schema validasi dengan Zod
 const loginSchema = z.object({

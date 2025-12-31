@@ -12,7 +12,7 @@ import {
   ArrowDown,
   Loader2,
 } from "lucide-react";
-import { useTheme } from "@/app/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export interface Column<T> {
   key: string;
