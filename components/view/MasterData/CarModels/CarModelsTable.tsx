@@ -4,28 +4,40 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Edit, Trash2, Eye, Plus, Image as ImageIcon } from "lucide-react";
+import { Edit, Trash2, Eye, Plus, Car } from "lucide-react";
 import { format } from "date-fns";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import DataTable, { Column } from "@/components/feature/table/data-table";
 import TableSearch from "@/components/feature/table/table-search";
 import { useTheme } from "@/context/ThemeContext";
-import {
-  Brand,
-  clearError,
-  clearSuccess,
-  deleteBrand,
-  getBrandsForTable,
-} from "@/lib/state/slice/brand/brandSlice";
+
 import Alert from "@/components/feature/alert/alert";
 import { generateEditUrl } from "@/lib/slug/slug";
-import ModalDetailBrand from "./ModalDetailBrand";
+import {
+  getCarModelsForTable,
+  clearError,
+  clearSuccess,
+  CarModels,
+  deleteCarModels,
+} from "@/lib/state/slice/car-models/CarModelsSlice";
+import ModalDetailCarModel from "./ModalDetailCarModels";
 
-export default function BrandTable() {
+// Format currency to Indonesian Rupiah
+const formatCurrency = (value: string | number) => {
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(numValue);
+};
+
+export default function CarModelsTable() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { data, loading, error, totalItems, totalPages, currentPage, success } =
-    useSelector((state: RootState) => state.brand);
+    useSelector((state: RootState) => state.CarModels);
 
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
@@ -45,9 +57,11 @@ export default function BrandTable() {
 
   // Modal state
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
+  const [selectedCarModelId, setSelectedCarModelId] = useState<string | null>(
+    null
+  );
 
-  const loadBrands = () => {
+  const loadCarModels = () => {
     const params: any = {
       page: filters.page,
       perPage: filters.perPage,
@@ -61,18 +75,18 @@ export default function BrandTable() {
     if (filters.endDate) params.endDate = filters.endDate;
     if (filters.periode) params.periode = filters.periode;
 
-    dispatch(getBrandsForTable(params));
+    dispatch(getCarModelsForTable(params));
   };
 
   useEffect(() => {
-    loadBrands();
+    loadCarModels();
   }, []);
 
   useEffect(() => {
     if (success) {
       Alert.toast.success("Operasi berhasil!");
       dispatch(clearSuccess());
-      loadBrands();
+      loadCarModels();
     }
   }, [success]);
 
@@ -85,12 +99,12 @@ export default function BrandTable() {
 
   const handleSearch = () => {
     setFilters((prev) => ({ ...prev, page: 1 }));
-    setTimeout(loadBrands, 0);
+    setTimeout(loadCarModels, 0);
   };
 
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
-    setTimeout(loadBrands, 0);
+    setTimeout(loadCarModels, 0);
   };
 
   const handleSort = (field: string) => {
@@ -101,7 +115,7 @@ export default function BrandTable() {
         prev.orderBy === field && prev.sortDirection === "ASC" ? "DESC" : "ASC",
       page: 1,
     }));
-    setTimeout(loadBrands, 0);
+    setTimeout(loadCarModels, 0);
   };
 
   const handleReset = () => {
@@ -116,53 +130,56 @@ export default function BrandTable() {
       endDate: "",
       periode: "",
     });
-    setTimeout(loadBrands, 0);
+    setTimeout(loadCarModels, 0);
   };
 
   // ============================================
   // CRUD Handlers
   // ============================================
 
-  const handleDelete = async (brand: Brand) => {
+  const handleDelete = async (carModel: CarModels) => {
     const confirmed = await Alert.confirmDelete({
-      title: "Hapus Brand?",
-      itemName: brand.name,
+      title: "Hapus Car Model?",
+      itemName: carModel?.modelName || "Car Model",
     });
 
     if (confirmed) {
       try {
-        Alert.loading("Menghapus brand...");
-        await dispatch(deleteBrand(brand.id)).unwrap();
+        Alert.loading("Menghapus car model...");
+        await dispatch(deleteCarModels(carModel.id)).unwrap();
         Alert.closeLoading();
-        await Alert.success("Berhasil!", "Brand berhasil dihapus");
+        await Alert.success("Berhasil!", "Car Model berhasil dihapus");
       } catch (err: any) {
         Alert.closeLoading();
-        await Alert.error("Gagal!", err?.message || "Gagal menghapus brand");
+        await Alert.error(
+          "Gagal!",
+          err?.message || "Gagal menghapus car model"
+        );
       }
     }
   };
 
   // Open Modal Detail
-  const handleView = (brand: Brand) => {
-    setSelectedBrandId(brand.id);
+  const handleView = (carModel: CarModels) => {
+    setSelectedCarModelId(carModel.id);
     setIsDetailModalOpen(true);
   };
 
   // Close Modal Detail
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
-    setSelectedBrandId(null);
+    setSelectedCarModelId(null);
   };
 
   // Navigate to Edit page with encrypted slug
-  const handleEdit = (brand: Brand) => {
-    const editUrl = generateEditUrl("/MasterData/Brand/Edit", brand.id);
+  const handleEdit = (carModel: CarModels) => {
+    const editUrl = generateEditUrl("/MasterData/CarModel/Edit", carModel.id);
     router.push(editUrl);
   };
 
   // Navigate to Add page
   const handleCreate = () => {
-    router.push("/MasterData/Brand/Add");
+    router.push("/MasterData/CarModel/Add");
   };
 
   const handleExport = async () => {
@@ -203,31 +220,31 @@ export default function BrandTable() {
   // Table Columns
   // ============================================
 
-  const columns: Column<Brand>[] = [
+  const columns: Column<CarModels>[] = [
     {
-      key: "name",
-      header: "Brand",
+      key: "modelName",
+      header: "Model Mobil",
       sortable: true,
-      render: (brand) => (
+      render: (carModel) => (
         <div className="flex items-center gap-4">
-          {brand?.logo ? (
+          {carModel?.imageUrl ? (
             <img
-              src={brand.logo}
-              alt={brand?.name || "Brand"}
-              className="w-14 h-14 rounded-xl object-cover group-hover:scale-110 transition-transform"
+              src={carModel.imageUrl}
+              alt={carModel?.modelName || "Car"}
+              className="w-16 h-12 rounded-xl object-cover group-hover:scale-110 transition-transform"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />
           ) : (
             <div
-              className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold transition-transform group-hover:scale-110 ${
+              className={`w-16 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
                 isDarkMode
                   ? "bg-gradient-to-br from-cyan-600 to-blue-700"
                   : "bg-gradient-to-br from-cyan-400 to-blue-500"
               } text-white`}
             >
-              {brand?.name ? brand.name.charAt(0).toUpperCase() : "B"}
+              <Car size={24} />
             </div>
           )}
           <div>
@@ -236,30 +253,79 @@ export default function BrandTable() {
                 isDarkMode ? "text-white" : "text-slate-900"
               }`}
             >
-              {brand?.name || "-"}
+              {carModel?.modelName || "-"}
             </p>
             <p
               className={`text-sm max-w-xs truncate ${
                 isDarkMode ? "text-slate-400" : "text-gray-500"
               }`}
             >
-              {brand?.description || "-"}
+              {carModel?.description || "-"}
             </p>
           </div>
         </div>
       ),
     },
     {
+      key: "brand",
+      header: "Brand",
+      render: (carModel) => (
+        <div className="flex items-center gap-2">
+          {carModel?.brand?.logo ? (
+            <img
+              src={carModel.brand.logo}
+              alt={carModel?.brand?.name || "Brand"}
+              className="w-8 h-8 rounded-lg object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          ) : (
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                isDarkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-200 text-slate-700"
+              }`}
+            >
+              {carModel?.brand?.name?.charAt(0)?.toUpperCase() || "B"}
+            </div>
+          )}
+          <span
+            className={`font-medium ${
+              isDarkMode ? "text-slate-300" : "text-slate-700"
+            }`}
+          >
+            {carModel?.brand?.name || "-"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "basePrice",
+      header: "Harga Dasar",
+      sortable: true,
+      render: (carModel) => (
+        <span
+          className={`font-semibold ${
+            isDarkMode ? "text-cyan-400" : "text-cyan-600"
+          }`}
+        >
+          {carModel?.basePrice ? formatCurrency(carModel.basePrice) : "-"}
+        </span>
+      ),
+    },
+    {
       key: "isActive",
       header: "Status",
       sortable: true,
-      render: (brand) => (
+      render: (carModel) => (
         <span
           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(
-            brand?.isActive ?? false
+            carModel?.isActive ?? false
           )}`}
         >
-          {brand?.isActive ? "Aktif" : "Tidak Aktif"}
+          {carModel?.isActive ? "Aktif" : "Tidak Aktif"}
         </span>
       ),
     },
@@ -267,30 +333,14 @@ export default function BrandTable() {
       key: "createdAt",
       header: "Tanggal Dibuat",
       sortable: true,
-      render: (brand) => (
+      render: (carModel) => (
         <span
           className={`text-sm ${
             isDarkMode ? "text-slate-300" : "text-gray-600"
           }`}
         >
-          {brand?.createdAt
-            ? format(new Date(brand.createdAt), "dd MMM yyyy")
-            : "-"}
-        </span>
-      ),
-    },
-    {
-      key: "updatedAt",
-      header: "Terakhir Diupdate",
-      sortable: true,
-      render: (brand) => (
-        <span
-          className={`text-sm ${
-            isDarkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          {brand?.updatedAt
-            ? format(new Date(brand.updatedAt), "dd MMM yyyy")
+          {carModel?.createdAt
+            ? format(new Date(carModel.createdAt), "dd MMM yyyy")
             : "-"}
         </span>
       ),
@@ -308,14 +358,14 @@ export default function BrandTable() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
-              Data Brand
+              Data Car Models
             </h1>
             <p
               className={`text-lg ${
                 isDarkMode ? "text-slate-400" : "text-slate-600"
               }`}
             >
-              Kelola semua brand yang tersedia
+              Kelola semua model mobil yang tersedia
             </p>
           </div>
           <div className="flex gap-3">
@@ -334,7 +384,7 @@ export default function BrandTable() {
               className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
             >
               <Plus className="text-xl" />
-              Tambah Brand
+              Tambah Car Model
             </button>
           </div>
         </div>
@@ -345,7 +395,7 @@ export default function BrandTable() {
           onSearchChange={(value) =>
             setFilters((prev) => ({ ...prev, search: value }))
           }
-          searchPlaceholder="Cari nama brand..."
+          searchPlaceholder="Cari nama model atau brand..."
           showDateRange
           startDate={filters.startDate}
           endDate={filters.endDate}
@@ -366,7 +416,8 @@ export default function BrandTable() {
             setFilters((prev) => ({ ...prev, orderBy: field }))
           }
           orderByOptions={[
-            { value: "name", label: "Nama" },
+            { value: "modelName", label: "Nama Model" },
+            { value: "basePrice", label: "Harga" },
             { value: "createdAt", label: "Tanggal Dibuat" },
             { value: "updatedAt", label: "Tanggal Update" },
           ]}
@@ -398,24 +449,24 @@ export default function BrandTable() {
           orderBy={filters.orderBy}
           sortDirection={filters.sortDirection}
           onSort={handleSort}
-          actions={(brand) => (
+          actions={(carModel) => (
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handleView(brand)}
+                onClick={() => handleView(carModel)}
                 className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"
                 title="Lihat Detail"
               >
                 <Eye size={18} />
               </button>
               <button
-                onClick={() => handleEdit(brand)}
+                onClick={() => handleEdit(carModel)}
                 className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
                 title="Edit"
               >
                 <Edit size={18} />
               </button>
               <button
-                onClick={() => handleDelete(brand)}
+                onClick={() => handleDelete(carModel)}
                 className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
                 title="Hapus"
               >
@@ -426,11 +477,11 @@ export default function BrandTable() {
         />
       </div>
 
-      {/* Modal Detail Brand */}
-      <ModalDetailBrand
+      {/* Modal Detail Car Model */}
+      <ModalDetailCarModel
         isOpen={isDetailModalOpen}
         onClose={handleCloseDetailModal}
-        brandId={selectedBrandId}
+        carModelId={selectedCarModelId}
         onEdit={handleEdit}
       />
     </>

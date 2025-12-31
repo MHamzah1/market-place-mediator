@@ -40,7 +40,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     {
       icon: BsCarFrontFill,
       label: "Car Model",
-      href: "/master-data-customer",
+      href: "/MasterData/CarModel/Table",
       active: false,
     },
     {
