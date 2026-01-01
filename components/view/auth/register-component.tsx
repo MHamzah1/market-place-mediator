@@ -39,7 +39,7 @@ const registerSchema = z
       .regex(/[A-Z]/, "Password harus mengandung huruf besar")
       .regex(/[0-9]/, "Password harus mengandung angka"),
     confirmPassword: z.string(),
-    role: z.enum(["user", "seller"]),
+    role: z.enum(["customer", "salesman"]),
     agreeToTerms: z.boolean().refine((val) => val === true, {
       message: "Anda harus menyetujui syarat dan ketentuan",
     }),
@@ -73,7 +73,7 @@ const RegisterComponent = () => {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: "user",
+      role: "customer",
     },
   });
 
@@ -99,6 +99,7 @@ const RegisterComponent = () => {
         role: data.role,
       };
       await dispatch(createUsers(payload)).unwrap();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err || "Registrasi gagal, silakan coba lagi");
     }
@@ -484,7 +485,7 @@ const RegisterComponent = () => {
                       <input
                         type="radio"
                         {...register("role")}
-                        value="user"
+                        value="customer"
                         className="sr-only"
                       />
                       <div className="flex items-center space-x-3">
@@ -517,7 +518,7 @@ const RegisterComponent = () => {
                       <input
                         type="radio"
                         {...register("role")}
-                        value="seller"
+                        value="salesman"
                         className="sr-only"
                       />
                       <div className="flex items-center space-x-3">
