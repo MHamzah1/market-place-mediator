@@ -5,6 +5,12 @@ import userSlice from "./slice/user/userSlice";
 import CarModelsSlice from "./slice/car-models/CarModelsSlice";
 import specificationSlice from "./slice/Specifications/SpecificationsSlice";
 import customPriceSlice from "./slice/CustomPrices/CustomPriceSlice";
+// New slices for API V2.1
+import variantSlice from "./slice/variant/variantSlice";
+import yearPriceSlice from "./slice/year-price/yearPriceSlice";
+import priceAdjustmentSlice from "./slice/price-adjustment/priceAdjustmentSlice";
+import priceCalculatorSlice from "./slice/price-calculator/priceCalculatorSlice";
+
 const store = configureStore({
   reducer: {
     // Tambahkan slice reducer di sini
@@ -14,6 +20,11 @@ const store = configureStore({
     CarModels: CarModelsSlice,
     Specifications: specificationSlice,
     customPrices: customPriceSlice,
+    // API V2.1 reducers
+    variant: variantSlice,
+    yearPrice: yearPriceSlice,
+    priceAdjustment: priceAdjustmentSlice,
+    priceCalculator: priceCalculatorSlice,
   },
 });
 

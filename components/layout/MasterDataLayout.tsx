@@ -189,9 +189,17 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
       subItems: [
         { label: "Brand", href: "/MasterData/Brand/Table" },
         { label: "Car Model", href: "/MasterData/CarModel/Table" },
+        { label: "Variant", href: "/MasterData/Variant/Table" },
+        { label: "Year Price", href: "/MasterData/YearPrice/Table" },
+        { label: "Price Adjustment", href: "/MasterData/PriceAdjustment/Table" },
         { label: "Specification", href: "/MasterData/Specification/Table" },
         { label: "User", href: "/MasterData/User/Table" },
       ],
+    },
+    {
+      icon: BsCarFrontFill,
+      label: "Kalkulator",
+      href: "/Kalkulator",
     },
     {
       icon: FiBarChart2,
@@ -212,6 +220,12 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
         return HiOutlineTag;
       case "Car Model":
         return IoCarSportOutline;
+      case "Variant":
+        return IoCarSportOutline;
+      case "Year Price":
+        return FiBarChart2;
+      case "Price Adjustment":
+        return HiOutlineCog;
       case "Specification":
         return HiOutlineCog;
       case "User":
