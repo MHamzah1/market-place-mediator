@@ -10,6 +10,8 @@ import variantSlice from "./slice/variant/variantSlice";
 import yearPriceSlice from "./slice/year-price/yearPriceSlice";
 import priceAdjustmentSlice from "./slice/price-adjustment/priceAdjustmentSlice";
 import priceCalculatorSlice from "./slice/price-calculator/priceCalculatorSlice";
+// Marketplace slice
+import marketplaceSlice from "./slice/marketplace/marketplaceSlice";
 
 const store = configureStore({
   reducer: {
@@ -25,6 +27,8 @@ const store = configureStore({
     yearPrice: yearPriceSlice,
     priceAdjustment: priceAdjustmentSlice,
     priceCalculator: priceCalculatorSlice,
+    // Marketplace
+    marketplace: marketplaceSlice,
   },
 });
 
