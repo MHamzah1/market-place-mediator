@@ -9,6 +9,11 @@ export interface CarModels {
   id: string;
   brandId: string;
   modelName: string;
+  modelCode?: string;
+  brandName?: string;
+  bodyType?: string;
+  yearStart?: number;
+  yearEnd?: number;
   description: string;
   basePrice: string;
   imageUrl: string;
