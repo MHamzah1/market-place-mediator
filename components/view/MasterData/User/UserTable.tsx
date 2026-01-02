@@ -74,7 +74,8 @@ const UserTable = () => {
     }
   };
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "?";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -106,8 +107,10 @@ const UserTable = () => {
             {getInitials(item.name)}
           </div>
           <div>
-            <p className="font-semibold text-slate-900 dark:text-white">{item.name}</p>
-            <p className="text-xs text-slate-500">{item.email}</p>
+            <p className="font-semibold text-slate-900 dark:text-white">
+              {item.name || "-"}
+            </p>
+            <p className="text-xs text-slate-500">{item.email || "-"}</p>
           </div>
         </div>
       ),
@@ -137,8 +140,12 @@ const UserTable = () => {
       key: "role",
       header: "Role",
       render: (item: Users) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(item.role)}`}>
-          {item.role}
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(
+            item.role ?? ""
+          )}`}
+        >
+          {item.role || "-"}
         </span>
       ),
     },
@@ -147,11 +154,13 @@ const UserTable = () => {
       header: "Tanggal Dibuat",
       render: (item: Users) => (
         <span className="text-sm text-slate-600 dark:text-slate-400">
-          {item.createdAt ? new Date(item.createdAt).toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }) : "-"}
+          {item.createdAt
+            ? new Date(item.createdAt).toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+            : "-"}
         </span>
       ),
     },
@@ -160,14 +169,14 @@ const UserTable = () => {
   const renderActions = (item: Users) => (
     <div className="flex items-center gap-2">
       <button
-        onClick={() => handleEdit(item.id)}
+        onClick={() => handleEdit(String(item.id))}
         className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors dark:hover:bg-blue-900"
         title="Edit"
       >
         <FiEdit2 className="w-4 h-4" />
       </button>
       <button
-        onClick={() => handleDelete(item.id, item.name)}
+        onClick={() => handleDelete(String(item.id), item.name || "User")}
         className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors dark:hover:bg-red-900"
         title="Hapus"
       >

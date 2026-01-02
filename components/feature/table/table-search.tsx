@@ -257,7 +257,7 @@ export default function TableSearch({
           <button
             type="button"
             onClick={handleSearch}
-            className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
+            className="px-6 py-2.5 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
           >
             <Search size={18} />
             Cari
@@ -278,7 +278,7 @@ export default function TableSearch({
               className={cn(
                 "px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200",
                 hasActiveFilters
-                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
+                  ? "bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
                   : isDarkMode
                   ? "bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600/50"
                   : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-300"
@@ -475,7 +475,7 @@ export default function TableSearch({
             <button
               type="button"
               onClick={handleSearch}
-              className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
+              className="px-6 py-2.5 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
             >
               Terapkan Filter
             </button>

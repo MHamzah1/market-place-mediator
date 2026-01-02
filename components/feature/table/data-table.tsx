@@ -108,10 +108,10 @@ export default function DataTable<T extends Record<string, any>>({
           onClick={() => onPageChange(i)}
           disabled={loading}
           className={cn(
-            "min-w-[40px] h-10 px-3 text-sm font-medium rounded-lg transition-all duration-200",
+            "min-w-10 h-10 px-3 text-sm font-medium rounded-lg transition-all duration-200",
             "focus:outline-none focus:ring-2 focus:ring-cyan-500/50",
             i === currentPage
-              ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30"
+              ? "bg-linear-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30"
               : isDarkMode
               ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
               : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-300",
