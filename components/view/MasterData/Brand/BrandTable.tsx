@@ -1,438 +1,217 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Edit, Trash2, Eye, Plus, Image as ImageIcon } from "lucide-react";
-import { format } from "date-fns";
 import { AppDispatch, RootState } from "@/lib/state/store";
-import DataTable, { Column } from "@/components/feature/table/data-table";
-import TableSearch from "@/components/feature/table/table-search";
-import { useTheme } from "@/context/ThemeContext";
 import {
-  Brand,
-  clearError,
-  clearSuccess,
+  getBrandsForSelect,
   deleteBrand,
-  getBrandsForTable,
+  clearSuccess,
+  clearError,
 } from "@/lib/state/slice/brand/brandSlice";
-import Alert from "@/components/feature/alert/alert";
-import { generateEditUrl } from "@/lib/slug/slug";
-import ModalDetailBrand from "./ModalDetailBrand";
+import { Brand } from "@/lib/state/slice/brand/brandSlice";
+import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
+import { showAlert } from "@/components/feature/alert/alert";
+import { encryptSlug } from "@/lib/slug/slug";
+import Swal from "sweetalert2";
+import DataTable, { Column } from "@/components/feature/table/data-table";
 
-export default function BrandTable() {
+const BrandTable = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { data, loading, error, totalItems, totalPages, currentPage, success } =
+  const { data, loading, error, success, totalPages, totalItems, currentPage } =
     useSelector((state: RootState) => state.brand);
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter states
-  const [filters, setFilters] = useState({
-    search: "",
-    page: 1,
-    perPage: 10,
-    orderBy: "createdAt",
-    sortDirection: "DESC" as "ASC" | "DESC",
-    isActive: null as boolean | null,
-    startDate: "",
-    endDate: "",
-    periode: "",
-  });
-
-  // Modal state
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
-
-  const loadBrands = () => {
-    const params: any = {
-      page: filters.page,
-      perPage: filters.perPage,
-      orderBy: filters.orderBy,
-      sortDirection: filters.sortDirection,
-    };
-
-    if (filters.search) params.search = filters.search;
-    if (filters.isActive !== null) params.isActive = filters.isActive;
-    if (filters.startDate) params.startDate = filters.startDate;
-    if (filters.endDate) params.endDate = filters.endDate;
-    if (filters.periode) params.periode = filters.periode;
-
-    dispatch(getBrandsForTable(params));
-  };
+  const fetchData = useCallback(
+    (page: number = 1, search: string = "") => {
+      dispatch(getBrandsForSelect({ page, perPage: 10, search }));
+    },
+    [dispatch]
+  );
 
   useEffect(() => {
-    loadBrands();
-  }, []);
+    fetchData(1, searchQuery);
+  }, [fetchData, searchQuery]);
 
   useEffect(() => {
     if (success) {
-      Alert.toast.success("Operasi berhasil!");
+      showAlert({
+        icon: "success",
+        title: "Berhasil",
+        text: "Operasi berhasil dilakukan",
+      });
       dispatch(clearSuccess());
-      loadBrands();
+      fetchData(currentPage, searchQuery);
     }
-  }, [success]);
-
-  useEffect(() => {
     if (error) {
-      Alert.toast.error(error);
+      showAlert({ icon: "error", title: "Error", text: error });
       dispatch(clearError());
     }
-  }, [error]);
+  }, [success, error, dispatch, fetchData, currentPage, searchQuery]);
 
-  const handleSearch = () => {
-    setFilters((prev) => ({ ...prev, page: 1 }));
-    setTimeout(loadBrands, 0);
+  const handleEdit = (id: string) => {
+    const encryptedSlug = encryptSlug(id);
+    router.push(`/MasterData/Brand/Edit/${encryptedSlug}`);
   };
 
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    setTimeout(loadBrands, 0);
-  };
-
-  const handleSort = (field: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      orderBy: field,
-      sortDirection:
-        prev.orderBy === field && prev.sortDirection === "ASC" ? "DESC" : "ASC",
-      page: 1,
-    }));
-    setTimeout(loadBrands, 0);
-  };
-
-  const handleReset = () => {
-    setFilters({
-      search: "",
-      page: 1,
-      perPage: 10,
-      orderBy: "createdAt",
-      sortDirection: "DESC",
-      isActive: null,
-      startDate: "",
-      endDate: "",
-      periode: "",
-    });
-    setTimeout(loadBrands, 0);
-  };
-
-  // ============================================
-  // CRUD Handlers
-  // ============================================
-
-  const handleDelete = async (brand: Brand) => {
-    const confirmed = await Alert.confirmDelete({
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Swal.fire({
       title: "Hapus Brand?",
-      itemName: brand.name,
+      text: `Apakah Anda yakin ingin menghapus brand "${name}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
     });
 
-    if (confirmed) {
-      try {
-        Alert.loading("Menghapus brand...");
-        await dispatch(deleteBrand(brand.id)).unwrap();
-        Alert.closeLoading();
-        await Alert.success("Berhasil!", "Brand berhasil dihapus");
-      } catch (err: any) {
-        Alert.closeLoading();
-        await Alert.error("Gagal!", err?.message || "Gagal menghapus brand");
-      }
+    if (result.isConfirmed) {
+      dispatch(deleteBrand(id));
     }
   };
-
-  // Open Modal Detail
-  const handleView = (brand: Brand) => {
-    setSelectedBrandId(brand.id);
-    setIsDetailModalOpen(true);
-  };
-
-  // Close Modal Detail
-  const handleCloseDetailModal = () => {
-    setIsDetailModalOpen(false);
-    setSelectedBrandId(null);
-  };
-
-  // Navigate to Edit page with encrypted slug
-  const handleEdit = (brand: Brand) => {
-    const editUrl = generateEditUrl("/MasterData/Brand/Edit", brand.id);
-    router.push(editUrl);
-  };
-
-  // Navigate to Add page
-  const handleCreate = () => {
-    router.push("/MasterData/Brand/Add");
-  };
-
-  const handleExport = async () => {
-    const exportFormat = await Alert.inputSelect(
-      "Export Data",
-      {
-        csv: "CSV",
-        excel: "Excel",
-        pdf: "PDF",
-      },
-      "Pilih format..."
-    );
-
-    if (exportFormat) {
-      Alert.loading(`Mengexport ke ${exportFormat.toUpperCase()}...`);
-
-      setTimeout(() => {
-        Alert.closeLoading();
-        Alert.success(
-          "Berhasil!",
-          `Data berhasil diexport ke ${exportFormat.toUpperCase()}`
-        );
-      }, 1500);
-    }
-  };
-
-  // ============================================
-  // Helper Functions
-  // ============================================
-
-  const getStatusBadge = (isActive: boolean) => {
-    return isActive
-      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-      : "bg-orange-500/20 text-orange-400 border border-orange-500/30";
-  };
-
-  // ============================================
-  // Table Columns
-  // ============================================
 
   const columns: Column<Brand>[] = [
     {
-      key: "name",
-      header: "Brand",
-      sortable: true,
-      render: (brand) => (
-        <div className="flex items-center gap-4">
-          {brand?.logo ? (
+      key: "logo",
+      header: "Logo",
+      render: (item: Brand) => (
+        <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+          {item.logo ? (
             <img
-              src={brand.logo}
-              alt={brand?.name || "Brand"}
-              className="w-14 h-14 rounded-xl object-cover group-hover:scale-110 transition-transform"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
+              src={item.logo}
+              alt={item.name}
+              className="w-full h-full object-contain p-1"
             />
           ) : (
-            <div
-              className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold transition-transform group-hover:scale-110 ${
-                isDarkMode
-                  ? "bg-gradient-to-br from-cyan-600 to-blue-700"
-                  : "bg-gradient-to-br from-cyan-400 to-blue-500"
-              } text-white`}
-            >
-              {brand?.name ? brand.name.charAt(0).toUpperCase() : "B"}
-            </div>
+            <span className="text-lg font-bold text-slate-400">
+              {item.name?.charAt(0).toUpperCase()}
+            </span>
           )}
-          <div>
-            <p
-              className={`font-bold mb-0.5 ${
-                isDarkMode ? "text-white" : "text-slate-900"
-              }`}
-            >
-              {brand?.name || "-"}
-            </p>
-            <p
-              className={`text-sm max-w-xs truncate ${
-                isDarkMode ? "text-slate-400" : "text-gray-500"
-              }`}
-            >
-              {brand?.description || "-"}
-            </p>
-          </div>
         </div>
+      ),
+    },
+    {
+      key: "name",
+      header: "Nama Brand",
+      render: (item: Brand) => (
+        <div>
+          <p className="font-semibold text-slate-900 dark:text-white">
+            {item.name}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "description",
+      header: "Deskripsi",
+      render: (item: Brand) => (
+        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">
+          {item.description || "-"}
+        </p>
       ),
     },
     {
       key: "isActive",
       header: "Status",
-      sortable: true,
-      render: (brand) => (
+      render: (item: Brand) => (
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(
-            brand?.isActive ?? false
-          )}`}
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            item.isActive
+              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+          }`}
         >
-          {brand?.isActive ? "Aktif" : "Tidak Aktif"}
+          {item.isActive ? "Aktif" : "Nonaktif"}
         </span>
       ),
     },
     {
       key: "createdAt",
       header: "Tanggal Dibuat",
-      sortable: true,
-      render: (brand) => (
-        <span
-          className={`text-sm ${
-            isDarkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          {brand?.createdAt
-            ? format(new Date(brand.createdAt), "dd MMM yyyy")
-            : "-"}
-        </span>
-      ),
-    },
-    {
-      key: "updatedAt",
-      header: "Terakhir Diupdate",
-      sortable: true,
-      render: (brand) => (
-        <span
-          className={`text-sm ${
-            isDarkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          {brand?.updatedAt
-            ? format(new Date(brand.updatedAt), "dd MMM yyyy")
+      render: (item: Brand) => (
+        <span className="text-sm text-slate-600 dark:text-slate-400">
+          {item.createdAt
+            ? new Date(item.createdAt).toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
             : "-"}
         </span>
       ),
     },
   ];
 
-  // ============================================
-  // Render
-  // ============================================
+  const renderActions = (item: Brand) => (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEdit(item.id)}
+        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors dark:hover:bg-blue-900"
+        title="Edit"
+      >
+        <FiEdit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDelete(item.id, item.name)}
+        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors dark:hover:bg-red-900"
+        title="Hapus"
+      >
+        <FiTrash2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
 
   return (
-    <>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
-              Data Brand
-            </h1>
-            <p
-              className={`text-lg ${
-                isDarkMode ? "text-slate-400" : "text-slate-600"
-              }`}
-            >
-              Kelola semua brand yang tersedia
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleExport}
-              className={`px-4 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 ${
-                isDarkMode
-                  ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              Export
-            </button>
-            <button
-              onClick={handleCreate}
-              className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
-            >
-              <Plus className="text-xl" />
-              Tambah Brand
-            </button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Data Brand
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400">
+            Kelola semua merek mobil yang tersedia
+          </p>
+        </div>
+        <button
+          onClick={() => router.push("/MasterData/Brand/Add")}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg"
+        >
+          <FiPlus className="w-5 h-5" />
+          Tambah Brand
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Cari brand..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full max-w-md px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-slate-800 dark:text-white"
+          />
         </div>
 
-        {/* Search & Filters */}
-        <TableSearch
-          searchValue={filters.search}
-          onSearchChange={(value) =>
-            setFilters((prev) => ({ ...prev, search: value }))
-          }
-          searchPlaceholder="Cari nama brand..."
-          showDateRange
-          startDate={filters.startDate}
-          endDate={filters.endDate}
-          onStartDateChange={(date) =>
-            setFilters((prev) => ({ ...prev, startDate: date }))
-          }
-          onEndDateChange={(date) =>
-            setFilters((prev) => ({ ...prev, endDate: date }))
-          }
-          showPeriod
-          period={filters.periode}
-          onPeriodChange={(periode) =>
-            setFilters((prev) => ({ ...prev, periode }))
-          }
-          showOrderBy
-          orderBy={filters.orderBy}
-          onOrderByChange={(field) =>
-            setFilters((prev) => ({ ...prev, orderBy: field }))
-          }
-          orderByOptions={[
-            { value: "name", label: "Nama" },
-            { value: "createdAt", label: "Tanggal Dibuat" },
-            { value: "updatedAt", label: "Tanggal Update" },
-          ]}
-          showSortDirection
-          sortDirection={filters.sortDirection}
-          onSortDirectionChange={(direction) =>
-            setFilters((prev) => ({ ...prev, sortDirection: direction }))
-          }
-          showActiveFilter
-          isActive={filters.isActive}
-          onIsActiveChange={(isActive) =>
-            setFilters((prev) => ({ ...prev, isActive }))
-          }
-          onSearch={handleSearch}
-          onReset={handleReset}
-        />
-
-        {/* Table */}
         <DataTable
-          data={data}
           columns={columns}
+          data={data}
           loading={loading}
           error={error}
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={totalItems}
-          pageSize={filters.perPage}
-          onPageChange={handlePageChange}
-          orderBy={filters.orderBy}
-          sortDirection={filters.sortDirection}
-          onSort={handleSort}
-          actions={(brand) => (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleView(brand)}
-                className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"
-                title="Lihat Detail"
-              >
-                <Eye size={18} />
-              </button>
-              <button
-                onClick={() => handleEdit(brand)}
-                className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-                title="Edit"
-              >
-                <Edit size={18} />
-              </button>
-              <button
-                onClick={() => handleDelete(brand)}
-                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                title="Hapus"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          )}
+          totalItems={totalItems || data.length}
+          pageSize={10}
+          onPageChange={(page) => fetchData(page, searchQuery)}
+          actions={renderActions}
+          emptyMessage="Tidak ada data brand"
         />
       </div>
-
-      {/* Modal Detail Brand */}
-      <ModalDetailBrand
-        isOpen={isDetailModalOpen}
-        onClose={handleCloseDetailModal}
-        brandId={selectedBrandId}
-        onEdit={handleEdit}
-      />
-    </>
+    </div>
   );
-}
+};
+
+export default BrandTable;

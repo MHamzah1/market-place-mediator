@@ -1,523 +1,240 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Edit, Trash2, Eye, Plus, Settings, Car } from "lucide-react";
-import { format } from "date-fns";
 import { AppDispatch, RootState } from "@/lib/state/store";
-import DataTable, { Column } from "@/components/feature/table/data-table";
-import TableSearch from "@/components/feature/table/table-search";
-import { useTheme } from "@/context/ThemeContext";
 import {
-  Specification,
-  clearError,
+  getSpecificationsForSelect,
+  deleteSpecifications,
   clearSuccess,
-  deleteSpecification,
-  getSpecificationsForTable,
+  clearError,
 } from "@/lib/state/slice/Specifications/SpecificationsSlice";
-import Alert from "@/components/feature/alert/alert";
-import { generateEditUrl } from "@/lib/slug/slug";
-import ModalDetailSpecification from "./ModalDetailSpecifications";
+import { Specifications } from "@/lib/state/slice/Specifications/SpecificationsSlice";
+import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
+import { showAlert } from "@/components/feature/alert/alert";
+import { encryptSlug } from "@/lib/slug/slug";
+import Swal from "sweetalert2";
+import DataTable, { Column } from "@/components/feature/table/data-table";
 
-// Spec Category Options
-const SPEC_CATEGORIES = [
-  { value: "", label: "Semua Kategori" },
-  { value: "engine", label: "Engine" },
-  { value: "transmission", label: "Transmission" },
-  { value: "fuel", label: "Fuel" },
-  { value: "dimension", label: "Dimension" },
-  { value: "performance", label: "Performance" },
-  { value: "safety", label: "Safety" },
-  { value: "comfort", label: "Comfort" },
-  { value: "exterior", label: "Exterior" },
-  { value: "interior", label: "Interior" },
-  { value: "other", label: "Other" },
-];
-
-// Get category badge style
-const getCategoryBadge = (category: string, isDarkMode: boolean) => {
-  const styles: Record<string, string> = {
-    engine: "bg-red-500/20 text-red-400 border border-red-500/30",
-    transmission:
-      "bg-purple-500/20 text-purple-400 border border-purple-500/30",
-    fuel: "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30",
-    dimension: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
-    performance: "bg-orange-500/20 text-orange-400 border border-orange-500/30",
-    safety: "bg-green-500/20 text-green-400 border border-green-500/30",
-    comfort: "bg-pink-500/20 text-pink-400 border border-pink-500/30",
-    exterior: "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30",
-    interior: "bg-teal-500/20 text-teal-400 border border-teal-500/30",
-  };
-  return (
-    styles[category] ||
-    (isDarkMode
-      ? "bg-slate-500/20 text-slate-400 border border-slate-500/30"
-      : "bg-slate-200 text-slate-600 border border-slate-300")
-  );
-};
-
-export default function SpecificationsTable() {
+const SpecificationsTable = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { data, loading, error, totalItems, totalPages, currentPage, success } =
+  const { data, loading, error, success, totalPages, totalItems, currentPage } =
     useSelector((state: RootState) => state.Specifications);
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter states
-  const [filters, setFilters] = useState({
-    search: "",
-    page: 1,
-    perPage: 10,
-    sortBy: "createdAt",
-    sortDirection: "DESC" as "ASC" | "DESC",
-    modelId: "",
-    specCategory: "",
-  });
-
-  // Modal state
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedSpecId, setSelectedSpecId] = useState<string | null>(null);
-
-  const loadSpecifications = () => {
-    const params: any = {
-      page: filters.page,
-      perPage: filters.perPage,
-      sortBy: filters.sortBy,
-      sortDirection: filters.sortDirection,
-    };
-
-    if (filters.search) params.search = filters.search;
-    if (filters.modelId) params.modelId = filters.modelId;
-    if (filters.specCategory) params.specCategory = filters.specCategory;
-
-    dispatch(getSpecificationsForTable(params));
-  };
+  const fetchData = useCallback(
+    (page: number = 1, search: string = "") => {
+      dispatch(getSpecificationsForSelect({ page, perPage: 10, search }));
+    },
+    [dispatch]
+  );
 
   useEffect(() => {
-    loadSpecifications();
-  }, []);
+    fetchData(1, searchQuery);
+  }, [fetchData, searchQuery]);
 
   useEffect(() => {
     if (success) {
-      Alert.toast.success("Operasi berhasil!");
+      showAlert({
+        icon: "success",
+        title: "Berhasil",
+        text: "Operasi berhasil dilakukan",
+      });
       dispatch(clearSuccess());
-      loadSpecifications();
+      fetchData(currentPage, searchQuery);
     }
-  }, [success]);
-
-  useEffect(() => {
     if (error) {
-      Alert.toast.error(error);
+      showAlert({ icon: "error", title: "Error", text: error });
       dispatch(clearError());
     }
-  }, [error]);
+  }, [success, error, dispatch, fetchData, currentPage, searchQuery]);
 
-  const handleSearch = () => {
-    setFilters((prev) => ({ ...prev, page: 1 }));
-    setTimeout(loadSpecifications, 0);
+  const handleEdit = (id: string) => {
+    const encryptedSlug = encryptSlug(id);
+    router.push(`/MasterData/Specification/Edit/${encryptedSlug}`);
   };
 
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    setTimeout(loadSpecifications, 0);
-  };
-
-  const handleSort = (field: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      sortBy: field,
-      sortDirection:
-        prev.sortBy === field && prev.sortDirection === "ASC" ? "DESC" : "ASC",
-      page: 1,
-    }));
-    setTimeout(loadSpecifications, 0);
-  };
-
-  const handleReset = () => {
-    setFilters({
-      search: "",
-      page: 1,
-      perPage: 10,
-      sortBy: "createdAt",
-      sortDirection: "DESC",
-      modelId: "",
-      specCategory: "",
-    });
-    setTimeout(loadSpecifications, 0);
-  };
-
-  // ============================================
-  // CRUD Handlers
-  // ============================================
-
-  const handleDelete = async (spec: Specification) => {
-    const confirmed = await Alert.confirmDelete({
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Swal.fire({
       title: "Hapus Specification?",
-      itemName: spec?.specName || "Specification",
+      text: `Apakah Anda yakin ingin menghapus spesifikasi "${name}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
     });
 
-    if (confirmed) {
-      try {
-        Alert.loading("Menghapus specification...");
-        await dispatch(deleteSpecification(spec.id)).unwrap();
-        Alert.closeLoading();
-        await Alert.success("Berhasil!", "Specification berhasil dihapus");
-      } catch (err: any) {
-        Alert.closeLoading();
-        await Alert.error(
-          "Gagal!",
-          err?.message || "Gagal menghapus specification"
-        );
-      }
+    if (result.isConfirmed) {
+      dispatch(deleteSpecifications(id));
     }
   };
 
-  // Open Modal Detail
-  const handleView = (spec: Specification) => {
-    setSelectedSpecId(spec.id);
-    setIsDetailModalOpen(true);
-  };
-
-  // Close Modal Detail
-  const handleCloseDetailModal = () => {
-    setIsDetailModalOpen(false);
-    setSelectedSpecId(null);
-  };
-
-  // Navigate to Edit page with encrypted slug
-  const handleEdit = (spec: Specification) => {
-    const editUrl = generateEditUrl("/MasterData/Specification/Edit", spec.id);
-    router.push(editUrl);
-  };
-
-  // Navigate to Add page
-  const handleCreate = () => {
-    router.push("/MasterData/Specification/Add");
-  };
-
-  const handleExport = async () => {
-    const exportFormat = await Alert.inputSelect(
-      "Export Data",
-      {
-        csv: "CSV",
-        excel: "Excel",
-        pdf: "PDF",
-      },
-      "Pilih format..."
-    );
-
-    if (exportFormat) {
-      Alert.loading(`Mengexport ke ${exportFormat.toUpperCase()}...`);
-
-      setTimeout(() => {
-        Alert.closeLoading();
-        Alert.success(
-          "Berhasil!",
-          `Data berhasil diexport ke ${exportFormat.toUpperCase()}`
-        );
-      }, 1500);
+  const getTransmissionBadge = (transmission: string) => {
+    switch (transmission?.toLowerCase()) {
+      case "automatic":
+      case "matic":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+      case "manual":
+        return "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300";
+      case "cvt":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+      default:
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
     }
   };
 
-  // ============================================
-  // Helper Functions
-  // ============================================
-
-  const getStatusBadge = (isActive: boolean) => {
-    return isActive
-      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-      : "bg-orange-500/20 text-orange-400 border border-orange-500/30";
+  const getFuelBadge = (fuel: string) => {
+    switch (fuel?.toLowerCase()) {
+      case "bensin":
+      case "petrol":
+        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
+      case "diesel":
+        return "bg-slate-700 text-white dark:bg-slate-600 dark:text-slate-100";
+      case "electric":
+      case "listrik":
+        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+      case "hybrid":
+        return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300";
+      default:
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+    }
   };
 
-  // ============================================
-  // Table Columns
-  // ============================================
-
-  const columns: Column<Specification>[] = [
+  const columns: Column<Specifications>[] = [
     {
-      key: "specName",
-      header: "Spesifikasi",
-      sortable: true,
-      render: (spec) => (
-        <div className="flex items-center gap-4">
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-              isDarkMode
-                ? "bg-gradient-to-br from-cyan-600 to-blue-700"
-                : "bg-gradient-to-br from-cyan-400 to-blue-500"
-            } text-white`}
-          >
-            <Settings size={20} />
-          </div>
-          <div>
-            <p
-              className={`font-bold mb-0.5 ${
-                isDarkMode ? "text-white" : "text-slate-900"
-              }`}
-            >
-              {spec?.specName || "-"}
-            </p>
-            <p
-              className={`text-sm ${
-                isDarkMode ? "text-slate-400" : "text-gray-500"
-              }`}
-            >
-              {spec?.description || "-"}
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "modelName",
-      header: "Model Mobil",
-      render: (spec) => (
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-              isDarkMode
-                ? "bg-slate-700 text-slate-300"
-                : "bg-slate-200 text-slate-700"
-            }`}
-          >
-            <Car size={16} />
-          </div>
-          <span
-            className={`font-medium ${
-              isDarkMode ? "text-slate-300" : "text-slate-700"
-            }`}
-          >
-            {spec?.modelName || "-"}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: "specCategory",
-      header: "Kategori",
-      sortable: true,
-      render: (spec) => (
-        <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold capitalize ${getCategoryBadge(
-            spec?.specCategory || "",
-            isDarkMode
-          )}`}
-        >
-          {spec?.specCategory || "-"}
+      key: "specCode",
+      header: "Kode",
+      render: (item: Specifications) => (
+        <span className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+          {item.specCode || "-"}
         </span>
       ),
     },
     {
-      key: "specValue",
-      header: "Nilai",
-      render: (spec) => (
+      key: "specName",
+      header: "Nama Spesifikasi",
+      render: (item: Specifications) => (
         <div>
-          <span
-            className={`font-semibold ${
-              isDarkMode ? "text-cyan-400" : "text-cyan-600"
-            }`}
-          >
-            {spec?.specValue || "-"}
-          </span>
-          {spec?.specUnit && (
-            <span
-              className={`ml-1 text-sm ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              {spec.specUnit}
-            </span>
-          )}
+          <p className="font-semibold text-slate-900 dark:text-white">{item.specName}</p>
+          <p className="text-xs text-slate-500">{item.modelName || "-"}</p>
         </div>
+      ),
+    },
+    {
+      key: "engineCapacity",
+      header: "Kapasitas Mesin",
+      render: (item: Specifications) => (
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          {item.engineCapacity ? `${item.engineCapacity} cc` : "-"}
+        </span>
+      ),
+    },
+    {
+      key: "transmission",
+      header: "Transmisi",
+      render: (item: Specifications) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTransmissionBadge(item.transmission || "")}`}>
+          {item.transmission || "-"}
+        </span>
+      ),
+    },
+    {
+      key: "fuelType",
+      header: "Bahan Bakar",
+      render: (item: Specifications) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getFuelBadge(item.fuelType || "")}`}>
+          {item.fuelType || "-"}
+        </span>
       ),
     },
     {
       key: "isActive",
       header: "Status",
-      sortable: true,
-      render: (spec) => (
+      render: (item: Specifications) => (
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(
-            spec?.isActive ?? false
-          )}`}
-        >
-          {spec?.isActive ? "Aktif" : "Tidak Aktif"}
-        </span>
-      ),
-    },
-    {
-      key: "createdAt",
-      header: "Tanggal Dibuat",
-      sortable: true,
-      render: (spec) => (
-        <span
-          className={`text-sm ${
-            isDarkMode ? "text-slate-300" : "text-gray-600"
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            item.isActive
+              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
           }`}
         >
-          {spec?.createdAt
-            ? format(new Date(spec.createdAt), "dd MMM yyyy")
-            : "-"}
+          {item.isActive ? "Aktif" : "Nonaktif"}
         </span>
       ),
     },
   ];
 
-  // ============================================
-  // Render
-  // ============================================
+  const renderActions = (item: Specifications) => (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEdit(item.id)}
+        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors dark:hover:bg-blue-900"
+        title="Edit"
+      >
+        <FiEdit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDelete(item.id, item.specName)}
+        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors dark:hover:bg-red-900"
+        title="Hapus"
+      >
+        <FiTrash2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
 
   return (
-    <>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
-              Data Specifications
-            </h1>
-            <p
-              className={`text-lg ${
-                isDarkMode ? "text-slate-400" : "text-slate-600"
-              }`}
-            >
-              Kelola spesifikasi mobil yang tersedia
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleExport}
-              className={`px-4 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 ${
-                isDarkMode
-                  ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              Export
-            </button>
-            <button
-              onClick={handleCreate}
-              className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
-            >
-              <Plus className="text-xl" />
-              Tambah Specification
-            </button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Data Specification
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400">
+            Kelola semua spesifikasi mobil yang tersedia
+          </p>
+        </div>
+        <button
+          onClick={() => router.push("/MasterData/Specification/Add")}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg"
+        >
+          <FiPlus className="w-5 h-5" />
+          Tambah Specification
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Cari spesifikasi..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full max-w-md px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-slate-800 dark:text-white"
+          />
         </div>
 
-        {/* Search & Filters */}
-        <TableSearch
-          searchValue={filters.search}
-          onSearchChange={(value) =>
-            setFilters((prev) => ({ ...prev, search: value }))
-          }
-          searchPlaceholder="Cari nama spesifikasi atau nilai..."
-          showOrderBy
-          orderBy={filters.sortBy}
-          onOrderByChange={(field) =>
-            setFilters((prev) => ({ ...prev, sortBy: field }))
-          }
-          orderByOptions={[
-            { value: "specName", label: "Nama Spesifikasi" },
-            { value: "specCategory", label: "Kategori" },
-            { value: "specValue", label: "Nilai" },
-            { value: "createdAt", label: "Tanggal Dibuat" },
-            { value: "updatedAt", label: "Tanggal Update" },
-          ]}
-          showSortDirection
-          sortDirection={filters.sortDirection}
-          onSortDirectionChange={(direction) =>
-            setFilters((prev) => ({ ...prev, sortDirection: direction }))
-          }
-          // Custom category filter
-          additionalFilters={
-            <div className="flex flex-col gap-1">
-              <label
-                className={`text-xs font-medium ${
-                  isDarkMode ? "text-slate-400" : "text-slate-600"
-                }`}
-              >
-                Kategori
-              </label>
-              <select
-                value={filters.specCategory}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    specCategory: e.target.value,
-                  }))
-                }
-                className={`px-3 py-2 rounded-lg text-sm border transition-all ${
-                  isDarkMode
-                    ? "bg-slate-800 border-slate-700 text-white"
-                    : "bg-white border-slate-300 text-slate-900"
-                } focus:outline-none focus:ring-2 focus:ring-cyan-500/50`}
-              >
-                {SPEC_CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          }
-          onSearch={handleSearch}
-          onReset={handleReset}
-        />
-
-        {/* Table */}
         <DataTable
-          data={data}
           columns={columns}
+          data={data}
           loading={loading}
           error={error}
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={totalItems}
-          pageSize={filters.perPage}
-          onPageChange={handlePageChange}
-          orderBy={filters.sortBy}
-          sortDirection={filters.sortDirection}
-          onSort={handleSort}
-          actions={(spec) => (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleView(spec)}
-                className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"
-                title="Lihat Detail"
-              >
-                <Eye size={18} />
-              </button>
-              <button
-                onClick={() => handleEdit(spec)}
-                className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-                title="Edit"
-              >
-                <Edit size={18} />
-              </button>
-              <button
-                onClick={() => handleDelete(spec)}
-                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                title="Hapus"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          )}
+          totalItems={totalItems || data.length}
+          pageSize={10}
+          onPageChange={(page) => fetchData(page, searchQuery)}
+          actions={renderActions}
+          emptyMessage="Tidak ada data specification"
         />
       </div>
-
-      {/* Modal Detail Specification */}
-      <ModalDetailSpecification
-        isOpen={isDetailModalOpen}
-        onClose={handleCloseDetailModal}
-        specificationId={selectedSpecId}
-        onEdit={handleEdit}
-      />
-    </>
+    </div>
   );
-}
+};
+
+export default SpecificationsTable;

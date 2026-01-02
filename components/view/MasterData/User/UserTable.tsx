@@ -1,274 +1,125 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Edit, Trash2, Eye, Plus } from "lucide-react";
-import { format } from "date-fns";
 import { AppDispatch, RootState } from "@/lib/state/store";
-import DataTable, { Column } from "@/components/feature/table/data-table";
-import TableSearch from "@/components/feature/table/table-search";
-import { useTheme } from "@/context/ThemeContext";
 import {
-  Users,
-  clearError,
-  clearSuccess,
+  getAllUsers,
   deleteUsers,
-  getUsersForTable,
+  clearSuccess,
+  clearError,
 } from "@/lib/state/slice/user/userSlice";
-import Alert from "@/components/feature/alert/alert";
-import { generateEditUrl } from "@/lib/slug/slug";
-import ModalDetailUser from "./ModalDetailUser";
+import { Users } from "@/lib/state/slice/user/userSlice";
+import { FiEdit2, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
+import { showAlert } from "@/components/feature/alert/alert";
+import { encryptSlug } from "@/lib/slug/slug";
+import Swal from "sweetalert2";
+import DataTable, { Column } from "@/components/feature/table/data-table";
 
-export default function UsersTable() {
+const UserTable = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { data, loading, error, totalItems, totalPages, currentPage, success } =
+  const { data, loading, error, success, totalPages, totalItems, currentPage } =
     useSelector((state: RootState) => state.Users);
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter states
-  const [filters, setFilters] = useState({
-    search: "",
-    page: 1,
-    perPage: 10,
-    orderBy: "createdAt",
-    sortDirection: "DESC" as "ASC" | "DESC",
-    role: "",
-    startDate: "",
-    endDate: "",
-  });
-
-  // Modal state
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | number | null>(
-    null
+  const fetchData = useCallback(
+    (page: number = 1, search: string = "") => {
+      dispatch(getAllUsers({ page, perPage: 10, search }));
+    },
+    [dispatch]
   );
 
-  const loadUsers = () => {
-    const params: any = {
-      page: filters.page,
-      perPage: filters.perPage,
-      orderBy: filters.orderBy,
-      sortDirection: filters.sortDirection,
-    };
-
-    if (filters.search) params.search = filters.search;
-    if (filters.role) params.role = filters.role;
-    if (filters.startDate) params.startDate = filters.startDate;
-    if (filters.endDate) params.endDate = filters.endDate;
-
-    dispatch(getUsersForTable(params));
-  };
-
   useEffect(() => {
-    loadUsers();
-  }, []);
+    fetchData(1, searchQuery);
+  }, [fetchData, searchQuery]);
 
   useEffect(() => {
     if (success) {
-      Alert.toast.success("Operasi berhasil!");
+      showAlert({
+        icon: "success",
+        title: "Berhasil",
+        text: "Operasi berhasil dilakukan",
+      });
       dispatch(clearSuccess());
-      loadUsers();
+      fetchData(currentPage, searchQuery);
     }
-  }, [success]);
-
-  useEffect(() => {
     if (error) {
-      Alert.toast.error(error);
+      showAlert({ icon: "error", title: "Error", text: error });
       dispatch(clearError());
     }
-  }, [error]);
+  }, [success, error, dispatch, fetchData, currentPage, searchQuery]);
 
-  const handleSearch = () => {
-    setFilters((prev) => ({ ...prev, page: 1 }));
-    setTimeout(loadUsers, 0);
+  const handleEdit = (id: string) => {
+    const encryptedSlug = encryptSlug(id);
+    router.push(`/MasterData/User/Edit/${encryptedSlug}`);
   };
 
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    setTimeout(loadUsers, 0);
-  };
-
-  const handleSort = (field: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      orderBy: field,
-      sortDirection:
-        prev.orderBy === field && prev.sortDirection === "ASC" ? "DESC" : "ASC",
-      page: 1,
-    }));
-    setTimeout(loadUsers, 0);
-  };
-
-  const handleReset = () => {
-    setFilters({
-      search: "",
-      page: 1,
-      perPage: 10,
-      orderBy: "createdAt",
-      sortDirection: "DESC",
-      role: "",
-      startDate: "",
-      endDate: "",
-    });
-    setTimeout(loadUsers, 0);
-  };
-
-  // ============================================
-  // CRUD Handlers
-  // ============================================
-
-  const handleDelete = async (user: Users) => {
-    const confirmed = await Alert.confirmDelete({
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Swal.fire({
       title: "Hapus User?",
-      itemName: user.fullName || user.email,
+      text: `Apakah Anda yakin ingin menghapus user "${name}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
     });
 
-    if (confirmed) {
-      try {
-        Alert.loading("Menghapus user...");
-        await dispatch(deleteUsers(String(user.id))).unwrap();
-        Alert.closeLoading();
-        await Alert.success("Berhasil!", "User berhasil dihapus");
-      } catch (err: any) {
-        Alert.closeLoading();
-        await Alert.error("Gagal!", err?.message || "Gagal menghapus user");
-      }
-    }
-  };
-
-  // Open Modal Detail
-  const handleView = (user: Users) => {
-    setSelectedUserId(user.id);
-    setIsDetailModalOpen(true);
-  };
-
-  // Close Modal Detail
-  const handleCloseDetailModal = () => {
-    setIsDetailModalOpen(false);
-    setSelectedUserId(null);
-  };
-
-  // Navigate to Edit page with encrypted slug
-  const handleEdit = (user: Users) => {
-    const editUrl = generateEditUrl("/MasterData/User/Edit", user.id);
-    router.push(editUrl);
-  };
-
-  // Navigate to Add page
-  const handleCreate = () => {
-    router.push("/MasterData/User/Add");
-  };
-
-  const handleExport = async () => {
-    const exportFormat = await Alert.inputSelect(
-      "Export Data",
-      {
-        csv: "CSV",
-        excel: "Excel",
-        pdf: "PDF",
-      },
-      "Pilih format..."
-    );
-
-    if (exportFormat) {
-      Alert.loading(`Mengexport ke ${exportFormat.toUpperCase()}...`);
-
-      // Simulasi export
-      setTimeout(() => {
-        Alert.closeLoading();
-        Alert.success(
-          "Berhasil!",
-          `Data berhasil diexport ke ${exportFormat.toUpperCase()}`
-        );
-      }, 1500);
-    }
-  };
-
-  // ============================================
-  // Helper Functions
-  // ============================================
-
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-purple-500/20 text-purple-400 border border-purple-500/30";
-      case "salesman":
-        return "bg-blue-500/20 text-blue-400 border border-blue-500/30";
-      case "customer":
-      default:
-        return "bg-green-500/20 text-green-400 border border-green-500/30";
+    if (result.isConfirmed) {
+      dispatch(deleteUsers(id));
     }
   };
 
   const getInitials = (name: string) => {
     return name
       .split(" ")
-      .map((n) => n.charAt(0))
+      .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
-  // ============================================
-  // Table Columns
-  // ============================================
+  const getRoleBadgeColor = (role: string) => {
+    switch (role?.toLowerCase()) {
+      case "admin":
+        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+      case "customer":
+        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+      case "salesman":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+      default:
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+    }
+  };
 
   const columns: Column<Users>[] = [
     {
-      key: "fullName",
+      key: "name",
       header: "User",
-      sortable: true,
-      render: (user) => (
-        <div className="flex items-center gap-4">
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold transition-transform group-hover:scale-110 ${
-              isDarkMode
-                ? "bg-gradient-to-br from-cyan-600 to-blue-700"
-                : "bg-gradient-to-br from-cyan-400 to-blue-500"
-            } text-white`}
-          >
-            {getInitials(user.fullName || "U")}
+      render: (item: Users) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+            {getInitials(item.name)}
           </div>
           <div>
-            <p
-              className={`font-bold mb-0.5 ${
-                isDarkMode ? "text-white" : "text-slate-900"
-              }`}
-            >
-              {user.fullName || "-"}
-            </p>
-            <p
-              className={`text-sm ${
-                isDarkMode ? "text-slate-400" : "text-gray-500"
-              }`}
-            >
-              {user.email || "-"}
-            </p>
+            <p className="font-semibold text-slate-900 dark:text-white">{item.name}</p>
+            <p className="text-xs text-slate-500">{item.email}</p>
           </div>
         </div>
       ),
     },
     {
-      key: "phoneNumber",
+      key: "phone",
       header: "No. Telepon",
-      render: (user) => (
+      render: (item: Users) => (
         <div>
-          <p className={isDarkMode ? "text-slate-300" : "text-gray-700"}>
-            {user.phoneNumber || "-"}
-          </p>
-          {user.whatsappNumber && (
-            <p
-              className={`text-sm ${
-                isDarkMode ? "text-slate-400" : "text-gray-500"
-              }`}
-            >
-              WA: {user.whatsappNumber}
-            </p>
+          <p className="font-medium">{item.phone || "-"}</p>
+          {item.whatsapp && (
+            <p className="text-xs text-green-600">WA: {item.whatsapp}</p>
           )}
         </div>
       ),
@@ -276,201 +127,102 @@ export default function UsersTable() {
     {
       key: "location",
       header: "Lokasi",
-      render: (user) => (
-        <p
-          className={`max-w-xs truncate ${
-            isDarkMode ? "text-slate-400" : "text-gray-600"
-          }`}
-        >
-          {user.location || "-"}
-        </p>
+      render: (item: Users) => (
+        <span className="text-slate-600 dark:text-slate-400">
+          {item.location || "-"}
+        </span>
       ),
     },
     {
       key: "role",
       header: "Role",
-      sortable: true,
-      render: (user) => (
-        <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold capitalize ${getRoleBadgeColor(
-            user.role || "customer"
-          )}`}
-        >
-          {user.role || "customer"}
+      render: (item: Users) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(item.role)}`}>
+          {item.role}
         </span>
       ),
     },
     {
       key: "createdAt",
       header: "Tanggal Dibuat",
-      sortable: true,
-      render: (user) => (
-        <span
-          className={`text-sm ${
-            isDarkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          {user.createdAt
-            ? format(new Date(user.createdAt), "dd MMM yyyy")
-            : "-"}
-        </span>
-      ),
-    },
-    {
-      key: "updatedAt",
-      header: "Terakhir Diupdate",
-      sortable: true,
-      render: (user) => (
-        <span
-          className={`text-sm ${
-            isDarkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          {user.updatedAt
-            ? format(new Date(user.updatedAt), "dd MMM yyyy")
-            : "-"}
+      render: (item: Users) => (
+        <span className="text-sm text-slate-600 dark:text-slate-400">
+          {item.createdAt ? new Date(item.createdAt).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }) : "-"}
         </span>
       ),
     },
   ];
 
-  // ============================================
-  // Render
-  // ============================================
+  const renderActions = (item: Users) => (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEdit(item.id)}
+        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors dark:hover:bg-blue-900"
+        title="Edit"
+      >
+        <FiEdit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDelete(item.id, item.name)}
+        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors dark:hover:bg-red-900"
+        title="Hapus"
+      >
+        <FiTrash2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
 
   return (
-    <>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
-              Data Users
-            </h1>
-            <p
-              className={`text-lg ${
-                isDarkMode ? "text-slate-400" : "text-slate-600"
-              }`}
-            >
-              Kelola semua pengguna yang terdaftar
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleExport}
-              className={`px-4 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 ${
-                isDarkMode
-                  ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              Export
-            </button>
-            <button
-              onClick={handleCreate}
-              className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white"
-            >
-              <Plus className="text-xl" />
-              Tambah User
-            </button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Data Users
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400">
+            Kelola semua pengguna yang terdaftar
+          </p>
+        </div>
+        <button
+          onClick={() => router.push("/MasterData/User/Add")}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg"
+        >
+          <FiPlus className="w-5 h-5" />
+          Tambah User
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Cari user..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full max-w-md px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-slate-800 dark:text-white"
+          />
         </div>
 
-        {/* Search & Filters */}
-        <TableSearch
-          searchValue={filters.search}
-          onSearchChange={(value) =>
-            setFilters((prev) => ({ ...prev, search: value }))
-          }
-          searchPlaceholder="Cari nama atau email..."
-          showDateRange
-          startDate={filters.startDate}
-          endDate={filters.endDate}
-          onStartDateChange={(date) =>
-            setFilters((prev) => ({ ...prev, startDate: date }))
-          }
-          onEndDateChange={(date) =>
-            setFilters((prev) => ({ ...prev, endDate: date }))
-          }
-          showOrderBy
-          orderBy={filters.orderBy}
-          onOrderByChange={(field: string) =>
-            setFilters((prev) => ({ ...prev, orderBy: field }))
-          }
-          orderByOptions={[
-            { value: "fullName", label: "Nama" },
-            { value: "email", label: "Email" },
-            { value: "role", label: "Role" },
-            { value: "createdAt", label: "Tanggal Dibuat" },
-            { value: "updatedAt", label: "Tanggal Update" },
-          ]}
-          showSortDirection
-          sortDirection={filters.sortDirection}
-          onSortDirectionChange={(direction) =>
-            setFilters((prev) => ({ ...prev, sortDirection: direction }))
-          }
-          showRoleFilter
-          role={filters.role}
-          onRoleChange={(role) => setFilters((prev) => ({ ...prev, role }))}
-          roleOptions={[
-            { value: "", label: "Semua Role" },
-            { value: "admin", label: "Admin" },
-            { value: "salesman", label: "Salesman" },
-            { value: "customer", label: "Customer" },
-          ]}
-          onSearch={handleSearch}
-          onReset={handleReset}
-        />
-
-        {/* Table */}
         <DataTable
-          data={data}
           columns={columns}
+          data={data}
           loading={loading}
           error={error}
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={totalItems}
-          pageSize={filters.perPage}
-          onPageChange={handlePageChange}
-          orderBy={filters.orderBy}
-          sortDirection={filters.sortDirection}
-          onSort={handleSort}
-          actions={(user) => (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleView(user)}
-                className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"
-                title="Lihat Detail"
-              >
-                <Eye size={18} />
-              </button>
-              <button
-                onClick={() => handleEdit(user)}
-                className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-                title="Edit"
-              >
-                <Edit size={18} />
-              </button>
-              <button
-                onClick={() => handleDelete(user)}
-                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                title="Hapus"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          )}
+          totalItems={totalItems || data.length}
+          pageSize={10}
+          onPageChange={(page) => fetchData(page, searchQuery)}
+          actions={renderActions}
+          emptyMessage="Tidak ada data user"
         />
       </div>
-
-      {/* Modal Detail User */}
-      <ModalDetailUser
-        isOpen={isDetailModalOpen}
-        onClose={handleCloseDetailModal}
-        userId={selectedUserId}
-        onEdit={handleEdit}
-      />
-    </>
+    </div>
   );
-}
+};
+
+export default UserTable;
