@@ -5,15 +5,22 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
 // Types
+// ...existing code...
+
+// Types
 export interface Specification {
   id: string;
   modelId: string;
   modelName?: string;
+  specCode?: string;
   specName: string;
   specCategory: string;
   specValue: string;
   specUnit: string;
   description: string;
+  engineCapacity?: string;
+  transmission?: string;
+  fuelType?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,6 +45,8 @@ export interface Specification {
     };
   };
 }
+
+// ...existing code...
 
 // Pagination interface
 interface Pagination {

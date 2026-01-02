@@ -5,12 +5,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import {
-  getSpecificationsForSelect,
-  deleteSpecifications,
+  getSpecificationsForTable,
+  deleteSpecification,
   clearSuccess,
   clearError,
+  Specification,
 } from "@/lib/state/slice/Specifications/SpecificationsSlice";
-import { Specifications } from "@/lib/state/slice/Specifications/SpecificationsSlice";
 import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
 import { showAlert } from "@/components/feature/alert/alert";
 import { encryptSlug } from "@/lib/slug/slug";
@@ -27,7 +27,7 @@ const SpecificationsTable = () => {
 
   const fetchData = useCallback(
     (page: number = 1, search: string = "") => {
-      dispatch(getSpecificationsForSelect({ page, perPage: 10, search }));
+      dispatch(getSpecificationsForTable({ page, perPage: 10, search }));
     },
     [dispatch]
   );
@@ -70,92 +70,80 @@ const SpecificationsTable = () => {
     });
 
     if (result.isConfirmed) {
-      dispatch(deleteSpecifications(id));
+      dispatch(deleteSpecification(id));
     }
   };
 
-  const getTransmissionBadge = (transmission: string) => {
-    switch (transmission?.toLowerCase()) {
-      case "automatic":
-      case "matic":
+  const getCategoryBadge = (category: string) => {
+    switch (category?.toLowerCase()) {
+      case "engine":
+      case "mesin":
         return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
-      case "manual":
+      case "dimension":
+      case "dimensi":
         return "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300";
-      case "cvt":
+      case "performance":
+      case "performa":
         return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
-      default:
-        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
-    }
-  };
-
-  const getFuelBadge = (fuel: string) => {
-    switch (fuel?.toLowerCase()) {
-      case "bensin":
-      case "petrol":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
-      case "diesel":
-        return "bg-slate-700 text-white dark:bg-slate-600 dark:text-slate-100";
-      case "electric":
-      case "listrik":
+      case "safety":
+      case "keamanan":
         return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
-      case "hybrid":
-        return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300";
       default:
         return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
     }
   };
 
-  const columns: Column<Specifications>[] = [
-    {
-      key: "specCode",
-      header: "Kode",
-      render: (item: Specifications) => (
-        <span className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-          {item.specCode || "-"}
-        </span>
-      ),
-    },
+  const columns: Column<Specification>[] = [
     {
       key: "specName",
       header: "Nama Spesifikasi",
-      render: (item: Specifications) => (
+      render: (item: Specification) => (
         <div>
-          <p className="font-semibold text-slate-900 dark:text-white">{item.specName}</p>
-          <p className="text-xs text-slate-500">{item.modelName || "-"}</p>
+          <p className="font-semibold text-slate-900 dark:text-white">
+            {item.specName}
+          </p>
+          <p className="text-xs text-slate-500">
+            {item.carModel?.modelName || item.modelName || "-"}
+          </p>
         </div>
       ),
     },
     {
-      key: "engineCapacity",
-      header: "Kapasitas Mesin",
-      render: (item: Specifications) => (
+      key: "specCategory",
+      header: "Kategori",
+      render: (item: Specification) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryBadge(
+            item.specCategory || ""
+          )}`}
+        >
+          {item.specCategory || "-"}
+        </span>
+      ),
+    },
+    {
+      key: "specValue",
+      header: "Nilai",
+      render: (item: Specification) => (
         <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-          {item.engineCapacity ? `${item.engineCapacity} cc` : "-"}
+          {item.specValue}
+          {item.specUnit ? ` ${item.specUnit}` : ""}
         </span>
       ),
     },
     {
-      key: "transmission",
-      header: "Transmisi",
-      render: (item: Specifications) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTransmissionBadge(item.transmission || "")}`}>
-          {item.transmission || "-"}
-        </span>
-      ),
-    },
-    {
-      key: "fuelType",
-      header: "Bahan Bakar",
-      render: (item: Specifications) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getFuelBadge(item.fuelType || "")}`}>
-          {item.fuelType || "-"}
-        </span>
+      key: "description",
+      header: "Deskripsi",
+      render: (item: Specification) => (
+        <p className="text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">
+          {item.description || "-"}
+        </p>
       ),
     },
     {
       key: "isActive",
       header: "Status",
-      render: (item: Specifications) => (
+      render: (item: Specification) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${
             item.isActive
@@ -169,7 +157,7 @@ const SpecificationsTable = () => {
     },
   ];
 
-  const renderActions = (item: Specifications) => (
+  const renderActions = (item: Specification) => (
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleEdit(item.id)}
