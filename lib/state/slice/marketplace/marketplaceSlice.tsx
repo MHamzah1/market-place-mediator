@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import instanceAxios from "@/lib/axiosInstance/instanceAxios";
-import { getHeaders } from "@/lib/headers/headers";
+import { getHeaders, getMultipartHeaders } from "@/lib/headers/headers";
 import { AxiosError } from "axios";
 
 // Types
@@ -81,7 +81,7 @@ export interface CreateListingData {
   condition?: string;
   ownershipStatus?: string;
   taxStatus?: string;
-  images: string[];
+  images: File[]; // Changed from string[] to File[] for file upload
   sellerWhatsapp: string;
 }
 
@@ -90,7 +90,7 @@ export interface UpdateListingData {
   mileage?: number;
   description?: string;
   taxStatus?: string;
-  images?: string[];
+  images?: File[]; // Changed from string[] to File[] for file upload
   isActive?: boolean;
 }
 
@@ -253,7 +253,7 @@ export const fetchMyListings = createAsyncThunk<
   }
 );
 
-// Create listing
+// Create listing with file upload
 export const createListing = createAsyncThunk<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
@@ -263,8 +263,34 @@ export const createListing = createAsyncThunk<
   "marketplace/createListing",
   async (data: CreateListingData, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.post(`/marketplace/listings`, data, {
-        headers: getHeaders(),
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      
+      // Append all text fields
+      formData.append("carModelId", data.carModelId);
+      formData.append("year", String(data.year));
+      formData.append("price", String(data.price));
+      formData.append("mileage", String(data.mileage));
+      formData.append("transmission", data.transmission);
+      formData.append("fuelType", data.fuelType);
+      formData.append("color", data.color);
+      formData.append("locationCity", data.locationCity);
+      formData.append("locationProvince", data.locationProvince);
+      formData.append("description", data.description);
+      formData.append("sellerWhatsapp", data.sellerWhatsapp);
+      
+      // Append optional fields if they exist
+      if (data.condition) formData.append("condition", data.condition);
+      if (data.ownershipStatus) formData.append("ownershipStatus", data.ownershipStatus);
+      if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
+      
+      // Append image files
+      data.images.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const response = await instanceAxios.post(`/marketplace/listings`, formData, {
+        headers: getMultipartHeaders(),
       });
       return response.data;
     } catch (error) {
@@ -276,7 +302,7 @@ export const createListing = createAsyncThunk<
   }
 );
 
-// Update listing
+// Update listing with file upload
 export const updateListing = createAsyncThunk<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
@@ -289,11 +315,28 @@ export const updateListing = createAsyncThunk<
     { rejectWithValue }
   ) => {
     try {
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      
+      // Append optional fields if they exist
+      if (data.price !== undefined) formData.append("price", String(data.price));
+      if (data.mileage !== undefined) formData.append("mileage", String(data.mileage));
+      if (data.description) formData.append("description", data.description);
+      if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
+      if (data.isActive !== undefined) formData.append("isActive", String(data.isActive));
+      
+      // Append image files if provided
+      if (data.images && data.images.length > 0) {
+        data.images.forEach((file) => {
+          formData.append("images", file);
+        });
+      }
+
       const response = await instanceAxios.put(
         `/marketplace/listings/${id}`,
-        data,
+        formData,
         {
-          headers: getHeaders(),
+          headers: getMultipartHeaders(),
         }
       );
       return response.data;
