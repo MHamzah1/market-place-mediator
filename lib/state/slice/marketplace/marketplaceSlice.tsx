@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import instanceAxios from "@/lib/axiosInstance/instanceAxios";
-import { getHeaders, getMultipartHeaders } from "@/lib/headers/headers";
+import { getHeaders, getHeadersFormData } from "@/lib/headers/headers";
 import { AxiosError } from "axios";
 
 // Types
@@ -265,7 +265,7 @@ export const createListing = createAsyncThunk<
     try {
       // Create FormData for multipart/form-data
       const formData = new FormData();
-      
+
       // Append all text fields
       formData.append("carModelId", data.carModelId);
       formData.append("year", String(data.year));
@@ -278,20 +278,25 @@ export const createListing = createAsyncThunk<
       formData.append("locationProvince", data.locationProvince);
       formData.append("description", data.description);
       formData.append("sellerWhatsapp", data.sellerWhatsapp);
-      
+
       // Append optional fields if they exist
       if (data.condition) formData.append("condition", data.condition);
-      if (data.ownershipStatus) formData.append("ownershipStatus", data.ownershipStatus);
+      if (data.ownershipStatus)
+        formData.append("ownershipStatus", data.ownershipStatus);
       if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
-      
+
       // Append image files
       data.images.forEach((file) => {
         formData.append("images", file);
       });
 
-      const response = await instanceAxios.post(`/marketplace/listings`, formData, {
-        headers: getMultipartHeaders(),
-      });
+      const response = await instanceAxios.post(
+        `/marketplace/listings`,
+        formData,
+        {
+          headers: getHeadersFormData(),
+        }
+      );
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ErrorResponse>;
@@ -317,14 +322,17 @@ export const updateListing = createAsyncThunk<
     try {
       // Create FormData for multipart/form-data
       const formData = new FormData();
-      
+
       // Append optional fields if they exist
-      if (data.price !== undefined) formData.append("price", String(data.price));
-      if (data.mileage !== undefined) formData.append("mileage", String(data.mileage));
+      if (data.price !== undefined)
+        formData.append("price", String(data.price));
+      if (data.mileage !== undefined)
+        formData.append("mileage", String(data.mileage));
       if (data.description) formData.append("description", data.description);
       if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
-      if (data.isActive !== undefined) formData.append("isActive", String(data.isActive));
-      
+      if (data.isActive !== undefined)
+        formData.append("isActive", String(data.isActive));
+
       // Append image files if provided
       if (data.images && data.images.length > 0) {
         data.images.forEach((file) => {
@@ -336,7 +344,7 @@ export const updateListing = createAsyncThunk<
         `/marketplace/listings/${id}`,
         formData,
         {
-          headers: getMultipartHeaders(),
+          headers: getHeadersFormData(),
         }
       );
       return response.data;
