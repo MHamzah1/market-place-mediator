@@ -79,11 +79,11 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
   const getRoleDashboard = () => {
     switch (userInfo?.role) {
       case "admin":
-        return "/admin/dashboard";
+        return "/marketplace/my-listings";
       case "salesman":
-        return "/salesman/dashboard";
+        return "/marketplace/my-listings";
       case "customer":
-        return "/customer/dashboard";
+        return "/marketplace/my-listings";
       default:
         return "/dashboard";
     }
