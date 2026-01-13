@@ -12,11 +12,11 @@ services:
     container_name: marketplace-mediator-app
     restart: unless-stopped
     ports:
-      - "3001:3000" # Akses via localhost:3001, internal tetap 3000
+      - "9090:9090" # Akses via localhost:9090, internal tetap 9090
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://192.168.0.182:3000/api}
-      - NEXT_PUBLIC_API_URL_FOTO=${NEXT_PUBLIC_API_URL_FOTO:-http://192.168.0.182:3000/uploads/}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://192.168.2.103:3000/api}
+      - NEXT_PUBLIC_API_URL_FOTO=${NEXT_PUBLIC_API_URL_FOTO:-http://192.168.2.103:3000/uploads/}
     networks:
       - marketplace-network
     healthcheck:
