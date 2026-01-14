@@ -1,322 +1,379 @@
 "use client";
 
-import React from "react";
-import { FiSearch, FiMapPin, FiTrendingUp } from "react-icons/fi";
-import { AiOutlineCar } from "react-icons/ai";
+import React, { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
+import { FiArrowRight, FiPlay } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
+import Image from "next/image";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import "swiper/css/effect-fade";
+
+const slides = [
+  {
+    id: 1,
+    badge: "Platform Marketplace #1 di Indonesia",
+    title: "Temukan Mobil",
+    highlight: "Impian Anda",
+    description:
+      "Ribuan pilihan mobil berkualitas dengan harga terbaik. Dilengkapi jasa inspeksi profesional dan kalkulator pembiayaan.",
+    image: "/image/cars1.jpg",
+    buttonText: "Jelajahi Marketplace",
+    buttonLink: "/marketplace",
+    accentColor: "from-blue-500 to-cyan-500",
+  },
+  {
+    id: 2,
+    badge: "Layanan Inspeksi Profesional",
+    title: "Jasa Inspeksi",
+    highlight: "Mobil Terpercaya",
+    description:
+      "Pemeriksaan menyeluruh oleh mekanik bersertifikat. Lebih dari 150 titik inspeksi untuk memastikan kualitas mobil Anda.",
+    image: "/image/cars2.png",
+    buttonText: "Pesan Inspeksi",
+    buttonLink: "/inspeksi",
+    accentColor: "from-emerald-500 to-teal-500",
+  },
+  {
+    id: 3,
+    badge: "Hitung Cicilan dengan Mudah",
+    title: "Kalkulator",
+    highlight: "Pembiayaan Mobil",
+    description:
+      "Simulasikan cicilan mobil impian Anda. Bandingkan berbagai opsi leasing dari partner terpercaya kami.",
+    image: "/image/cars3.png",
+    buttonText: "Hitung Sekarang",
+    buttonLink: "/Kalkulator",
+    accentColor: "from-amber-500 to-orange-500",
+  },
+];
 
 const HeaderBeranda = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+  const router = useRouter();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section
-      className={`relative overflow-hidden transition-colors duration-300 ${
-        isDarkMode
-          ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
-          : "bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900"
-      }`}
-    >
-      {/* Animated Background Pattern */}
-      <div className="absolute inset-0 opacity-30">
-        <div
-          className={`absolute top-20 left-20 w-96 h-96 rounded-full blur-3xl animate-pulse ${
-            isDarkMode ? "bg-cyan-500" : "bg-white"
-          }`}
-        ></div>
-        <div
-          className={`absolute bottom-20 right-20 w-[500px] h-[500px] rounded-full blur-3xl animate-pulse ${
-            isDarkMode ? "bg-blue-500" : "bg-blue-300"
-          }`}
-          style={{ animationDelay: "1s" }}
-        ></div>
-      </div>
-
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundImage: `linear-gradient(${
-              isDarkMode ? "#ffffff" : "#000000"
-            } 1px, transparent 1px), linear-gradient(90deg, ${
-              isDarkMode ? "#ffffff" : "#000000"
-            } 1px, transparent 1px)`,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
-      </div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left Content */}
-          <div className="space-y-8 animate-fade-in">
-            {/* Badge */}
-            <div className="inline-block">
-              <span
-                className={`px-5 py-2.5 rounded-full text-sm font-bold border-2 backdrop-blur-sm ${
-                  isDarkMode
-                    ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
-                    : "bg-white/20 border-white/30 text-white"
-                }`}
-              >
-                🎉 Platform Marketplace #1 di Indonesia
-              </span>
-            </div>
-
-            {/* Main Heading */}
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
-                <span className="text-white">Temukan Mobil</span>
-                <span
-                  className={`block ${
+    <section className="relative overflow-hidden">
+      <Swiper
+        modules={[Autoplay, Pagination, Navigation, EffectFade]}
+        effect="fade"
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+        }}
+        pagination={{
+          clickable: true,
+          el: ".custom-pagination",
+          bulletClass: "custom-bullet",
+          bulletActiveClass: "custom-bullet-active",
+        }}
+        navigation={{
+          nextEl: ".swiper-next",
+          prevEl: ".swiper-prev",
+        }}
+        loop={true}
+        speed={1000}
+        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+        className="w-full"
+      >
+        {slides.map((slide) => (
+          <SwiperSlide key={slide.id}>
+            <div className="relative min-h-[85vh] md:min-h-[90vh]">
+              {/* Background Image with Overlay */}
+              <div className="absolute inset-0">
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  priority
+                  quality={90}
+                  className="object-cover object-center"
+                  sizes="100vw"
+                />
+                {/* Gradient Overlay */}
+                <div
+                  className={`absolute inset-0 ${
                     isDarkMode
-                      ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500"
-                      : "text-yellow-300"
+                      ? "bg-gradient-to-r from-slate-950/95 via-slate-900/75 to-transparent"
+                      : "bg-gradient-to-r from-blue-950/90 via-blue-900/70 to-transparent"
                   }`}
-                >
-                  Impian Anda
-                </span>
-              </h1>
+                />
+                {/* Additional overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
 
-              <p
-                className={`text-xl md:text-2xl font-medium leading-relaxed max-w-xl ${
-                  isDarkMode ? "text-slate-300" : "text-blue-100"
-                }`}
-              >
-                Ribuan pilihan mobil berkualitas dengan harga terbaik.
-                Dilengkapi jasa inspeksi profesional dan kalkulator pembiayaan.
-              </p>
+                {/* Animated gradient accent */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${slide.accentColor} opacity-10 mix-blend-overlay`}
+                />
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+                <div className="flex flex-col justify-center min-h-[85vh] md:min-h-[90vh] py-20">
+                  <div className="max-w-3xl">
+                    {/* Badge with animation */}
+                    <div
+                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold mb-6 backdrop-blur-md animate-pulse ${
+                        isDarkMode
+                          ? "bg-white/10 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/20"
+                          : "bg-white/20 text-white border border-white/40 shadow-lg shadow-white/20"
+                      }`}
+                    >
+                      <span className="text-lg animate-bounce">✨</span>
+                      {slide.badge}
+                    </div>
+
+                    {/* Title with stagger animation */}
+                    <div className="mb-6 space-y-2">
+                      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight animate-fade-in-up">
+                        {slide.title}
+                      </h1>
+                      <h2
+                        className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight bg-gradient-to-r ${slide.accentColor} bg-clip-text text-transparent animate-fade-in-up animation-delay-100 drop-shadow-2xl`}
+                        style={{ textShadow: "0 0 40px rgba(0,0,0,0.3)" }}
+                      >
+                        {slide.highlight}
+                      </h2>
+                    </div>
+
+                    {/* Description with better typography */}
+                    <p className="text-lg md:text-xl text-white/90 leading-relaxed mb-10 max-w-2xl font-medium animate-fade-in-up animation-delay-200 backdrop-blur-sm bg-black/10 p-4 rounded-xl">
+                      {slide.description}
+                    </p>
+
+                    {/* Buttons with enhanced styling */}
+                    <div className="flex flex-wrap gap-4 animate-fade-in-up animation-delay-300">
+                      <button
+                        onClick={() => router.push(slide.buttonLink)}
+                        className={`group px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-3xl hover:scale-105 bg-gradient-to-r ${slide.accentColor} text-white hover:brightness-110`}
+                      >
+                        {slide.buttonText}
+                        <FiArrowRight className="group-hover:translate-x-2 transition-transform duration-300" />
+                      </button>
+
+                      <button
+                        className={`group px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center gap-3 border-2 hover:scale-105 ${
+                          isDarkMode
+                            ? "border-white/40 text-white hover:bg-white/20 backdrop-blur-md hover:border-white/60"
+                            : "border-white/60 text-white hover:bg-white/30 backdrop-blur-md hover:border-white/80"
+                        }`}
+                      >
+                        <FiPlay className="text-xl group-hover:scale-125 transition-transform" />
+                        Lihat Video
+                      </button>
+                    </div>
+
+                    {/* Stats/Features */}
+                    <div className="mt-12 grid grid-cols-3 gap-6 max-w-2xl">
+                      {[
+                        { value: "10K+", label: "Mobil Terjual" },
+                        { value: "98%", label: "Kepuasan" },
+                        { value: "24/7", label: "Dukungan" },
+                      ].map((stat, idx) => (
+                        <div
+                          key={idx}
+                          className="backdrop-blur-md bg-white/10 rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300"
+                        >
+                          <div
+                            className={`text-2xl md:text-3xl font-black bg-gradient-to-r ${slide.accentColor} bg-clip-text text-transparent`}
+                          >
+                            {stat.value}
+                          </div>
+                          <div className="text-sm text-white/80 font-medium">
+                            {stat.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-            {/* Search Box */}
-            <div
-              className={`rounded-3xl p-6 shadow-2xl backdrop-blur-xl border-2 ${
-                isDarkMode
-                  ? "bg-slate-900/50 border-slate-700/50"
-                  : "bg-white/95 border-white/20"
+      {/* Custom Navigation Arrows - Enhanced */}
+      <button
+        className={`swiper-prev absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group ${
+          isDarkMode
+            ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border-2 border-white/20 hover:border-white/40"
+            : "bg-white/20 text-white hover:bg-white/30 backdrop-blur-md border-2 border-white/30 hover:border-white/50"
+        }`}
+      >
+        <svg
+          className="w-7 h-7 group-hover:-translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={3}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </button>
+
+      <button
+        className={`swiper-next absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group ${
+          isDarkMode
+            ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border-2 border-white/20 hover:border-white/40"
+            : "bg-white/20 text-white hover:bg-white/30 backdrop-blur-md border-2 border-white/30 hover:border-white/50"
+        }`}
+      >
+        <svg
+          className="w-7 h-7 group-hover:translate-x-1 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={3}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </button>
+
+      {/* Custom Pagination Dots - Enhanced */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+        <div className="custom-pagination flex items-center gap-3 backdrop-blur-md bg-black/20 px-6 py-3 rounded-full">
+          {slides.map((slide, index) => (
+            <button
+              key={slide.id}
+              className={`transition-all duration-500 rounded-full ${
+                activeIndex === index
+                  ? `w-12 h-3.5 bg-gradient-to-r ${slide.accentColor} shadow-lg`
+                  : `w-3.5 h-3.5 ${
+                      isDarkMode
+                        ? "bg-white/50 hover:bg-white/70"
+                        : "bg-white/60 hover:bg-white/80"
+                    } hover:scale-125`
               }`}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="relative group">
-                  <FiSearch
-                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-xl ${
-                      isDarkMode ? "text-slate-500" : "text-gray-400"
-                    }`}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Cari merek atau model..."
-                    className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 font-medium transition-all duration-200 focus:outline-none ${
-                      isDarkMode
-                        ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                        : "bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                    }`}
-                  />
-                </div>
-
-                <div className="relative group">
-                  <FiMapPin
-                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-xl ${
-                      isDarkMode ? "text-slate-500" : "text-gray-400"
-                    }`}
-                  />
-                  <select
-                    className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 font-medium transition-all duration-200 focus:outline-none appearance-none ${
-                      isDarkMode
-                        ? "bg-slate-800 border-slate-700 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                        : "bg-white border-gray-200 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                    }`}
-                  >
-                    <option>Semua Lokasi</option>
-                    <option>Jakarta</option>
-                    <option>Bandung</option>
-                    <option>Surabaya</option>
-                    <option>Medan</option>
-                  </select>
-                </div>
-
-                <button
-                  className={`py-4 px-6 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center space-x-2 shadow-xl ${
-                    isDarkMode
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
-                      : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
-                  } hover:scale-105`}
-                >
-                  <FiSearch />
-                  <span>Cari Mobil</span>
-                </button>
-              </div>
-
-              {/* Quick Filters */}
-              <div className="flex flex-wrap gap-3 mt-6">
-                <span
-                  className={`text-sm font-semibold ${
-                    isDarkMode ? "text-slate-400" : "text-gray-600"
-                  }`}
-                >
-                  Populer:
-                </span>
-                {[
-                  "Toyota Avanza",
-                  "Honda CR-V",
-                  "Mitsubishi Xpander",
-                  "Suzuki Ertiga",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                      isDarkMode
-                        ? "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-cyan-400 border border-slate-700"
-                        : "bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
-                    }`}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6">
-              {[
-                { value: "10K+", label: "Mobil Tersedia", icon: "🚗" },
-                { value: "50K+", label: "Pengguna", icon: "👥" },
-                { value: "4.9", label: "Rating", icon: "⭐" },
-              ].map((stat, index) => (
-                <div key={index} className="text-center md:text-left group">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-2xl">{stat.icon}</span>
-                    <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform">
-                      {stat.value}
-                    </div>
-                  </div>
-                  <div
-                    className={`text-sm font-semibold ${
-                      isDarkMode ? "text-slate-400" : "text-blue-200"
-                    }`}
-                  >
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Content - Floating Cards */}
-          <div className="relative hidden lg:block">
-            <div className="relative">
-              {/* Floating Badge Cards */}
-              <div
-                className={`absolute -top-8 -right-8 rounded-2xl shadow-2xl p-6 backdrop-blur-xl border-2 animate-bounce ${
-                  isDarkMode
-                    ? "bg-slate-800/50 border-slate-700/50"
-                    : "bg-white/90 border-white/20"
-                }`}
-                style={{ animationDuration: "3s" }}
-              >
-                <div className="flex items-center space-x-4">
-                  <div
-                    className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                      isDarkMode
-                        ? "bg-gradient-to-br from-green-500 to-emerald-600"
-                        : "bg-green-100"
-                    }`}
-                  >
-                    <span className="text-3xl">✓</span>
-                  </div>
-                  <div>
-                    <div
-                      className={`text-xs font-bold ${
-                        isDarkMode ? "text-slate-400" : "text-gray-500"
-                      }`}
-                    >
-                      Inspeksi
-                    </div>
-                    <div
-                      className={`text-lg font-black ${
-                        isDarkMode ? "text-white" : "text-gray-800"
-                      }`}
-                    >
-                      Terpercaya
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`absolute -bottom-8 -left-8 rounded-2xl shadow-2xl p-6 backdrop-blur-xl border-2 animate-bounce ${
-                  isDarkMode
-                    ? "bg-slate-800/50 border-slate-700/50"
-                    : "bg-white/90 border-white/20"
-                }`}
-                style={{ animationDuration: "3s", animationDelay: "0.5s" }}
-              >
-                <div className="flex items-center space-x-4">
-                  <div
-                    className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                      isDarkMode
-                        ? "bg-gradient-to-br from-yellow-500 to-orange-600"
-                        : "bg-blue-100"
-                    }`}
-                  >
-                    <span className="text-3xl">💰</span>
-                  </div>
-                  <div>
-                    <div
-                      className={`text-xs font-bold ${
-                        isDarkMode ? "text-slate-400" : "text-gray-500"
-                      }`}
-                    >
-                      Harga
-                    </div>
-                    <div
-                      className={`text-lg font-black ${
-                        isDarkMode ? "text-white" : "text-gray-800"
-                      }`}
-                    >
-                      Terjangkau
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Car Illustration */}
-              <div
-                className={`rounded-3xl p-12 backdrop-blur-xl border-2 ${
-                  isDarkMode
-                    ? "bg-slate-800/30 border-slate-700/50"
-                    : "bg-white/10 border-white/20"
-                }`}
-              >
-                <div className="flex items-center justify-center h-96">
-                  <AiOutlineCar
-                    className={`text-9xl animate-pulse ${
-                      isDarkMode ? "text-slate-700" : "text-white/50"
-                    }`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+            />
+          ))}
         </div>
       </div>
 
-      {/* Wave Bottom */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 1440 120"
-          className="w-full"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill={isDarkMode ? "#0f172a" : "#f9fafb"}
-            fillOpacity="1"
-            d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,58.7C960,64,1056,64,1152,58.7C1248,53,1344,43,1392,37.3L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
-          ></path>
-        </svg>
-      </div>
+      {/* Quick Links Bar - Enhanced */}
+      {/* <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 transform translate-y-1/2">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-3 rounded-2xl overflow-hidden shadow-2xl ${
+              isDarkMode
+                ? "bg-slate-900/95 backdrop-blur-xl border border-slate-700/50"
+                : "bg-white/95 backdrop-blur-xl border border-white/20"
+            }`}
+          >
+            {[
+              {
+                title: "Marketplace",
+                desc: "Jual Beli Mobil",
+                link: "/marketplace",
+                icon: "🚗",
+                color: "from-blue-500 to-cyan-500",
+              },
+              {
+                title: "Inspeksi",
+                desc: "Cek Kualitas Mobil",
+                link: "/inspeksi",
+                icon: "🔍",
+                color: "from-emerald-500 to-teal-500",
+              },
+              {
+                title: "Kalkulator",
+                desc: "Hitung Cicilan",
+                link: "/Kalkulator",
+                icon: "💰",
+                color: "from-amber-500 to-orange-500",
+              },
+            ].map((item, index) => (
+              <button
+                key={index}
+                onClick={() => router.push(item.link)}
+                className={`group relative p-6 md:p-7 text-left transition-all duration-300 ${
+                  index !== 2
+                    ? isDarkMode
+                      ? "border-b md:border-b-0 md:border-r border-slate-700/50"
+                      : "border-b md:border-b-0 md:border-r border-gray-200"
+                    : ""
+                } ${isDarkMode ? "hover:bg-slate-800/70" : "hover:bg-gray-50"}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-2xl md:text-3xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
+                  >
+                    {item.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h3
+                      className={`font-bold text-base md:text-lg ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {item.title}
+                    </h3>
+                    <p
+                      className={`text-sm ${
+                        isDarkMode ? "text-slate-400" : "text-gray-500"
+                      }`}
+                    >
+                      {item.desc}
+                    </p>
+                  </div>
+                  <FiArrowRight
+                    className={`text-xl opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 ${
+                      isDarkMode ? "text-cyan-400" : "text-blue-600"
+                    }`}
+                  />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div> */}
+
+      {/* Spacer for Quick Links Bar */}
+      {/* <div className="h-20 md:h-24"></div> */}
+
+      <style jsx global>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out forwards;
+        }
+
+        .animation-delay-100 {
+          animation-delay: 0.1s;
+        }
+
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .animation-delay-300 {
+          animation-delay: 0.3s;
+        }
+      `}</style>
     </section>
   );
 };
