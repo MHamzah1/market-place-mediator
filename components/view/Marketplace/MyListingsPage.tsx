@@ -22,6 +22,7 @@ import {
   FiArrowLeft,
   FiTrendingUp,
   FiBarChart2,
+  FiZap,
 } from "react-icons/fi";
 import { AiOutlineCar, AiOutlineWhatsApp } from "react-icons/ai";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -124,13 +125,22 @@ const MyListingsPage = () => {
               <FiArrowLeft />
               Kembali ke Marketplace
             </button>
-            <Link
-              href="/marketplace/create"
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all"
-            >
-              <FiPlus />
-              Jual Mobil
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/marketplace/boost/history"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm text-yellow-300 font-semibold rounded-xl hover:from-yellow-500/30 hover:to-orange-500/30 transition-all"
+              >
+                <FiZap />
+                Riwayat Boost
+              </Link>
+              <Link
+                href="/marketplace/create"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all"
+              >
+                <FiPlus />
+                Jual Mobil
+              </Link>
+            </div>
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-2">Listing Saya</h1>
@@ -335,6 +345,17 @@ const MyListingsPage = () => {
                         </>
                       )}
                     </button>
+
+                    {/* Boost Button */}
+                    {listing.isActive && (
+                      <Link
+                        href={`/marketplace/boost?listingId=${listing.id}`}
+                        className="p-2 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-500 hover:from-yellow-500/30 hover:to-orange-500/30 transition-all"
+                        title="Boost Listing"
+                      >
+                        <FiZap />
+                      </Link>
+                    )}
 
                     <Link
                       href={`/marketplace/${listing.id}`}

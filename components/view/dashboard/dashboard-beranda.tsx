@@ -1,6 +1,6 @@
 import React from "react";
 import HeaderBeranda from "./section/header-beranda";
-import SuperiorCarSection from "./section/superior-car-section";
+import FeaturedListingsSection from "@/components/view/Boost/FeaturedListingsSection";
 import MarketingSection from "./section/marketing-section";
 import JasaInspeksiSection from "./section/jasa-inspeksi-section";
 import ReviewSection from "./section/review-section";
@@ -9,7 +9,7 @@ const DashboardBeranda = () => {
   return (
     <>
       <HeaderBeranda />
-      <SuperiorCarSection />
+      <FeaturedListingsSection limit={6} showViewAll={true} />
       <MarketingSection />
       <JasaInspeksiSection />
       <ReviewSection />

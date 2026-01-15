@@ -8,6 +8,7 @@ import {
   setFilters,
   clearFilters,
 } from "@/lib/state/slice/marketplace/marketplaceSlice";
+import { fetchFeaturedListings } from "@/lib/state/slice/boost/boostSlice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
@@ -27,6 +28,7 @@ import {
   FiChevronDown,
   FiX,
   FiRefreshCw,
+  FiStar,
 } from "react-icons/fi";
 import {
   AiOutlineCar,
@@ -37,6 +39,7 @@ import {
 import { BsSpeedometer2, BsFuelPump } from "react-icons/bs";
 import { TbManualGearbox } from "react-icons/tb";
 import { getBrandsWithFilters } from "@/lib/state/slice/brand/brandSlice";
+import FeaturedBadge from "@/components/view/Boost/FeaturedBadge";
 
 const MarketplacePage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -49,6 +52,9 @@ const MarketplacePage = () => {
   );
   const { data: brands } = useSelector((state: RootState) => state.brand);
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+  const { featuredListings, featuredLoading } = useSelector(
+    (state: RootState) => state.boost
+  );
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(true);
@@ -69,6 +75,7 @@ const MarketplacePage = () => {
   useEffect(() => {
     dispatch(fetchListings({ isActive: true }));
     dispatch(getBrandsWithFilters({ perPage: 100 }));
+    dispatch(fetchFeaturedListings({ limit: 4 }));
   }, [dispatch]);
 
   // Debounced search
@@ -223,6 +230,74 @@ const MarketplacePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Featured Listings Section */}
+      {featuredListings && featuredListings.length > 0 && (
+        <div className={`py-8 ${isDarkMode ? "bg-slate-900/50" : "bg-yellow-50/50"}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl ${isDarkMode ? "bg-yellow-500/20" : "bg-yellow-100"}`}>
+                  <FiStar className={`text-xl ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`} />
+                </div>
+                <div>
+                  <h2 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    Mobil Unggulan
+                  </h2>
+                  <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
+                    Pilihan terbaik dengan eksposur tertinggi
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {featuredListings.slice(0, 4).map((listing) => (
+                <Link
+                  key={listing.id}
+                  href={`/marketplace/${listing.id}`}
+                  className={`group rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                    isDarkMode ? "bg-slate-800 border border-yellow-500/20" : "bg-white border border-yellow-200"
+                  }`}
+                >
+                  <div className="relative h-36">
+                    {listing.images && listing.images[0] ? (
+                      <img
+                        src={listing.images[0]}
+                        alt={`${listing.carModel?.brand?.name} ${listing.carModel?.modelName}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center ${isDarkMode ? "bg-slate-700" : "bg-gray-100"}`}>
+                        <span className="text-4xl">🚗</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <div className="absolute top-2 left-2">
+                      <FeaturedBadge badge={listing.featuredBadge || "Unggulan"} size="sm" />
+                    </div>
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded text-white text-xs">
+                      <FiEye className="text-xs" />
+                      {listing.viewCount}
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <h3 className={`font-bold text-sm truncate ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                      {listing.carModel?.brand?.name} {listing.carModel?.modelName}
+                    </h3>
+                    <div className={`text-xs ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
+                      {listing.year} • {listing.transmission === "automatic" ? "AT" : "MT"}
+                    </div>
+                    <div className={`mt-2 font-bold ${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                      {formatPrice(listing.price)}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
