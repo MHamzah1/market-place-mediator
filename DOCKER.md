@@ -5,6 +5,7 @@ Dokumentasi untuk menjalankan aplikasi Marketplace Mediator menggunakan Docker.
 ## 📋 Prerequisites
 
 Pastikan sudah terinstall:
+
 - [Docker](https://docs.docker.com/get-docker/) (v20.10+)
 - [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
 
@@ -26,7 +27,7 @@ docker-compose -f docker-compose.dev.yml up
 make dev
 ```
 
-Aplikasi akan berjalan di: http://localhost:3000
+Aplikasi akan berjalan di: http://localhost:9090
 
 ### Production Mode
 
@@ -54,12 +55,12 @@ make prod-build
 
 ## ⚙️ Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NODE_ENV` | `production` | Environment mode |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3000/api` | Backend API URL |
-| `NEXT_PUBLIC_API_URL_FOTO` | `http://localhost:3000/uploads/` | URL untuk foto/uploads |
-| `PORT` | `3000` | Application port |
+| Variable                   | Default                          | Description            |
+| -------------------------- | -------------------------------- | ---------------------- |
+| `NODE_ENV`                 | `production`                     | Environment mode       |
+| `NEXT_PUBLIC_API_URL`      | `http://localhost:9090/api`      | Backend API URL        |
+| `NEXT_PUBLIC_API_URL_FOTO` | `http://localhost:9090/uploads/` | URL untuk foto/uploads |
+| `PORT`                     | `9090`                           | Application port       |
 
 ## 🔧 Available Commands
 
@@ -106,7 +107,7 @@ docker-compose logs -f
 ### Production Image (Multi-stage Build)
 
 - **Base**: `node:20-alpine`
-- **Stages**: 
+- **Stages**:
   1. `deps` - Install dependencies
   2. `builder` - Build Next.js application
   3. `runner` - Production runtime (minimal)
@@ -138,6 +139,7 @@ make prod-nginx
 ```
 
 Fitur Nginx:
+
 - Reverse proxy ke Next.js
 - Gzip compression
 - Static files caching
@@ -178,8 +180,8 @@ docker-compose up --build
 ### Port sudah digunakan
 
 ```bash
-# Cek proses yang menggunakan port 3000
-lsof -i :3000
+# Cek proses yang menggunakan port 9090
+lsof -i :9090
 
 # Atau ganti port di .env
 PORT=3001
