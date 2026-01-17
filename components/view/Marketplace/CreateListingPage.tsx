@@ -29,7 +29,12 @@ import { getCarModelsWithFilters } from "@/lib/state/slice/car-models/CarModelsS
 import { getBrandsWithFilters } from "@/lib/state/slice/brand/brandSlice";
 
 // Allowed image types
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILES = 10;
 
@@ -263,6 +268,8 @@ const CreateListingPage = () => {
     setStep(step - 1);
   };
 
+  // ...existing code...
+
   const handleSubmit = async () => {
     if (!validateStep(4)) return;
 
@@ -281,7 +288,7 @@ const CreateListingPage = () => {
         condition: formData.condition,
         ownershipStatus: formData.ownershipStatus,
         taxStatus: formData.taxStatus,
-        images: imageFiles, // Send File[] instead of string[]
+        images: imageFiles,
         sellerWhatsapp: formData.sellerWhatsapp,
       };
 
@@ -289,11 +296,17 @@ const CreateListingPage = () => {
       toast.success("Listing berhasil dibuat!");
       router.push("/marketplace/my-listings");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(errorMessage || "Gagal membuat listing");
+      // Error dari unwrap() sudah dalam bentuk string dari rejectWithValue
+      console.error("Error creating listing:", error);
+      if (typeof error === "string") {
+        toast.error(error);
+      } else {
+        toast.error("Gagal membuat listing");
+      }
     }
   };
 
+  // ...existing code...
   const formatPrice = (value: string) => {
     const num = value.replace(/\D/g, "");
     return new Intl.NumberFormat("id-ID").format(Number(num));
@@ -800,9 +813,7 @@ const CreateListingPage = () => {
                   </label>
                 </div>
 
-                {errors.images && (
-                  <p className={errorClass}>{errors.images}</p>
-                )}
+                {errors.images && <p className={errorClass}>{errors.images}</p>}
 
                 {/* Image Preview Grid */}
                 {imagePreviews.length > 0 && (

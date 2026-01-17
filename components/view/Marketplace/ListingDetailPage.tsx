@@ -35,7 +35,11 @@ import {
   AiOutlineClockCircle,
 } from "react-icons/ai";
 import { BsSpeedometer2, BsFuelPump, BsGear } from "react-icons/bs";
-import { TbManualGearbox, TbColorSwatch, TbFileDescription } from "react-icons/tb";
+import {
+  TbManualGearbox,
+  TbColorSwatch,
+  TbFileDescription,
+} from "react-icons/tb";
 import { HiOutlineDocumentText } from "react-icons/hi";
 import toast from "react-hot-toast";
 
@@ -50,6 +54,8 @@ const ListingDetailPage = () => {
     (state: RootState) => state.marketplace
   );
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL_IMAGES;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -69,7 +75,9 @@ const ListingDetailPage = () => {
     if (!params.id) return;
 
     try {
-      const result = await dispatch(getWhatsAppLink(params.id as string)).unwrap();
+      const result = await dispatch(
+        getWhatsAppLink(params.id as string)
+      ).unwrap();
       window.open(result.whatsappUrl, "_blank");
     } catch (error) {
       toast.error("Gagal membuka WhatsApp");
@@ -109,7 +117,9 @@ const ListingDetailPage = () => {
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    const diffInDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
     if (diffInDays === 0) return "Hari ini";
     if (diffInDays === 1) return "Kemarin";
     if (diffInDays < 7) return `${diffInDays} hari lalu`;
@@ -119,10 +129,16 @@ const ListingDetailPage = () => {
 
   if (detailLoading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}>
+      <div
+        className={`min-h-screen flex items-center justify-center ${
+          isDarkMode ? "bg-slate-950" : "bg-gray-50"
+        }`}
+      >
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-500 border-t-transparent mx-auto mb-4"></div>
-          <p className={isDarkMode ? "text-slate-400" : "text-gray-600"}>Memuat detail...</p>
+          <p className={isDarkMode ? "text-slate-400" : "text-gray-600"}>
+            Memuat detail...
+          </p>
         </div>
       </div>
     );
@@ -130,10 +146,22 @@ const ListingDetailPage = () => {
 
   if (!selectedListing) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}>
+      <div
+        className={`min-h-screen flex items-center justify-center ${
+          isDarkMode ? "bg-slate-950" : "bg-gray-50"
+        }`}
+      >
         <div className="text-center">
-          <AiOutlineCar className={`text-8xl mx-auto mb-4 ${isDarkMode ? "text-slate-700" : "text-gray-300"}`} />
-          <h2 className={`text-2xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+          <AiOutlineCar
+            className={`text-8xl mx-auto mb-4 ${
+              isDarkMode ? "text-slate-700" : "text-gray-300"
+            }`}
+          />
+          <h2
+            className={`text-2xl font-bold mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Listing tidak ditemukan
           </h2>
           <Link
@@ -152,11 +180,15 @@ const ListingDetailPage = () => {
   const images = listing.images || [];
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}>
+    <div
+      className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}
+    >
       {/* Header */}
       <div
         className={`sticky top-0 z-40 ${
-          isDarkMode ? "bg-slate-900/95 backdrop-blur-xl" : "bg-white/95 backdrop-blur-xl"
+          isDarkMode
+            ? "bg-slate-900/95 backdrop-blur-xl"
+            : "bg-white/95 backdrop-blur-xl"
         } shadow-lg`}
       >
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -164,7 +196,9 @@ const ListingDetailPage = () => {
             <button
               onClick={() => router.back()}
               className={`flex items-center gap-2 font-semibold ${
-                isDarkMode ? "text-slate-300 hover:text-white" : "text-gray-700 hover:text-gray-900"
+                isDarkMode
+                  ? "text-slate-300 hover:text-white"
+                  : "text-gray-700 hover:text-gray-900"
               }`}
             >
               <FiArrowLeft className="text-xl" />
@@ -204,14 +238,18 @@ const ListingDetailPage = () => {
           {/* Left Column - Images & Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <div className={`rounded-3xl overflow-hidden shadow-2xl ${isDarkMode ? "bg-slate-900" : "bg-white"}`}>
+            <div
+              className={`rounded-3xl overflow-hidden shadow-2xl ${
+                isDarkMode ? "bg-slate-900" : "bg-white"
+              }`}
+            >
               {/* Main Image */}
               <div
                 className="relative aspect-[16/10] cursor-pointer"
                 onClick={() => setIsImageModalOpen(true)}
               >
                 <img
-                  src={images[currentImageIndex] || "https://via.placeholder.com/800x500?text=No+Image"}
+                  src={`${baseUrl}${images[currentImageIndex]}`}
                   alt={`${listing.carModel?.brand?.name} ${listing.carModel?.modelName}`}
                   className="w-full h-full object-cover"
                 />
@@ -223,7 +261,9 @@ const ListingDetailPage = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+                        setCurrentImageIndex((prev) =>
+                          prev === 0 ? images.length - 1 : prev - 1
+                        );
                       }}
                       className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-all"
                     >
@@ -232,7 +272,9 @@ const ListingDetailPage = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+                        setCurrentImageIndex((prev) =>
+                          prev === images.length - 1 ? 0 : prev + 1
+                        );
                       }}
                       className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-all"
                     >
@@ -274,7 +316,11 @@ const ListingDetailPage = () => {
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={img}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -282,13 +328,26 @@ const ListingDetailPage = () => {
             </div>
 
             {/* Car Title & Basic Info */}
-            <div className={`rounded-3xl p-6 shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"}`}>
+            <div
+              className={`rounded-3xl p-6 shadow-xl ${
+                isDarkMode ? "bg-slate-900" : "bg-white"
+              }`}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className={`text-3xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                    {listing.carModel?.brand?.name} {listing.carModel?.modelName}
+                  <h1
+                    className={`text-3xl font-bold mb-2 ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {listing.carModel?.brand?.name}{" "}
+                    {listing.carModel?.modelName}
                   </h1>
-                  <p className={`text-lg ${isDarkMode ? "text-slate-400" : "text-gray-600"}`}>
+                  <p
+                    className={`text-lg ${
+                      isDarkMode ? "text-slate-400" : "text-gray-600"
+                    }`}
+                  >
                     {listing.year} • {listing.color}
                   </p>
                 </div>
@@ -300,22 +359,38 @@ const ListingDetailPage = () => {
               </div>
 
               {/* Stats Bar */}
-              <div className={`flex items-center gap-6 py-4 border-t border-b ${isDarkMode ? "border-slate-800" : "border-gray-100"}`}>
+              <div
+                className={`flex items-center gap-6 py-4 border-t border-b ${
+                  isDarkMode ? "border-slate-800" : "border-gray-100"
+                }`}
+              >
                 <div className="flex items-center gap-2">
-                  <FiEye className={isDarkMode ? "text-cyan-400" : "text-blue-500"} />
-                  <span className={isDarkMode ? "text-slate-300" : "text-gray-700"}>
+                  <FiEye
+                    className={isDarkMode ? "text-cyan-400" : "text-blue-500"}
+                  />
+                  <span
+                    className={isDarkMode ? "text-slate-300" : "text-gray-700"}
+                  >
                     <strong>{listing.viewCount}</strong> dilihat
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <FiMessageCircle className={isDarkMode ? "text-cyan-400" : "text-blue-500"} />
-                  <span className={isDarkMode ? "text-slate-300" : "text-gray-700"}>
+                  <FiMessageCircle
+                    className={isDarkMode ? "text-cyan-400" : "text-blue-500"}
+                  />
+                  <span
+                    className={isDarkMode ? "text-slate-300" : "text-gray-700"}
+                  >
                     <strong>{listing.contactClickCount}</strong> dihubungi
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <AiOutlineClockCircle className={isDarkMode ? "text-cyan-400" : "text-blue-500"} />
-                  <span className={isDarkMode ? "text-slate-300" : "text-gray-700"}>
+                  <AiOutlineClockCircle
+                    className={isDarkMode ? "text-cyan-400" : "text-blue-500"}
+                  />
+                  <span
+                    className={isDarkMode ? "text-slate-300" : "text-gray-700"}
+                  >
                     {getTimeAgo(listing.createdAt)}
                   </span>
                 </div>
@@ -323,30 +398,75 @@ const ListingDetailPage = () => {
 
               {/* Location */}
               <div className="flex items-center gap-2 mt-4">
-                <FiMapPin className={isDarkMode ? "text-cyan-400" : "text-blue-500"} />
-                <span className={isDarkMode ? "text-slate-300" : "text-gray-700"}>
+                <FiMapPin
+                  className={isDarkMode ? "text-cyan-400" : "text-blue-500"}
+                />
+                <span
+                  className={isDarkMode ? "text-slate-300" : "text-gray-700"}
+                >
                   {listing.locationCity}, {listing.locationProvince}
                 </span>
               </div>
             </div>
 
             {/* Specifications */}
-            <div className={`rounded-3xl p-6 shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"}`}>
-              <h2 className={`text-xl font-bold mb-6 flex items-center gap-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+            <div
+              className={`rounded-3xl p-6 shadow-xl ${
+                isDarkMode ? "bg-slate-900" : "bg-white"
+              }`}
+            >
+              <h2
+                className={`text-xl font-bold mb-6 flex items-center gap-2 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 <BsGear className="text-cyan-500" />
                 Spesifikasi
               </h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { icon: BsSpeedometer2, label: "Kilometer", value: formatMileage(listing.mileage) },
-                  { icon: TbManualGearbox, label: "Transmisi", value: listing.transmission === "automatic" ? "Automatic" : "Manual" },
-                  { icon: BsFuelPump, label: "Bahan Bakar", value: listing.fuelType.charAt(0).toUpperCase() + listing.fuelType.slice(1) },
-                  { icon: FiCalendar, label: "Tahun", value: listing.year.toString() },
+                  {
+                    icon: BsSpeedometer2,
+                    label: "Kilometer",
+                    value: formatMileage(listing.mileage),
+                  },
+                  {
+                    icon: TbManualGearbox,
+                    label: "Transmisi",
+                    value:
+                      listing.transmission === "automatic"
+                        ? "Automatic"
+                        : "Manual",
+                  },
+                  {
+                    icon: BsFuelPump,
+                    label: "Bahan Bakar",
+                    value:
+                      listing.fuelType.charAt(0).toUpperCase() +
+                      listing.fuelType.slice(1),
+                  },
+                  {
+                    icon: FiCalendar,
+                    label: "Tahun",
+                    value: listing.year.toString(),
+                  },
                   { icon: TbColorSwatch, label: "Warna", value: listing.color },
-                  { icon: AiOutlineSafety, label: "Kondisi", value: listing.condition === "baru" ? "Baru" : "Bekas" },
-                  { icon: HiOutlineDocumentText, label: "Pajak", value: listing.taxStatus || "N/A" },
-                  { icon: FiUser, label: "Kepemilikan", value: listing.ownershipStatus || "N/A" },
+                  {
+                    icon: AiOutlineSafety,
+                    label: "Kondisi",
+                    value: listing.condition === "baru" ? "Baru" : "Bekas",
+                  },
+                  {
+                    icon: HiOutlineDocumentText,
+                    label: "Pajak",
+                    value: listing.taxStatus || "N/A",
+                  },
+                  {
+                    icon: FiUser,
+                    label: "Kepemilikan",
+                    value: listing.ownershipStatus || "N/A",
+                  },
                 ].map((spec, idx) => (
                   <div
                     key={idx}
@@ -354,21 +474,49 @@ const ListingDetailPage = () => {
                       isDarkMode ? "bg-slate-800/50" : "bg-gray-50"
                     }`}
                   >
-                    <spec.icon className={`text-2xl mx-auto mb-2 ${isDarkMode ? "text-cyan-400" : "text-blue-500"}`} />
-                    <div className={`text-sm ${isDarkMode ? "text-slate-500" : "text-gray-500"}`}>{spec.label}</div>
-                    <div className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{spec.value}</div>
+                    <spec.icon
+                      className={`text-2xl mx-auto mb-2 ${
+                        isDarkMode ? "text-cyan-400" : "text-blue-500"
+                      }`}
+                    />
+                    <div
+                      className={`text-sm ${
+                        isDarkMode ? "text-slate-500" : "text-gray-500"
+                      }`}
+                    >
+                      {spec.label}
+                    </div>
+                    <div
+                      className={`font-bold ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      {spec.value}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Description */}
-            <div className={`rounded-3xl p-6 shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"}`}>
-              <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+            <div
+              className={`rounded-3xl p-6 shadow-xl ${
+                isDarkMode ? "bg-slate-900" : "bg-white"
+              }`}
+            >
+              <h2
+                className={`text-xl font-bold mb-4 flex items-center gap-2 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 <TbFileDescription className="text-cyan-500" />
                 Deskripsi
               </h2>
-              <p className={`whitespace-pre-line leading-relaxed ${isDarkMode ? "text-slate-300" : "text-gray-700"}`}>
+              <p
+                className={`whitespace-pre-line leading-relaxed ${
+                  isDarkMode ? "text-slate-300" : "text-gray-700"
+                }`}
+              >
                 {listing.description}
               </p>
             </div>
@@ -379,8 +527,16 @@ const ListingDetailPage = () => {
             {/* Sticky Container */}
             <div className="lg:sticky lg:top-24 space-y-6">
               {/* Seller Card */}
-              <div className={`rounded-3xl p-6 shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"}`}>
-                <h2 className={`text-lg font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              <div
+                className={`rounded-3xl p-6 shadow-xl ${
+                  isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
+              >
+                <h2
+                  className={`text-lg font-bold mb-4 ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Informasi Penjual
                 </h2>
 
@@ -389,10 +545,18 @@ const ListingDetailPage = () => {
                     {listing.seller?.fullName?.charAt(0).toUpperCase() || "U"}
                   </div>
                   <div>
-                    <div className={`font-bold text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <div
+                      className={`font-bold text-lg ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       {listing.seller?.fullName || "Penjual"}
                     </div>
-                    <div className={`text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"}`}>
+                    <div
+                      className={`text-sm ${
+                        isDarkMode ? "text-slate-400" : "text-gray-500"
+                      }`}
+                    >
                       {listing.seller?.location || listing.locationCity}
                     </div>
                   </div>
@@ -426,12 +590,24 @@ const ListingDetailPage = () => {
               </div>
 
               {/* Safety Tips */}
-              <div className={`rounded-3xl p-6 shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"}`}>
-                <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              <div
+                className={`rounded-3xl p-6 shadow-xl ${
+                  isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
+              >
+                <h3
+                  className={`font-bold mb-4 flex items-center gap-2 ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   <FiShield className="text-cyan-500" />
                   Tips Keamanan
                 </h3>
-                <ul className={`space-y-3 text-sm ${isDarkMode ? "text-slate-400" : "text-gray-600"}`}>
+                <ul
+                  className={`space-y-3 text-sm ${
+                    isDarkMode ? "text-slate-400" : "text-gray-600"
+                  }`}
+                >
                   <li className="flex items-start gap-2">
                     <FiCheck className="text-green-500 mt-0.5 flex-shrink-0" />
                     Selalu cek kondisi mobil secara langsung
@@ -482,7 +658,9 @@ const ListingDetailPage = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+              setCurrentImageIndex((prev) =>
+                prev === 0 ? images.length - 1 : prev - 1
+              );
             }}
             className="absolute left-4 p-4 bg-white/10 rounded-full text-white hover:bg-white/20"
           >
@@ -499,7 +677,9 @@ const ListingDetailPage = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+              setCurrentImageIndex((prev) =>
+                prev === images.length - 1 ? 0 : prev + 1
+              );
             }}
             className="absolute right-4 p-4 bg-white/10 rounded-full text-white hover:bg-white/20"
           >

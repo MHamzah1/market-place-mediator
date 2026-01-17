@@ -35,12 +35,13 @@ const MyListingsPage = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  const { myListings, loading, myListingsPagination, myListingsSummary } = useSelector(
-    (state: RootState) => state.marketplace
-  );
+  const { myListings, loading, myListingsPagination, myListingsSummary } =
+    useSelector((state: RootState) => state.marketplace);
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
-  const [activeTab, setActiveTab] = useState<"all" | "active" | "inactive">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "active" | "inactive">(
+    "all"
+  );
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -61,13 +62,19 @@ const MyListingsPage = () => {
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      await dispatch(updateListing({ id, data: { isActive: !currentStatus } })).unwrap();
-      toast.success(currentStatus ? "Listing dinonaktifkan" : "Listing diaktifkan");
+      await dispatch(
+        updateListing({ id, data: { isActive: !currentStatus } })
+      ).unwrap();
+      toast.success(
+        currentStatus ? "Listing dinonaktifkan" : "Listing diaktifkan"
+      );
       dispatch(fetchMyListings({}));
     } catch (error: any) {
       toast.error(error || "Gagal mengubah status");
     }
   };
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL_IMAGES;
 
   const handleDelete = async (id: string, title: string) => {
     const result = await Swal.fire({
@@ -107,7 +114,9 @@ const MyListingsPage = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}>
+    <div
+      className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}
+    >
       {/* Header */}
       <div
         className={`${
@@ -179,11 +188,15 @@ const MyListingsPage = () => {
                 className={`rounded-2xl p-4 bg-white/10 backdrop-blur-sm`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
+                  <div
+                    className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}
+                  >
                     <stat.icon className="text-xl text-white" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                    <div className="text-2xl font-bold text-white">
+                      {stat.value}
+                    </div>
                     <div className="text-sm text-blue-100">{stat.label}</div>
                   </div>
                 </div>
@@ -270,7 +283,7 @@ const MyListingsPage = () => {
                 {/* Image */}
                 <div className="relative aspect-[4/3]">
                   <img
-                    src={listing.images?.[0] || "https://via.placeholder.com/400x300?text=No+Image"}
+                    src={`${baseUrl}/${listing.images?.[0]}`}
                     alt={`${listing.carModel?.brand?.name} ${listing.carModel?.modelName}`}
                     className="w-full h-full object-cover"
                   />
@@ -311,9 +324,12 @@ const MyListingsPage = () => {
                       isDarkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    {listing.carModel?.brand?.name} {listing.carModel?.modelName}
+                    {listing.carModel?.brand?.name}{" "}
+                    {listing.carModel?.modelName}
                   </h3>
-                  <p className={isDarkMode ? "text-slate-400" : "text-gray-500"}>
+                  <p
+                    className={isDarkMode ? "text-slate-400" : "text-gray-500"}
+                  >
                     {listing.year} • {formatMileage(listing.mileage)}
                   </p>
 
@@ -326,7 +342,9 @@ const MyListingsPage = () => {
                   {/* Actions */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleToggleActive(listing.id, listing.isActive)}
+                      onClick={() =>
+                        handleToggleActive(listing.id, listing.isActive)
+                      }
                       className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold transition-all ${
                         listing.isActive
                           ? "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20"

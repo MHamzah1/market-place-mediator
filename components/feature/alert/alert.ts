@@ -531,6 +531,30 @@ export const toastInfo = (message: string): void => {
   });
 };
 
+export const showErrorMessages = (
+  title: string = "Error!",
+  messages?: string | string[]
+): Promise<SweetAlertResult> => {
+  let errorText = "";
+
+  if (Array.isArray(messages)) {
+    // Jika message adalah array, gabungkan dengan bullet points
+    errorText = messages.map((msg) => `• ${msg}`).join("\n");
+  } else if (typeof messages === "string") {
+    errorText = messages;
+  } else {
+    errorText = "Terjadi kesalahan. Silakan coba lagi.";
+  }
+
+  return Swal.fire({
+    icon: "error",
+    title,
+    html: errorText.replace(/\n/g, "<br>"),
+    confirmButtonText: "OK",
+    customClass: deleteCustomClass,
+    buttonsStyling: false,
+  });
+};
 // ============================================
 // Export Default Object
 // ============================================
@@ -542,6 +566,7 @@ const Alert = {
   error: showError,
   warning: showWarning,
   info: showInfo,
+  errorMessages: showErrorMessages, // TAMBAHKAN INI
 
   // Confirmations
   confirm: showConfirm,
