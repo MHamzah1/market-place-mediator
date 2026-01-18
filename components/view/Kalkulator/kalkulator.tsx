@@ -16,6 +16,7 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import {
   getCalculatorOptions,
@@ -49,6 +50,8 @@ const formatCompact = (value: number): string => {
 
 const Kalkulator = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const {
     options,
@@ -153,42 +156,90 @@ const Kalkulator = () => {
     selectedOwnership &&
     selectedColor;
 
-  // Common classes
-  const selectClass =
-    "w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-xl text-white text-sm sm:text-base appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500/50 disabled:opacity-50";
+  // Dynamic classes based on theme
+  const selectClass = `w-full px-3 sm:px-4 py-2.5 sm:py-3 ${
+    isDarkMode
+      ? "bg-slate-800 border-slate-700 text-white"
+      : "bg-white border-gray-200 text-gray-900"
+  } border rounded-xl text-sm sm:text-base appearance-none focus:outline-none focus:ring-2 ${
+    isDarkMode ? "focus:ring-purple-500/50" : "focus:ring-blue-500/50"
+  } disabled:opacity-50 transition-colors`;
 
-  const labelClass =
-    "flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-white/80 mb-1.5 sm:mb-2";
+  const labelClass = `flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium ${
+    isDarkMode ? "text-slate-300" : "text-gray-700"
+  } mb-1.5 sm:mb-2`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        isDarkMode
+          ? "bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950"
+          : "bg-gradient-to-br from-blue-50 via-purple-50 to-blue-50"
+      }`}
+    >
       <div className="relative py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-purple-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-blue-500/10 rounded-full blur-3xl" />
+          <div
+            className={`absolute top-0 left-1/4 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 ${
+              isDarkMode ? "bg-purple-500/10" : "bg-purple-300/20"
+            } rounded-full blur-3xl`}
+          />
+          <div
+            className={`absolute bottom-0 right-1/4 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 ${
+              isDarkMode ? "bg-blue-500/10" : "bg-blue-300/20"
+            } rounded-full blur-3xl`}
+          />
         </div>
 
         <div className="relative max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8 md:mb-12">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-purple-500/20 rounded-full border border-purple-500/30 mb-4 sm:mb-6">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
-              <span className="text-xs sm:text-sm font-medium text-purple-300">
+            <div
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border mb-4 sm:mb-6 ${
+                isDarkMode
+                  ? "bg-purple-500/20 border-purple-500/30"
+                  : "bg-purple-100 border-purple-200"
+              }`}
+            >
+              <Sparkles
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                  isDarkMode ? "text-purple-400" : "text-purple-600"
+                }`}
+              />
+              <span
+                className={`text-xs sm:text-sm font-medium ${
+                  isDarkMode ? "text-purple-300" : "text-purple-700"
+                }`}
+              >
                 Kalkulator Harga Mobil Bekas
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-4">
+            <h1
+              className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
               Cek Harga Mobil Bekas
             </h1>
-            <p className="text-sm sm:text-base md:text-lg text-white/60 max-w-2xl mx-auto px-4">
+            <p
+              className={`text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4 ${
+                isDarkMode ? "text-slate-400" : "text-gray-600"
+              }`}
+            >
               Dapatkan estimasi harga mobil bekas Anda secara akurat
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-center text-sm sm:text-base">
+            <div
+              className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl text-center text-sm sm:text-base ${
+                isDarkMode
+                  ? "bg-red-500/20 border border-red-500/30 text-red-300"
+                  : "bg-red-50 border border-red-200 text-red-700"
+              }`}
+            >
               {error}
             </div>
           )}
@@ -197,7 +248,13 @@ const Kalkulator = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {/* Form Section */}
             <div className="lg:col-span-2">
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl border border-white/20">
+              <div
+                className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl border ${
+                  isDarkMode
+                    ? "bg-slate-900/50 backdrop-blur-xl border-slate-800"
+                    : "bg-white/90 backdrop-blur-xl border-gray-200"
+                }`}
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
                   {/* Merek */}
                   <div>
@@ -212,20 +269,27 @@ const Kalkulator = () => {
                         className={selectClass}
                         disabled={loading}
                       >
-                        <option value="" className="bg-slate-900">
+                        <option
+                          value=""
+                          className={isDarkMode ? "bg-slate-900" : "bg-white"}
+                        >
                           Pilih Merek
                         </option>
                         {options?.brands.map((brand) => (
                           <option
                             key={brand.id}
                             value={brand.id}
-                            className="bg-slate-900"
+                            className={isDarkMode ? "bg-slate-900" : "bg-white"}
                           >
                             {brand.name}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50 pointer-events-none" />
+                      <ChevronDown
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none ${
+                          isDarkMode ? "text-slate-400" : "text-gray-400"
+                        }`}
+                      />
                     </div>
                   </div>
 
@@ -242,20 +306,27 @@ const Kalkulator = () => {
                         className={selectClass}
                         disabled={!selectedBrandId || loading}
                       >
-                        <option value="" className="bg-slate-900">
+                        <option
+                          value=""
+                          className={isDarkMode ? "bg-slate-900" : "bg-white"}
+                        >
                           Pilih Model
                         </option>
                         {modelsByBrand?.models.map((model) => (
                           <option
                             key={model.id}
                             value={model.id}
-                            className="bg-slate-900"
+                            className={isDarkMode ? "bg-slate-900" : "bg-white"}
                           >
                             {model.modelName}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50 pointer-events-none" />
+                      <ChevronDown
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none ${
+                          isDarkMode ? "text-slate-400" : "text-gray-400"
+                        }`}
+                      />
                     </div>
                   </div>
 
@@ -272,20 +343,27 @@ const Kalkulator = () => {
                         className={selectClass}
                         disabled={!selectedModelId || variantsLoading}
                       >
-                        <option value="" className="bg-slate-900">
+                        <option
+                          value=""
+                          className={isDarkMode ? "bg-slate-900" : "bg-white"}
+                        >
                           Pilih Tipe
                         </option>
                         {variants.map((variant) => (
                           <option
                             key={variant.id}
                             value={variant.id}
-                            className="bg-slate-900"
+                            className={isDarkMode ? "bg-slate-900" : "bg-white"}
                           >
                             {variant.variantName}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50 pointer-events-none" />
+                      <ChevronDown
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none ${
+                          isDarkMode ? "text-slate-400" : "text-gray-400"
+                        }`}
+                      />
                     </div>
                   </div>
 
@@ -304,20 +382,27 @@ const Kalkulator = () => {
                         className={selectClass}
                         disabled={!selectedVariantId}
                       >
-                        <option value="" className="bg-slate-900">
+                        <option
+                          value=""
+                          className={isDarkMode ? "bg-slate-900" : "bg-white"}
+                        >
                           Pilih Tahun
                         </option>
                         {yearsByVariant?.years.map((year) => (
                           <option
                             key={year}
                             value={year}
-                            className="bg-slate-900"
+                            className={isDarkMode ? "bg-slate-900" : "bg-white"}
                           >
                             {year}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50 pointer-events-none" />
+                      <ChevronDown
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none ${
+                          isDarkMode ? "text-slate-400" : "text-gray-400"
+                        }`}
+                      />
                     </div>
                   </div>
 
@@ -339,8 +424,12 @@ const Kalkulator = () => {
                             disabled={!selectedModelId || adjustmentsLoading}
                             className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm ${
                               selectedTransmission === trans.code
-                                ? "bg-purple-600 border-purple-500 text-white"
-                                : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10"
+                                ? isDarkMode
+                                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white"
+                                  : "bg-gradient-to-r from-blue-600 to-blue-700 border-blue-500 text-white"
+                                : isDarkMode
+                                  ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                                  : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
                             }`}
                           >
                             <span>{trans.code === "matic" ? "⚙️" : "🔧"}</span>
@@ -379,8 +468,12 @@ const Kalkulator = () => {
                           disabled={!selectedModelId || adjustmentsLoading}
                           className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm ${
                             selectedOwnership === own.code
-                              ? "bg-purple-600 border-purple-500 text-white"
-                              : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10"
+                              ? isDarkMode
+                                ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white"
+                                : "bg-gradient-to-r from-blue-600 to-blue-700 border-blue-500 text-white"
+                              : isDarkMode
+                                ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                                : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
                           }`}
                         >
                           <span>{own.code === "personal" ? "👤" : "🏢"}</span>
@@ -418,8 +511,12 @@ const Kalkulator = () => {
                           disabled={!selectedModelId || adjustmentsLoading}
                           className={`px-2 sm:px-3 py-2 sm:py-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 sm:gap-2 disabled:opacity-50 ${
                             selectedColor === color.code
-                              ? "bg-purple-600/30 border-purple-500"
-                              : "bg-white/5 border-white/20 hover:bg-white/10"
+                              ? isDarkMode
+                                ? "bg-purple-600/30 border-purple-500"
+                                : "bg-blue-100 border-blue-500"
+                              : isDarkMode
+                                ? "bg-slate-800 border-slate-700 hover:bg-slate-700"
+                                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                           }`}
                         >
                           <div
@@ -428,7 +525,11 @@ const Kalkulator = () => {
                               backgroundColor: color.colorHex || "#888",
                             }}
                           />
-                          <span className="text-[10px] sm:text-xs text-white/80 font-medium text-center leading-tight">
+                          <span
+                            className={`text-[10px] sm:text-xs font-medium text-center leading-tight ${
+                              isDarkMode ? "text-slate-300" : "text-gray-700"
+                            }`}
+                          >
                             {color.name}
                           </span>
                         </button>
@@ -442,7 +543,11 @@ const Kalkulator = () => {
                   <button
                     onClick={handleCalculate}
                     disabled={!isFormComplete || loading}
-                    className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
+                    className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 font-semibold rounded-xl transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base ${
+                      isDarkMode
+                        ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-purple-500/30"
+                        : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
+                    }`}
                   >
                     {loading ? (
                       <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
@@ -453,7 +558,11 @@ const Kalkulator = () => {
                   </button>
                   <button
                     onClick={handleReset}
-                    className="px-4 sm:px-6 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all border border-white/20 flex items-center justify-center gap-2 text-sm sm:text-base"
+                    className={`px-4 sm:px-6 py-3 sm:py-4 font-semibold rounded-xl transition-all border-2 flex items-center justify-center gap-2 text-sm sm:text-base ${
+                      isDarkMode
+                        ? "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                        : "bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200"
+                    }`}
                   >
                     <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     Reset
@@ -466,10 +575,20 @@ const Kalkulator = () => {
             <div className="lg:col-span-1">
               <div className="lg:sticky lg:top-20 space-y-4 sm:space-y-6">
                 {/* Estimasi Harga Card */}
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/20">
+                <div
+                  className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border ${
+                    isDarkMode
+                      ? "bg-slate-900/50 backdrop-blur-xl border-slate-800"
+                      : "bg-white/90 backdrop-blur-xl border-gray-200"
+                  }`}
+                >
                   <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">
+                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    <h2
+                      className={`text-lg sm:text-xl font-semibold ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       Estimasi Harga
                     </h2>
                   </div>
@@ -477,16 +596,34 @@ const Kalkulator = () => {
                   {showResult && calculationResult ? (
                     <div className="space-y-4 sm:space-y-6">
                       {/* Car Info */}
-                      <div className="bg-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/10">
-                        <p className="text-xs sm:text-sm text-white/60 mb-1">
+                      <div
+                        className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 border ${
+                          isDarkMode
+                            ? "bg-slate-800 border-slate-700"
+                            : "bg-gray-50 border-gray-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-xs sm:text-sm mb-1 ${
+                            isDarkMode ? "text-slate-400" : "text-gray-500"
+                          }`}
+                        >
                           Mobil Anda
                         </p>
-                        <h3 className="text-sm sm:text-base md:text-lg font-bold text-white leading-tight">
+                        <h3
+                          className={`text-sm sm:text-base md:text-lg font-bold leading-tight ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
                           {calculationResult.car.brandName}{" "}
                           {calculationResult.car.modelName}{" "}
                           {calculationResult.car.variantName}
                         </h3>
-                        <p className="text-xs sm:text-sm text-white/60 mt-1">
+                        <p
+                          className={`text-xs sm:text-sm mt-1 ${
+                            isDarkMode ? "text-slate-400" : "text-gray-500"
+                          }`}
+                        >
                           {calculationResult.car.year} •{" "}
                           {calculationResult.conditions.transmission.name} •{" "}
                           {calculationResult.conditions.color.name}
@@ -495,11 +632,23 @@ const Kalkulator = () => {
 
                       {/* Price Breakdown */}
                       <div className="space-y-2 sm:space-y-3">
-                        <div className="flex justify-between items-center py-2 border-b border-white/10">
-                          <span className="text-white/70 text-xs sm:text-sm">
+                        <div
+                          className={`flex justify-between items-center py-2 border-b ${
+                            isDarkMode ? "border-slate-700" : "border-gray-200"
+                          }`}
+                        >
+                          <span
+                            className={`text-xs sm:text-sm ${
+                              isDarkMode ? "text-slate-400" : "text-gray-600"
+                            }`}
+                          >
                             Harga Dasar
                           </span>
-                          <span className="text-white font-medium text-xs sm:text-sm">
+                          <span
+                            className={`font-medium text-xs sm:text-sm ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
                             {formatCurrency(
                               calculationResult.priceBreakdown.basePrice,
                             )}
@@ -510,18 +659,30 @@ const Kalkulator = () => {
                           (adj, index) => (
                             <div
                               key={index}
-                              className="flex justify-between items-center py-2 border-b border-white/10"
+                              className={`flex justify-between items-center py-2 border-b ${
+                                isDarkMode
+                                  ? "border-slate-700"
+                                  : "border-gray-200"
+                              }`}
                             >
-                              <span className="text-white/70 text-xs sm:text-sm">
+                              <span
+                                className={`text-xs sm:text-sm ${
+                                  isDarkMode
+                                    ? "text-slate-400"
+                                    : "text-gray-600"
+                                }`}
+                              >
                                 {adj.name}
                               </span>
                               <span
                                 className={`font-medium text-xs sm:text-sm ${
                                   adj.amount > 0
-                                    ? "text-green-400"
+                                    ? "text-green-500"
                                     : adj.amount < 0
-                                      ? "text-red-400"
-                                      : "text-white/50"
+                                      ? "text-red-500"
+                                      : isDarkMode
+                                        ? "text-slate-500"
+                                        : "text-gray-400"
                                 }`}
                               >
                                 {adj.amount > 0
@@ -536,21 +697,49 @@ const Kalkulator = () => {
                       </div>
 
                       {/* Final Price */}
-                      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-green-500/30">
-                        <p className="text-xs sm:text-sm text-green-300 mb-1">
+                      <div
+                        className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 border ${
+                          isDarkMode
+                            ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/30"
+                            : "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-xs sm:text-sm mb-1 ${
+                            isDarkMode ? "text-green-300" : "text-green-700"
+                          }`}
+                        >
                           Estimasi Harga
                         </p>
-                        <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+                        <p
+                          className={`text-xl sm:text-2xl md:text-3xl font-bold ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
                           {formatCurrency(calculationResult.finalPrice)}
                         </p>
                       </div>
 
                       {/* Price Range */}
-                      <div className="bg-white/5 rounded-xl p-3 sm:p-4 border border-white/10">
-                        <p className="text-xs sm:text-sm text-white/60 mb-2">
+                      <div
+                        className={`rounded-xl p-3 sm:p-4 border ${
+                          isDarkMode
+                            ? "bg-slate-800 border-slate-700"
+                            : "bg-gray-50 border-gray-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-xs sm:text-sm mb-2 ${
+                            isDarkMode ? "text-slate-400" : "text-gray-600"
+                          }`}
+                        >
                           Range Harga
                         </p>
-                        <div className="flex justify-between text-white/80 text-xs sm:text-sm">
+                        <div
+                          className={`flex justify-between text-xs sm:text-sm ${
+                            isDarkMode ? "text-slate-300" : "text-gray-700"
+                          }`}
+                        >
                           <span>
                             {formatCurrency(calculationResult.priceRange.min)}
                           </span>
@@ -562,19 +751,45 @@ const Kalkulator = () => {
                       </div>
 
                       {/* Note */}
-                      <div className="flex items-start gap-2 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                        <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-[10px] sm:text-xs text-blue-200/80">
+                      <div
+                        className={`flex items-start gap-2 p-3 rounded-xl border ${
+                          isDarkMode
+                            ? "bg-blue-500/10 border-blue-500/20"
+                            : "bg-blue-50 border-blue-200"
+                        }`}
+                      >
+                        <Info
+                          className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 ${
+                            isDarkMode ? "text-blue-400" : "text-blue-600"
+                          }`}
+                        />
+                        <p
+                          className={`text-[10px] sm:text-xs ${
+                            isDarkMode ? "text-blue-200" : "text-blue-700"
+                          }`}
+                        >
                           {calculationResult.priceRange.note}
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div className="text-center py-8 sm:py-12">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-white/5 rounded-full flex items-center justify-center">
-                        <Car className="w-8 h-8 sm:w-10 sm:h-10 text-white/30" />
+                      <div
+                        className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full flex items-center justify-center ${
+                          isDarkMode ? "bg-slate-800" : "bg-gray-100"
+                        }`}
+                      >
+                        <Car
+                          className={`w-8 h-8 sm:w-10 sm:h-10 ${
+                            isDarkMode ? "text-slate-600" : "text-gray-400"
+                          }`}
+                        />
                       </div>
-                      <p className="text-white/50 text-sm sm:text-base px-4">
+                      <p
+                        className={`text-sm sm:text-base px-4 ${
+                          isDarkMode ? "text-slate-400" : "text-gray-500"
+                        }`}
+                      >
                         Lengkapi data mobil Anda untuk melihat estimasi harga
                       </p>
                     </div>
@@ -582,25 +797,63 @@ const Kalkulator = () => {
                 </div>
 
                 {/* Tips Card */}
-                <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-amber-500/20">
-                  <h3 className="text-xs sm:text-sm font-semibold text-amber-300 mb-2 sm:mb-3">
+                <div
+                  className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 border ${
+                    isDarkMode
+                      ? "bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20"
+                      : "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200"
+                  }`}
+                >
+                  <h3
+                    className={`text-xs sm:text-sm font-semibold mb-2 sm:mb-3 ${
+                      isDarkMode ? "text-amber-300" : "text-amber-700"
+                    }`}
+                  >
                     💡 Tips Jual Mobil
                   </h3>
-                  <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-white/70">
+                  <ul
+                    className={`space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs ${
+                      isDarkMode ? "text-slate-300" : "text-gray-600"
+                    }`}
+                  >
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-400">•</span>
+                      <span
+                        className={
+                          isDarkMode ? "text-amber-400" : "text-amber-600"
+                        }
+                      >
+                        •
+                      </span>
                       Mobil warna hitam & putih lebih diminati pasar
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-400">•</span>
+                      <span
+                        className={
+                          isDarkMode ? "text-amber-400" : "text-amber-600"
+                        }
+                      >
+                        •
+                      </span>
                       Transmisi matic memiliki nilai jual lebih tinggi
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-400">•</span>
+                      <span
+                        className={
+                          isDarkMode ? "text-amber-400" : "text-amber-600"
+                        }
+                      >
+                        •
+                      </span>
                       STNK atas nama pribadi lebih disukai pembeli
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-400">•</span>
+                      <span
+                        className={
+                          isDarkMode ? "text-amber-400" : "text-amber-600"
+                        }
+                      >
+                        •
+                      </span>
                       Lengkapi service record untuk nilai tambah
                     </li>
                   </ul>

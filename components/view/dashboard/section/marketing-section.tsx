@@ -25,7 +25,7 @@ const MarketingSection = () => {
   const mainFeatures = [
     {
       id: 1,
-      icon: <AiOutlineCar className="text-6xl" />,
+      icon: <AiOutlineCar className="text-4xl sm:text-5xl md:text-6xl" />,
       title: "Marketplace Mobil",
       description:
         "Ribuan pilihan mobil dari berbagai merek dan model dengan harga terbaik",
@@ -42,7 +42,9 @@ const MarketingSection = () => {
     },
     {
       id: 2,
-      icon: <AiOutlineCalculator className="text-6xl" />,
+      icon: (
+        <AiOutlineCalculator className="text-4xl sm:text-5xl md:text-6xl" />
+      ),
       title: "Kalkulator Mobil",
       description:
         "Hitung simulasi kredit dan cicilan mobil impian Anda dengan mudah dan akurat",
@@ -59,7 +61,9 @@ const MarketingSection = () => {
     },
     {
       id: 3,
-      icon: <AiOutlineCheckCircle className="text-6xl" />,
+      icon: (
+        <AiOutlineCheckCircle className="text-4xl sm:text-5xl md:text-6xl" />
+      ),
       title: "Jasa Inspeksi",
       description:
         "Inspeksi profesional untuk memastikan kualitas mobil sebelum Anda membeli",
@@ -133,7 +137,6 @@ const MarketingSection = () => {
     },
   ];
 
-  // Animation Variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -158,7 +161,7 @@ const MarketingSection = () => {
 
   const floatingVariants = {
     animate: {
-      y: [0, -20, 0],
+      y: [0, -10, 0],
       transition: {
         duration: 3,
         repeat: Infinity,
@@ -167,41 +170,30 @@ const MarketingSection = () => {
     },
   };
 
-  const scaleVariants = {
-    hover: {
-      scale: 1.05,
-      rotate: 5,
-      transition: {
-        duration: 0.3,
-        ease: [0.4, 0, 0.2, 1],
-      },
-    },
-  };
-
   return (
     <section
-      className={`py-20 transition-colors duration-300 ${
+      className={`py-10 sm:py-14 md:py-20 transition-colors duration-300 ${
         isDarkMode ? "bg-slate-900" : "bg-gray-50"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12 md:mb-16"
         >
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
-            className="inline-block mb-6"
+            className="inline-block mb-4 sm:mb-6"
           >
             <span
-              className={`px-6 py-3 rounded-full text-sm font-bold border-2 ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-bold border-2 ${
                 isDarkMode
                   ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
                   : "bg-purple-100 border-purple-200 text-purple-600"
@@ -215,7 +207,7 @@ const MarketingSection = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className={`text-4xl md:text-5xl font-black mb-6 ${
+            className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-3 sm:mb-4 md:mb-6 px-2 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
@@ -226,7 +218,7 @@ const MarketingSection = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className={`text-xl max-w-2xl mx-auto ${
+            className={`text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto px-4 ${
               isDarkMode ? "text-slate-400" : "text-gray-600"
             }`}
           >
@@ -241,14 +233,14 @@ const MarketingSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-10 mb-10 sm:mb-14 md:mb-20"
         >
-          {mainFeatures.map((feature, index) => (
+          {mainFeatures.map((feature) => (
             <motion.div
               key={feature.id}
               variants={itemVariants}
               whileHover="hover"
-              className={`rounded-3xl shadow-2xl transition-all duration-500 overflow-hidden group border-2 ${
+              className={`rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl transition-all duration-500 overflow-hidden group border-2 ${
                 isDarkMode
                   ? "bg-slate-800 border-slate-700 hover:border-cyan-500/50"
                   : "bg-white border-gray-200 hover:border-blue-500/50"
@@ -256,7 +248,7 @@ const MarketingSection = () => {
             >
               {/* Header with Gradient */}
               <div
-                className={`bg-gradient-to-r ${feature.gradient} p-8 text-white relative overflow-hidden`}
+                className={`bg-gradient-to-r ${feature.gradient} p-5 sm:p-6 md:p-8 text-white relative overflow-hidden`}
               >
                 {/* Animated background circles */}
                 <motion.div
@@ -269,8 +261,8 @@ const MarketingSection = () => {
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"
-                ></motion.div>
+                  className="absolute top-0 right-0 w-20 sm:w-24 md:w-32 h-20 sm:h-24 md:h-32 bg-white/10 rounded-full blur-2xl"
+                />
                 <motion.div
                   animate={{
                     scale: [1, 1.3, 1],
@@ -281,27 +273,27 @@ const MarketingSection = () => {
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl"
-                ></motion.div>
+                  className="absolute bottom-0 left-0 w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 bg-white/10 rounded-full blur-xl"
+                />
 
                 <div className="relative z-10">
                   <motion.div
                     variants={floatingVariants}
                     animate="animate"
-                    className="flex justify-center mb-6"
+                    className="flex justify-center mb-3 sm:mb-4 md:mb-6"
                   >
                     {feature.icon}
                   </motion.div>
-                  <h3 className="text-2xl font-black text-center">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-black text-center">
                     {feature.title}
                   </h3>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-8">
+              <div className="p-4 sm:p-6 md:p-8">
                 <p
-                  className={`text-center mb-8 leading-relaxed ${
+                  className={`text-center mb-4 sm:mb-6 md:mb-8 leading-relaxed text-xs sm:text-sm md:text-base ${
                     isDarkMode ? "text-slate-400" : "text-gray-600"
                   }`}
                 >
@@ -309,7 +301,7 @@ const MarketingSection = () => {
                 </p>
 
                 {/* Feature List */}
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-2 sm:space-y-3 md:space-y-4 mb-4 sm:mb-6 md:mb-8">
                   {feature.features.map((item, idx) => (
                     <motion.li
                       key={idx}
@@ -317,13 +309,13 @@ const MarketingSection = () => {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: idx * 0.1 }}
-                      className="flex items-center text-sm"
+                      className="flex items-center text-xs sm:text-sm"
                     >
                       <div
-                        className={`w-6 h-6 rounded-full ${feature.iconBg} flex items-center justify-center mr-3 shrink-0`}
+                        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full ${feature.iconBg} flex items-center justify-center mr-2 sm:mr-3 shrink-0`}
                       >
                         <span
-                          className={`text-xs font-bold ${
+                          className={`text-[10px] sm:text-xs font-bold ${
                             isDarkMode ? "text-white" : "text-gray-700"
                           }`}
                         >
@@ -344,11 +336,11 @@ const MarketingSection = () => {
                 {/* CTA Button */}
                 <Link href={feature.link}>
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     className={`w-full bg-gradient-to-r ${
                       feature.gradient
-                    } text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 shadow-xl ${
+                    } text-white font-bold py-3 sm:py-3.5 md:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg sm:shadow-xl text-sm sm:text-base ${
                       isDarkMode ? "shadow-cyan-500/20" : "shadow-blue-500/20"
                     }`}
                   >
@@ -366,7 +358,7 @@ const MarketingSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className={`rounded-3xl shadow-2xl p-10 md:p-16 border-2 ${
+          className={`rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-5 sm:p-8 md:p-12 lg:p-16 border-2 ${
             isDarkMode
               ? "bg-slate-800 border-slate-700"
               : "bg-white border-gray-200"
@@ -377,7 +369,7 @@ const MarketingSection = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className={`text-3xl md:text-4xl font-black text-center mb-14 ${
+            className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-center mb-6 sm:mb-10 md:mb-14 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
@@ -389,35 +381,35 @@ const MarketingSection = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 md:gap-8"
           >
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ scale: 1.1, y: -10 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 className="text-center group cursor-pointer"
               >
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
-                  className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-3xl transition-all duration-300 ${
+                  className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 text-xl sm:text-2xl md:text-3xl transition-all duration-300 ${
                     isDarkMode
-                      ? "bg-slate-900 group-hover:shadow-xl"
-                      : "bg-gray-100 group-hover:shadow-xl"
+                      ? "bg-slate-900 group-hover:shadow-lg"
+                      : "bg-gray-100 group-hover:shadow-lg"
                   } ${benefit.color} ${benefit.bgHover} group-hover:text-white`}
                 >
                   {benefit.icon}
                 </motion.div>
                 <h4
-                  className={`font-black text-sm mb-2 ${
+                  className={`font-bold text-xs sm:text-sm mb-1 sm:mb-2 ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
                   {benefit.title}
                 </h4>
                 <p
-                  className={`text-xs ${
+                  className={`text-[10px] sm:text-xs ${
                     isDarkMode ? "text-slate-500" : "text-gray-600"
                   }`}
                 >
@@ -434,7 +426,7 @@ const MarketingSection = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className={`mt-20 rounded-3xl p-10 md:p-16 text-white relative overflow-hidden ${
+          className={`mt-10 sm:mt-14 md:mt-20 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 lg:p-16 text-white relative overflow-hidden ${
             isDarkMode
               ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
               : "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900"
@@ -452,8 +444,8 @@ const MarketingSection = () => {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"
-            ></motion.div>
+              className="absolute top-0 right-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-white rounded-full blur-3xl"
+            />
             <motion.div
               animate={{
                 scale: [1, 1.3, 1],
@@ -465,8 +457,8 @@ const MarketingSection = () => {
                 ease: "easeInOut",
                 delay: 1,
               }}
-              className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-300 rounded-full blur-3xl"
-            ></motion.div>
+              className="absolute bottom-0 left-0 w-64 sm:w-80 md:w-[500px] h-64 sm:h-80 md:h-[500px] bg-cyan-300 rounded-full blur-3xl"
+            />
           </div>
 
           {/* Grid overlay */}
@@ -476,9 +468,9 @@ const MarketingSection = () => {
               style={{
                 backgroundImage:
                   "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-                backgroundSize: "50px 50px",
+                backgroundSize: "30px 30px",
               }}
-            ></div>
+            />
           </div>
 
           <div className="relative z-10 text-center max-w-3xl mx-auto">
@@ -487,7 +479,7 @@ const MarketingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl font-black mb-6"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-3 sm:mb-4 md:mb-6"
             >
               Siap Menemukan Mobil Impian Anda?
             </motion.h3>
@@ -496,7 +488,7 @@ const MarketingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className={`text-xl mb-10 ${
+              className={`text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 md:mb-10 px-2 ${
                 isDarkMode ? "text-slate-300" : "text-blue-100"
               }`}
             >
@@ -508,33 +500,33 @@ const MarketingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-col sm:flex-row gap-5 justify-center"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5 justify-center"
             >
               <Link href="/marketplace">
                 <motion.button
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`font-bold py-5 px-10 rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-2xl ${
+                  whileHover={{ scale: 1.03, y: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`w-full sm:w-auto font-bold py-3 sm:py-4 md:py-5 px-6 sm:px-8 md:px-10 rounded-xl sm:rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl sm:shadow-2xl text-sm sm:text-base ${
                     isDarkMode
                       ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
                       : "bg-white text-blue-600 hover:bg-blue-50 shadow-white/30"
                   }`}
                 >
-                  <AiOutlineCar className="text-2xl" />
+                  <AiOutlineCar className="text-xl sm:text-2xl" />
                   <span>Lihat Mobil</span>
                 </motion.button>
               </Link>
               <Link href="/Kalkulator">
                 <motion.button
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`font-bold py-5 px-10 rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-2xl ${
+                  whileHover={{ scale: 1.03, y: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`w-full sm:w-auto font-bold py-3 sm:py-4 md:py-5 px-6 sm:px-8 md:px-10 rounded-xl sm:rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl sm:shadow-2xl text-sm sm:text-base ${
                     isDarkMode
                       ? "bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white shadow-yellow-500/30"
                       : "bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-gray-900 shadow-yellow-500/30"
                   }`}
                 >
-                  <AiOutlineCalculator className="text-2xl" />
+                  <AiOutlineCalculator className="text-xl sm:text-2xl" />
                   <span>Hitung Kalkulator</span>
                 </motion.button>
               </Link>
