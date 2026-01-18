@@ -23,6 +23,7 @@ import Link from "next/link";
 import { createUsers } from "@/lib/state/slice/user/userSlice";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import { useTheme } from "@/context/ThemeContext";
+import { MediatorLogo } from "@/components/ui/mediatorLogo";
 
 // Schema validasi dengan Zod
 const registerSchema = z
@@ -165,8 +166,8 @@ const RegisterComponent = () => {
         >
           {/* Logo & Title */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg mb-4">
-              <UserPlus className="w-8 h-8 text-white" />
+            <div className="flex justify-center mb-2">
+              <MediatorLogo />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               Buat Akun Baru

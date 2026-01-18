@@ -44,7 +44,9 @@ const BoostHistoryPage = () => {
   } = useSelector((state: RootState) => state.boost);
 
   const [selectedTab, setSelectedTab] = useState<string>("all");
-  const [viewingStatistics, setViewingStatistics] = useState<string | null>(null);
+  const [viewingStatistics, setViewingStatistics] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -173,7 +175,9 @@ const BoostHistoryPage = () => {
   ];
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}>
+    <div
+      className={`min-h-screen ${isDarkMode ? "bg-slate-950" : "bg-gray-50"}`}
+    >
       {/* Header */}
       <div
         className={`${
@@ -182,22 +186,25 @@ const BoostHistoryPage = () => {
             : "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
           <button
             onClick={() => router.push("/marketplace/my-listings")}
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-all mb-6"
+            className="flex items-center gap-1.5 sm:gap-2 text-white/80 hover:text-white transition-all mb-4 sm:mb-6 text-sm sm:text-base"
           >
-            <FiArrowLeft />
-            Kembali ke Listing Saya
+            <FiArrowLeft className="text-base sm:text-lg" />
+            <span className="hidden sm:inline">Kembali ke Listing Saya</span>
+            <span className="sm:hidden">Kembali</span>
           </button>
 
-          <div className="flex items-center gap-4">
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-600">
-              <FiBarChart2 className="text-3xl text-white" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2.5 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-purple-500 to-pink-600">
+              <FiBarChart2 className="text-xl sm:text-2xl md:text-3xl text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Riwayat Boost</h1>
-              <p className="text-blue-100">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+                Riwayat Boost
+              </h1>
+              <p className="text-xs sm:text-sm md:text-base text-blue-100">
                 Kelola dan pantau performa boost listing Anda
               </p>
             </div>
@@ -206,12 +213,14 @@ const BoostHistoryPage = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {/* Statistics Modal/View */}
         {viewingStatistics && transactionStatistics && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
+              <h2
+                className={`text-lg sm:text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}
+              >
                 Statistik Performa
               </h2>
               <button
@@ -219,7 +228,7 @@ const BoostHistoryPage = () => {
                   setViewingStatistics(null);
                   dispatch(clearSelectedTransaction());
                 }}
-                className={`px-4 py-2 rounded-xl ${
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold ${
                   isDarkMode
                     ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -233,17 +242,17 @@ const BoostHistoryPage = () => {
         )}
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 md:mb-8 overflow-x-auto pb-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => handleTabChange(tab.key)}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold transition-all whitespace-nowrap text-xs sm:text-sm ${
                 selectedTab === tab.key
-                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                   : isDarkMode
-                  ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                    ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tab.label}
@@ -253,36 +262,38 @@ const BoostHistoryPage = () => {
 
         {/* Loading */}
         {transactionsLoading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-500 border-t-transparent"></div>
+          <div className="flex justify-center items-center py-12 sm:py-16 md:py-20">
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 border-4 border-cyan-500 border-t-transparent"></div>
           </div>
         )}
 
         {/* Empty State */}
         {!transactionsLoading && transactions.length === 0 && (
           <div
-            className={`text-center py-20 rounded-3xl ${
+            className={`text-center py-12 sm:py-16 md:py-20 rounded-xl sm:rounded-2xl ${
               isDarkMode ? "bg-slate-900" : "bg-white"
-            } shadow-xl`}
+            } shadow-lg sm:shadow-xl`}
           >
             <FiZap
-              className={`text-8xl mx-auto mb-6 ${
+              className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl mx-auto mb-3 sm:mb-4 md:mb-6 ${
                 isDarkMode ? "text-slate-700" : "text-gray-300"
               }`}
             />
             <h3
-              className={`text-2xl font-bold mb-2 ${
+              className={`text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 ${
                 isDarkMode ? "text-white" : "text-gray-900"
               }`}
             >
               Belum ada transaksi boost
             </h3>
-            <p className={isDarkMode ? "text-slate-400" : "text-gray-600"}>
+            <p
+              className={`text-xs sm:text-sm md:text-base ${isDarkMode ? "text-slate-400" : "text-gray-600"}`}
+            >
               Mulai boost listing Anda untuk meningkatkan visibilitas
             </p>
             <button
               onClick={() => router.push("/marketplace/my-listings")}
-              className="mt-6 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all"
+              className="mt-4 sm:mt-5 md:mt-6 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg sm:rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all text-xs sm:text-sm md:text-base"
             >
               Lihat Listing Saya
             </button>
@@ -291,7 +302,7 @@ const BoostHistoryPage = () => {
 
         {/* Transactions List */}
         {!transactionsLoading && transactions.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {transactions.map((transaction) => {
               const statusBadge = getStatusBadge(transaction.status);
               const StatusIcon = statusBadge.icon;
@@ -299,16 +310,16 @@ const BoostHistoryPage = () => {
               return (
                 <div
                   key={transaction.id}
-                  className={`rounded-2xl overflow-hidden ${
+                  className={`rounded-xl sm:rounded-2xl overflow-hidden ${
                     isDarkMode ? "bg-slate-900" : "bg-white"
-                  } shadow-xl`}
+                  } shadow-lg sm:shadow-xl`}
                 >
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="p-3 sm:p-4 md:p-6">
+                    <div className="flex flex-col md:flex-row md:items-center gap-3 sm:gap-4">
                       {/* Listing Info */}
-                      <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1">
                         {/* Thumbnail */}
-                        <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0">
                           {transaction.listing?.images?.[0] ? (
                             <img
                               src={transaction.listing.images[0]}
@@ -321,14 +332,14 @@ const BoostHistoryPage = () => {
                                 isDarkMode ? "bg-slate-800" : "bg-gray-100"
                               }`}
                             >
-                              <span className="text-2xl">🚗</span>
+                              <span className="text-xl sm:text-2xl">🚗</span>
                             </div>
                           )}
                         </div>
 
                         <div className="flex-1 min-w-0">
                           <h3
-                            className={`font-bold text-lg truncate ${
+                            className={`font-bold text-sm sm:text-base md:text-lg truncate ${
                               isDarkMode ? "text-white" : "text-gray-900"
                             }`}
                           >
@@ -336,79 +347,87 @@ const BoostHistoryPage = () => {
                             {transaction.listing?.carModel?.modelName}
                           </h3>
                           <div
-                            className={`text-sm ${
+                            className={`text-xs sm:text-sm ${
                               isDarkMode ? "text-slate-400" : "text-gray-500"
                             }`}
                           >
                             Paket: {transaction.package?.name || "Custom"}
                           </div>
                           <div
-                            className={`text-sm flex items-center gap-2 ${
+                            className={`text-xs sm:text-sm flex items-center gap-1 sm:gap-2 ${
                               isDarkMode ? "text-slate-400" : "text-gray-500"
                             }`}
                           >
-                            <FiCalendar />
-                            {formatDate(transaction.createdAt)}
+                            <FiCalendar className="text-xs sm:text-sm" />
+                            <span className="truncate">
+                              {formatDate(transaction.createdAt)}
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Status & Amount */}
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
+                      <div className="flex items-center justify-between md:justify-end gap-3 sm:gap-4 md:gap-6">
+                        <div className="text-left md:text-right">
                           <div
-                            className={`text-xl font-bold ${
+                            className={`text-base sm:text-lg md:text-xl font-bold ${
                               isDarkMode ? "text-white" : "text-gray-900"
                             }`}
                           >
                             {formatPrice(transaction.amount)}
                           </div>
                           <span
-                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white ${statusBadge.color}`}
+                            className={`inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-white ${statusBadge.color}`}
                           >
-                            <StatusIcon />
+                            <StatusIcon className="text-[10px] sm:text-xs" />
                             {statusBadge.text}
                           </span>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5 sm:gap-2">
                           {(transaction.status === "active" ||
                             transaction.status === "expired") && (
                             <button
-                              onClick={() => handleViewStatistics(transaction.id)}
-                              className={`p-2 rounded-xl transition-colors ${
+                              onClick={() =>
+                                handleViewStatistics(transaction.id)
+                              }
+                              className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${
                                 isDarkMode
                                   ? "bg-slate-800 text-cyan-400 hover:bg-slate-700"
                                   : "bg-blue-50 text-blue-600 hover:bg-blue-100"
                               }`}
                               title="Lihat Statistik"
                             >
-                              <FiBarChart2 />
+                              <FiBarChart2 className="text-sm sm:text-base" />
                             </button>
                           )}
 
                           <button
                             onClick={() =>
-                              router.push(`/marketplace/${transaction.listingId}`)
+                              router.push(
+                                `/marketplace/${transaction.listingId}`,
+                              )
                             }
-                            className={`p-2 rounded-xl transition-colors ${
+                            className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${
                               isDarkMode
                                 ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                             title="Lihat Listing"
                           >
-                            <FiEye />
+                            <FiEye className="text-sm sm:text-base" />
                           </button>
 
                           {transaction.status === "pending_payment" && (
                             <button
-                              onClick={() => handleCancelTransaction(transaction)}
-                              className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                              onClick={() =>
+                                handleCancelTransaction(transaction)
+                              }
+                              className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                               title="Batalkan"
                             >
-                              <FiX />
+                              <FiX className="text-sm sm:text-base" />
                             </button>
                           )}
                         </div>
@@ -416,39 +435,51 @@ const BoostHistoryPage = () => {
                     </div>
 
                     {/* Period Info for Active */}
-                    {transaction.status === "active" && transaction.startDate && transaction.endDate && (
-                      <div
-                        className={`mt-4 p-3 rounded-xl ${
-                          isDarkMode ? "bg-slate-800" : "bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-sm">
-                          <span className={isDarkMode ? "text-slate-400" : "text-gray-500"}>
-                            Periode: {formatDate(transaction.startDate)} -{" "}
-                            {formatDate(transaction.endDate)}
-                          </span>
-                          <span className={isDarkMode ? "text-cyan-400" : "text-blue-600"}>
-                            {transaction.actualReach} impressions
-                          </span>
-                        </div>
-                        {/* Progress Bar */}
+                    {transaction.status === "active" &&
+                      transaction.startDate &&
+                      transaction.endDate && (
                         <div
-                          className={`mt-2 h-2 rounded-full ${
-                            isDarkMode ? "bg-slate-700" : "bg-gray-200"
+                          className={`mt-3 sm:mt-4 p-2 sm:p-3 rounded-lg sm:rounded-xl ${
+                            isDarkMode ? "bg-slate-800" : "bg-gray-50"
                           }`}
                         >
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm gap-1 sm:gap-0">
+                            <span
+                              className={
+                                isDarkMode ? "text-slate-400" : "text-gray-500"
+                              }
+                            >
+                              Periode: {formatDate(transaction.startDate)} -{" "}
+                              {formatDate(transaction.endDate)}
+                            </span>
+                            <span
+                              className={
+                                isDarkMode ? "text-cyan-400" : "text-blue-600"
+                              }
+                            >
+                              {transaction.actualReach} impressions
+                            </span>
+                          </div>
+                          {/* Progress Bar */}
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600"
-                            style={{
-                              width: `${Math.min(
-                                (transaction.actualReach / transaction.estimatedReachMax) * 100,
-                                100
-                              )}%`,
-                            }}
-                          />
+                            className={`mt-2 h-1.5 sm:h-2 rounded-full ${
+                              isDarkMode ? "bg-slate-700" : "bg-gray-200"
+                            }`}
+                          >
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600"
+                              style={{
+                                width: `${Math.min(
+                                  (transaction.actualReach /
+                                    transaction.estimatedReachMax) *
+                                    100,
+                                  100,
+                                )}%`,
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 </div>
               );
@@ -458,22 +489,27 @@ const BoostHistoryPage = () => {
 
         {/* Pagination */}
         {!transactionsLoading && transactionsPagination.totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-8">
+          <div className="flex justify-center gap-1.5 sm:gap-2 mt-6 sm:mt-8 flex-wrap">
             {Array.from(
               { length: Math.min(transactionsPagination.totalPages, 5) },
-              (_, i) => i + 1
+              (_, i) => i + 1,
             ).map((page) => (
               <button
                 key={page}
                 onClick={() =>
-                  dispatch(fetchMyTransactions({ page, status: selectedTab === "all" ? undefined : selectedTab }))
+                  dispatch(
+                    fetchMyTransactions({
+                      page,
+                      status: selectedTab === "all" ? undefined : selectedTab,
+                    }),
+                  )
                 }
-                className={`w-10 h-10 rounded-xl font-semibold transition-all ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl font-semibold transition-all text-xs sm:text-sm ${
                   transactionsPagination.page === page
                     ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                     : isDarkMode
-                    ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                      ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 {page}
