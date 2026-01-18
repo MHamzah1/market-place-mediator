@@ -46,14 +46,14 @@ const CreateListingPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { createLoading } = useSelector(
-    (state: RootState) => state.marketplace
+    (state: RootState) => state.marketplace,
   );
   const { data: brands } = useSelector((state: RootState) => state.brand);
   const { data: carModels } = useSelector(
-    (state: RootState) => state.CarModels
+    (state: RootState) => state.CarModels,
   );
   const { isLoggedIn, userInfo } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   const [step, setStep] = useState(1);
@@ -95,7 +95,7 @@ const CreateListingPage = () => {
   useEffect(() => {
     if (formData.brandId) {
       dispatch(
-        getCarModelsWithFilters({ brandId: formData.brandId, perPage: 100 })
+        getCarModelsWithFilters({ brandId: formData.brandId, perPage: 100 }),
       );
     }
   }, [dispatch, formData.brandId]);
@@ -119,7 +119,7 @@ const CreateListingPage = () => {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -339,6 +339,8 @@ const CreateListingPage = () => {
     { number: 4, title: "Foto & Kontak" },
   ];
 
+  // ...existing code...
+
   return (
     <div
       className={`min-h-screen ${
@@ -347,76 +349,84 @@ const CreateListingPage = () => {
           : "bg-gradient-to-b from-gray-50 via-white to-gray-100"
       }`}
     >
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className={`flex items-center gap-2 mb-6 ${
+          className={`flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 text-sm sm:text-base ${
             isDarkMode
               ? "text-slate-400 hover:text-white"
               : "text-gray-600 hover:text-gray-900"
           } transition-colors`}
         >
-          <FiArrowLeft />
+          <FiArrowLeft className="text-base sm:text-lg" />
           Kembali
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <h1
-            className={`text-3xl md:text-4xl font-bold mb-2 ${
+            className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-1.5 sm:mb-2 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Jual Mobil Anda
           </h1>
-          <p className={isDarkMode ? "text-slate-400" : "text-gray-600"}>
+          <p
+            className={`text-sm sm:text-base ${
+              isDarkMode ? "text-slate-400" : "text-gray-600"
+            }`}
+          >
             Isi detail mobil untuk mulai menjual
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex justify-between mb-8">
+        <div className="flex justify-between mb-6 sm:mb-8 overflow-x-auto pb-2">
           {steps.map((s, index) => (
             <div
               key={s.number}
               className={`flex flex-col items-center ${
-                index < steps.length - 1 ? "flex-1" : ""
+                index < steps.length - 1 ? "flex-1 min-w-0" : "flex-shrink-0"
               }`}
             >
               <div className="flex items-center w-full">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold transition-all text-sm sm:text-base flex-shrink-0 ${
                     step >= s.number
                       ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                       : isDarkMode
-                      ? "bg-slate-800 text-slate-500"
-                      : "bg-gray-200 text-gray-500"
+                        ? "bg-slate-800 text-slate-500"
+                        : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {step > s.number ? <FiCheck /> : s.number}
+                  {step > s.number ? (
+                    <FiCheck className="text-sm sm:text-base" />
+                  ) : (
+                    s.number
+                  )}
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 ${
+                    className={`flex-1 h-0.5 sm:h-1 mx-1 sm:mx-2 ${
                       step > s.number
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600"
                         : isDarkMode
-                        ? "bg-slate-800"
-                        : "bg-gray-200"
+                          ? "bg-slate-800"
+                          : "bg-gray-200"
                     }`}
                   />
                 )}
               </div>
               <span
-                className={`text-xs mt-2 hidden md:block ${
+                className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 text-center ${
                   step >= s.number
                     ? isDarkMode
                       ? "text-cyan-400"
                       : "text-blue-600"
                     : isDarkMode
-                    ? "text-slate-500"
-                    : "text-gray-500"
+                      ? "text-slate-500"
+                      : "text-gray-500"
                 }`}
               >
                 {s.title}
@@ -427,7 +437,7 @@ const CreateListingPage = () => {
 
         {/* Form Card */}
         <div
-          className={`rounded-2xl p-6 md:p-8 ${
+          className={`rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 ${
             isDarkMode
               ? "bg-slate-800/50 border border-slate-700"
               : "bg-white shadow-xl border border-gray-100"
@@ -435,16 +445,16 @@ const CreateListingPage = () => {
         >
           {/* Step 1: Car Info */}
           {step === 1 && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-2xl font-bold mb-6 ${
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
                   isDarkMode ? "text-white" : "text-gray-900"
                 }`}
               >
                 Informasi Mobil
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className={labelClass}>
                     <AiOutlineCar className="inline mr-2" />
@@ -483,7 +493,7 @@ const CreateListingPage = () => {
                         <option key={model.id} value={model.id}>
                           {model.modelName}
                         </option>
-                      )
+                      ),
                     )}
                   </select>
                   {errors.carModelId && (
@@ -501,7 +511,7 @@ const CreateListingPage = () => {
                   >
                     {Array.from(
                       { length: 36 },
-                      (_, i) => new Date().getFullYear() - i
+                      (_, i) => new Date().getFullYear() - i,
                     ).map((year) => (
                       <option key={year} value={year}>
                         {year}
@@ -528,7 +538,7 @@ const CreateListingPage = () => {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className={labelClass}>
                     <TbManualGearbox className="inline mr-2" />
@@ -568,16 +578,16 @@ const CreateListingPage = () => {
 
           {/* Step 2: Price & Mileage */}
           {step === 2 && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-2xl font-bold mb-6 ${
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
                   isDarkMode ? "text-white" : "text-gray-900"
                 }`}
               >
                 Harga & Kilometer
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className={labelClass}>Harga (Rp)</label>
                   <input
@@ -613,7 +623,7 @@ const CreateListingPage = () => {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className={labelClass}>Kondisi</label>
                   <select
@@ -660,16 +670,16 @@ const CreateListingPage = () => {
 
           {/* Step 3: Location & Description */}
           {step === 3 && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-2xl font-bold mb-6 ${
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
                   isDarkMode ? "text-white" : "text-gray-900"
                 }`}
               >
                 Lokasi & Deskripsi
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className={labelClass}>
                     <FiMapPin className="inline mr-2" />
@@ -717,7 +727,7 @@ const CreateListingPage = () => {
                   placeholder="Jelaskan kondisi mobil, fitur, riwayat servis, dll..."
                   className={inputClass}
                 />
-                <div className="flex justify-between mt-1">
+                <div className="flex flex-col sm:flex-row justify-between gap-1 mt-1">
                   {errors.description && (
                     <p className={errorClass}>{errors.description}</p>
                   )}
@@ -733,11 +743,11 @@ const CreateListingPage = () => {
             </div>
           )}
 
-          {/* Step 4: Images & Contact - UPDATED with File Upload */}
+          {/* Step 4: Images & Contact */}
           {step === 4 && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-2xl font-bold mb-6 ${
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
                   isDarkMode ? "text-white" : "text-gray-900"
                 }`}
               >
@@ -757,10 +767,10 @@ const CreateListingPage = () => {
                     dragActive
                       ? "border-cyan-500 bg-cyan-500/10"
                       : errors.images
-                      ? "border-red-400"
-                      : isDarkMode
-                      ? "border-slate-600 hover:border-slate-500"
-                      : "border-gray-300 hover:border-gray-400"
+                        ? "border-red-400"
+                        : isDarkMode
+                          ? "border-slate-600 hover:border-slate-500"
+                          : "border-gray-300 hover:border-gray-400"
                   }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -779,23 +789,23 @@ const CreateListingPage = () => {
 
                   <label
                     htmlFor="image-upload"
-                    className={`flex flex-col items-center justify-center p-8 cursor-pointer ${
+                    className={`flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer ${
                       imageFiles.length >= MAX_FILES
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
                   >
                     <FiUpload
-                      className={`text-4xl mb-3 ${
+                      className={`text-3xl sm:text-4xl mb-2 sm:mb-3 ${
                         dragActive
                           ? "text-cyan-500"
                           : isDarkMode
-                          ? "text-slate-500"
-                          : "text-gray-400"
+                            ? "text-slate-500"
+                            : "text-gray-400"
                       }`}
                     />
                     <p
-                      className={`text-sm font-medium mb-1 ${
+                      className={`text-xs sm:text-sm font-medium mb-1 text-center ${
                         isDarkMode ? "text-slate-300" : "text-gray-700"
                       }`}
                     >
@@ -804,7 +814,7 @@ const CreateListingPage = () => {
                         : "Drag & drop gambar atau klik untuk upload"}
                     </p>
                     <p
-                      className={`text-xs ${
+                      className={`text-[10px] sm:text-xs text-center ${
                         isDarkMode ? "text-slate-500" : "text-gray-500"
                       }`}
                     >
@@ -817,11 +827,11 @@ const CreateListingPage = () => {
 
                 {/* Image Preview Grid */}
                 {imagePreviews.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 mt-3 sm:mt-4">
                     {imagePreviews.map((preview, idx) => (
                       <div
                         key={idx}
-                        className="relative aspect-square rounded-xl overflow-hidden group"
+                        className="relative aspect-square rounded-lg sm:rounded-xl overflow-hidden group"
                       >
                         <img
                           src={preview}
@@ -834,19 +844,19 @@ const CreateListingPage = () => {
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(idx)}
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                            className="p-1.5 sm:p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                           >
-                            <FiX className="text-lg" />
+                            <FiX className="text-base sm:text-lg" />
                           </button>
                         </div>
                         {idx === 0 && (
-                          <span className="absolute bottom-2 left-2 px-2 py-1 bg-cyan-500 text-white text-xs font-bold rounded">
+                          <span className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-cyan-500 text-white text-[10px] sm:text-xs font-bold rounded">
                             Utama
                           </span>
                         )}
                         {/* File info */}
                         <div
-                          className={`absolute top-2 right-2 px-2 py-1 rounded text-xs ${
+                          className={`absolute top-1 sm:top-2 right-1 sm:right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs ${
                             isDarkMode ? "bg-slate-800/80" : "bg-white/80"
                           }`}
                         >
@@ -859,19 +869,19 @@ const CreateListingPage = () => {
                     {imageFiles.length < MAX_FILES && (
                       <label
                         htmlFor="image-upload"
-                        className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+                        className={`aspect-square rounded-lg sm:rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
                           isDarkMode
                             ? "border-slate-600 hover:border-cyan-500 hover:bg-cyan-500/10"
                             : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
                         }`}
                       >
                         <FiPlus
-                          className={`text-2xl mb-1 ${
+                          className={`text-xl sm:text-2xl mb-0.5 sm:mb-1 ${
                             isDarkMode ? "text-slate-500" : "text-gray-400"
                           }`}
                         />
                         <span
-                          className={`text-xs ${
+                          className={`text-[10px] sm:text-xs ${
                             isDarkMode ? "text-slate-500" : "text-gray-500"
                           }`}
                         >
@@ -883,7 +893,7 @@ const CreateListingPage = () => {
                 )}
 
                 <p
-                  className={`text-sm mt-3 ${
+                  className={`text-xs sm:text-sm mt-2 sm:mt-3 ${
                     isDarkMode ? "text-slate-500" : "text-gray-500"
                   }`}
                 >
@@ -910,7 +920,7 @@ const CreateListingPage = () => {
                   <p className={errorClass}>{errors.sellerWhatsapp}</p>
                 )}
                 <p
-                  className={`text-sm mt-2 ${
+                  className={`text-xs sm:text-sm mt-2 ${
                     isDarkMode ? "text-slate-500" : "text-gray-500"
                   }`}
                 >
@@ -921,48 +931,52 @@ const CreateListingPage = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-slate-800">
+          <div
+            className={`flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t ${
+              isDarkMode ? "border-slate-700" : "border-gray-200"
+            }`}
+          >
             {step > 1 ? (
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
                   isDarkMode
                     ? "bg-slate-800 text-white hover:bg-slate-700"
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                 }`}
               >
-                <FiArrowLeft />
+                <FiArrowLeft className="text-base sm:text-lg" />
                 Sebelumnya
               </button>
             ) : (
-              <div></div>
+              <div className="hidden sm:block"></div>
             )}
 
             {step < 4 ? (
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg shadow-cyan-500/25"
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg shadow-cyan-500/25 text-sm sm:text-base order-first sm:order-last"
               >
                 Selanjutnya
-                <FiArrowRight />
+                <FiArrowRight className="text-base sm:text-lg" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={createLoading}
-                className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 disabled:opacity-50 text-sm sm:text-base order-first sm:order-last"
               >
                 {createLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
                     Memproses...
                   </>
                 ) : (
                   <>
-                    <FiCheck />
+                    <FiCheck className="text-base sm:text-lg" />
                     Publikasikan
                   </>
                 )}
