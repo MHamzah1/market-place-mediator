@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/context/ThemeContext";
+import { useRouter } from "next/navigation";
 import React from "react";
 import {
   AiOutlineCheckCircle,
@@ -12,6 +13,7 @@ import { FiCheckCircle, FiTool, FiClock } from "react-icons/fi";
 const JasaInspeksiSection = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+  const router = useRouter();
 
   const inspectionFeatures = [
     {
@@ -364,6 +366,7 @@ const JasaInspeksiSection = () => {
                     ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
                     : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
                 }`}
+                onClick={() => router.push("/Inspeksi")}
               >
                 Pesan Inspeksi Sekarang
               </button>

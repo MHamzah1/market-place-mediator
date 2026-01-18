@@ -138,7 +138,7 @@ const MarketplacePage = () => {
 
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL_IMAGES ||
-    "http://192.168.1.8:8080/uploads/";
+    "http://192.168.2.100:8080/uploads/";
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -170,27 +170,27 @@ const MarketplacePage = () => {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('/pattern.svg')] bg-repeat"></div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-              <AiOutlineCar className="inline-block mr-3 text-5xl" />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-3 sm:mb-4">
+              <AiOutlineCar className="inline-block mr-2 text-3xl sm:text-4xl lg:text-5xl" />
               Marketplace Mobil
             </h1>
-            <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
               Temukan mobil impian Anda dari ribuan pilihan. Jual atau beli
               mobil dengan mudah dan aman.
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto px-2 sm:px-4">
               <div
-                className={`flex items-center rounded-2xl overflow-hidden shadow-2xl ${
+                className={`flex flex-col sm:flex-row items-stretch sm:items-center rounded-2xl overflow-hidden shadow-2xl ${
                   isDarkMode ? "bg-slate-800" : "bg-white"
                 }`}
               >
-                <div className="flex-1 flex items-center px-6 py-4">
+                <div className="flex-1 flex items-center px-4 sm:px-6 py-3 sm:py-4">
                   <FiSearch
-                    className={`text-xl ${
+                    className={`text-lg sm:text-xl flex-shrink-0 ${
                       isDarkMode ? "text-slate-400" : "text-gray-400"
                     }`}
                   />
@@ -199,7 +199,7 @@ const MarketplacePage = () => {
                     placeholder="Cari mobil, merk, atau model..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full ml-4 text-lg outline-none ${
+                    className={`w-full ml-3 sm:ml-4 text-sm sm:text-base lg:text-lg outline-none ${
                       isDarkMode
                         ? "bg-transparent text-white placeholder-slate-500"
                         : "bg-transparent text-gray-800 placeholder-gray-400"
@@ -208,7 +208,7 @@ const MarketplacePage = () => {
                 </div>
                 <button
                   onClick={handleApplyFilters}
-                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg hover:from-cyan-600 hover:to-blue-700 transition-all"
+                  className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm sm:text-base lg:text-lg hover:from-cyan-600 hover:to-blue-700 transition-all"
                 >
                   Cari
                 </button>
@@ -216,20 +216,28 @@ const MarketplacePage = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="flex justify-center gap-8 mt-8 text-white">
-              <div className="text-center">
-                <div className="text-3xl font-bold">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 mt-6 sm:mt-8 text-white px-4">
+              <div className="text-center min-w-[80px]">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
                   {pagination.totalRecords}+
                 </div>
-                <div className="text-sm text-blue-200">Mobil Tersedia</div>
+                <div className="text-xs sm:text-sm text-blue-200">
+                  Mobil Tersedia
+                </div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">{brands?.length || 0}+</div>
-                <div className="text-sm text-blue-200">Brand</div>
+              <div className="text-center min-w-[80px]">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                  {brands?.length || 0}+
+                </div>
+                <div className="text-xs sm:text-sm text-blue-200">Brand</div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">100%</div>
-                <div className="text-sm text-blue-200">Terpercaya</div>
+              <div className="text-center min-w-[80px]">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                  100%
+                </div>
+                <div className="text-xs sm:text-sm text-blue-200">
+                  Terpercaya
+                </div>
               </div>
             </div>
           </div>
@@ -239,12 +247,12 @@ const MarketplacePage = () => {
       {/* Featured Listings Section */}
       {featuredListings && featuredListings.length > 0 && (
         <div
-          className={`py-8 ${
+          className={`py-6 sm:py-8 ${
             isDarkMode ? "bg-slate-900/50" : "bg-yellow-50/50"
           }`}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
               <div className="flex items-center gap-3">
                 <div
                   className={`p-2 rounded-xl ${
@@ -252,21 +260,21 @@ const MarketplacePage = () => {
                   }`}
                 >
                   <FiStar
-                    className={`text-xl ${
+                    className={`text-lg sm:text-xl ${
                       isDarkMode ? "text-yellow-400" : "text-yellow-600"
                     }`}
                   />
                 </div>
                 <div>
                   <h2
-                    className={`text-xl font-bold ${
+                    className={`text-lg sm:text-xl font-bold ${
                       isDarkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
                     Mobil Unggulan
                   </h2>
                   <p
-                    className={`text-sm ${
+                    className={`text-xs sm:text-sm ${
                       isDarkMode ? "text-slate-400" : "text-gray-500"
                     }`}
                   >
@@ -276,7 +284,7 @@ const MarketplacePage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {featuredListings.slice(0, 4).map((listing) => (
                 <Link
                   key={listing.id}
@@ -287,7 +295,7 @@ const MarketplacePage = () => {
                       : "bg-white border border-yellow-200"
                   }`}
                 >
-                  <div className="relative h-36">
+                  <div className="relative h-28 sm:h-36">
                     {listing.images && listing.images[0] ? (
                       <img
                         src={`${baseUrl}${listing.images[0]}`}
@@ -300,24 +308,24 @@ const MarketplacePage = () => {
                           isDarkMode ? "bg-slate-700" : "bg-gray-100"
                         }`}
                       >
-                        <span className="text-4xl">🚗</span>
+                        <span className="text-3xl sm:text-4xl">🚗</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div className="absolute top-2 left-2">
+                    <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2">
                       <FeaturedBadge
                         badge={listing.featuredBadge || "Unggulan"}
                         size="sm"
                       />
                     </div>
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded text-white text-xs">
-                      <FiEye className="text-xs" />
+                    <div className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 flex items-center gap-1 px-1.5 sm:px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded text-white text-[10px] sm:text-xs">
+                      <FiEye className="text-[10px] sm:text-xs" />
                       {listing.viewCount}
                     </div>
                   </div>
-                  <div className="p-3">
+                  <div className="p-2 sm:p-3">
                     <h3
-                      className={`font-bold text-sm truncate ${
+                      className={`font-bold text-xs sm:text-sm truncate ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
@@ -325,7 +333,7 @@ const MarketplacePage = () => {
                       {listing.carModel?.modelName}
                     </h3>
                     <div
-                      className={`text-xs ${
+                      className={`text-[10px] sm:text-xs ${
                         isDarkMode ? "text-slate-400" : "text-gray-500"
                       }`}
                     >
@@ -333,7 +341,7 @@ const MarketplacePage = () => {
                       {listing.transmission === "automatic" ? "AT" : "MT"}
                     </div>
                     <div
-                      className={`mt-2 font-bold ${
+                      className={`mt-1 sm:mt-2 font-bold text-xs sm:text-sm ${
                         isDarkMode ? "text-yellow-400" : "text-yellow-600"
                       }`}
                     >
@@ -348,8 +356,8 @@ const MarketplacePage = () => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters - Desktop */}
           <div
             className={`hidden lg:block w-72 flex-shrink-0 ${
@@ -616,25 +624,26 @@ const MarketplacePage = () => {
           </div>
 
           {/* Main Listings Area */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Toolbar */}
             <div
-              className={`flex items-center justify-between mb-6 p-4 rounded-2xl ${
+              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl gap-3 sm:gap-4 ${
                 isDarkMode ? "bg-slate-900" : "bg-white"
               } shadow-lg`}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <span
-                  className={`text-sm ${
+                  className={`text-xs sm:text-sm ${
                     isDarkMode ? "text-slate-400" : "text-gray-600"
                   }`}
                 >
-                  Menampilkan <strong>{listings.length}</strong> dari{" "}
-                  <strong>{pagination.totalRecords}</strong> mobil
+                  <span className="hidden sm:inline">Menampilkan </span>
+                  <strong>{listings.length}</strong> dari{" "}
+                  <strong>{pagination.totalRecords}</strong>
                 </span>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
                 {/* Sort */}
                 <select
                   value={localFilters.sortBy}
@@ -645,7 +654,7 @@ const MarketplacePage = () => {
                     });
                     setTimeout(handleApplyFilters, 100);
                   }}
-                  className={`px-4 py-2 rounded-xl border text-sm ${
+                  className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs sm:text-sm flex-1 sm:flex-initial ${
                     isDarkMode
                       ? "bg-slate-800 border-slate-700 text-white"
                       : "bg-gray-50 border-gray-200 text-gray-800"
@@ -666,7 +675,7 @@ const MarketplacePage = () => {
                 >
                   <button
                     onClick={() => setViewMode("grid")}
-                    className={`p-2 ${
+                    className={`p-1.5 sm:p-2 ${
                       viewMode === "grid"
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
@@ -674,11 +683,11 @@ const MarketplacePage = () => {
                           : "bg-gray-50 text-gray-600"
                     }`}
                   >
-                    <FiGrid />
+                    <FiGrid className="text-sm sm:text-base" />
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
-                    className={`p-2 ${
+                    className={`p-1.5 sm:p-2 ${
                       viewMode === "list"
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
@@ -686,18 +695,18 @@ const MarketplacePage = () => {
                           : "bg-gray-50 text-gray-600"
                     }`}
                   >
-                    <FiList />
+                    <FiList className="text-sm sm:text-base" />
                   </button>
                 </div>
 
-                {/* Create Listing Button */}
+                {/* Create Listing Button - Desktop */}
                 {isLoggedIn && (
                   <Link
                     href="/marketplace/create"
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25"
+                    className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    <FiPlus />
-                    Jual Mobil
+                    <FiPlus className="text-sm sm:text-base" />
+                    <span className="hidden md:inline">Jual Mobil</span>
                   </Link>
                 )}
               </div>
@@ -747,7 +756,7 @@ const MarketplacePage = () => {
 
             {/* Grid View */}
             {!loading && listings.length > 0 && viewMode === "grid" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {listings.map((listing) => (
                   <Link
                     key={listing.id}
@@ -770,12 +779,12 @@ const MarketplacePage = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
                       {/* Badges */}
-                      <div className="absolute top-3 left-3 flex gap-2">
-                        <span className="px-3 py-1 bg-cyan-500 text-white text-xs font-bold rounded-full">
+                      <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex gap-1.5 sm:gap-2 flex-wrap max-w-[calc(100%-4rem)]">
+                        <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-cyan-500 text-white text-[10px] sm:text-xs font-bold rounded-full whitespace-nowrap">
                           {listing.condition === "baru" ? "Baru" : "Bekas"}
                         </span>
                         {listing.ownershipStatus && (
-                          <span className="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full">
+                          <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-purple-500 text-white text-[10px] sm:text-xs font-bold rounded-full whitespace-nowrap">
                             {listing.ownershipStatus}
                           </span>
                         )}
@@ -785,32 +794,31 @@ const MarketplacePage = () => {
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          // Handle favorite
                         }}
-                        className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-all"
+                        className="absolute top-2 sm:top-3 right-2 sm:right-3 p-1.5 sm:p-2 bg-white/90 rounded-full hover:bg-white transition-all"
                       >
-                        <FiHeart className="text-gray-600 hover:text-red-500" />
+                        <FiHeart className="text-sm sm:text-base text-gray-600 hover:text-red-500" />
                       </button>
 
                       {/* Price Badge */}
-                      <div className="absolute bottom-3 left-3">
-                        <div className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl shadow-lg">
+                      <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3">
+                        <div className="px-2 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl shadow-lg text-xs sm:text-sm">
                           {formatPrice(listing.price)}
                         </div>
                       </div>
 
                       {/* Views */}
-                      <div className="absolute bottom-3 right-3 flex items-center gap-1 text-white text-sm bg-black/50 px-2 py-1 rounded-lg">
-                        <FiEye />
-                        {listing.viewCount}
+                      <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 flex items-center gap-0.5 sm:gap-1 text-white text-[10px] sm:text-sm bg-black/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg backdrop-blur-sm">
+                        <FiEye className="text-[10px] sm:text-xs flex-shrink-0" />
+                        <span>{listing.viewCount}</span>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
+                    <div className="p-3 sm:p-4">
                       {/* Title */}
                       <h3
-                        className={`font-bold text-lg mb-1 truncate ${
+                        className={`font-bold text-sm sm:text-base lg:text-lg mb-1 truncate ${
                           isDarkMode ? "text-white" : "text-gray-900"
                         }`}
                       >
@@ -818,7 +826,7 @@ const MarketplacePage = () => {
                         {listing.carModel?.modelName}
                       </h3>
                       <p
-                        className={`text-sm mb-3 ${
+                        className={`text-xs sm:text-sm mb-2 sm:mb-3 ${
                           isDarkMode ? "text-slate-400" : "text-gray-500"
                         }`}
                       >
@@ -826,56 +834,66 @@ const MarketplacePage = () => {
                       </p>
 
                       {/* Specs */}
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                         <span
-                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg ${
+                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${
                             isDarkMode
                               ? "bg-slate-800 text-slate-300"
                               : "bg-gray-100 text-gray-600"
                           }`}
                         >
-                          <BsSpeedometer2 />
-                          {formatMileage(listing.mileage)}
+                          <BsSpeedometer2 className="text-[10px] sm:text-xs flex-shrink-0" />
+                          <span className="truncate max-w-[60px] sm:max-w-none">
+                            {formatMileage(listing.mileage)}
+                          </span>
                         </span>
                         <span
-                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg ${
+                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${
                             isDarkMode
                               ? "bg-slate-800 text-slate-300"
                               : "bg-gray-100 text-gray-600"
                           }`}
                         >
-                          <TbManualGearbox />
-                          {listing.transmission === "automatic" ? "AT" : "MT"}
+                          <TbManualGearbox className="text-[10px] sm:text-xs flex-shrink-0" />
+                          <span className="whitespace-nowrap">
+                            {listing.transmission === "automatic" ? "AT" : "MT"}
+                          </span>
                         </span>
                         <span
-                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg ${
+                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${
                             isDarkMode
                               ? "bg-slate-800 text-slate-300"
                               : "bg-gray-100 text-gray-600"
                           }`}
                         >
-                          <BsFuelPump />
-                          {listing.fuelType}
+                          <BsFuelPump className="text-[10px] sm:text-xs flex-shrink-0" />
+                          <span className="truncate max-w-[50px] sm:max-w-none capitalize">
+                            {listing.fuelType}
+                          </span>
                         </span>
                       </div>
 
                       {/* Location & Time */}
-                      <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center justify-between text-[10px] sm:text-xs gap-2">
                         <span
-                          className={`flex items-center gap-1 ${
+                          className={`flex items-center gap-0.5 sm:gap-1 truncate max-w-[60%] ${
                             isDarkMode ? "text-slate-400" : "text-gray-500"
                           }`}
                         >
-                          <FiMapPin />
-                          {listing.locationCity}
+                          <FiMapPin className="flex-shrink-0 text-[10px] sm:text-xs" />
+                          <span className="truncate">
+                            {listing.locationCity}
+                          </span>
                         </span>
                         <span
-                          className={`flex items-center gap-1 ${
+                          className={`flex items-center gap-0.5 sm:gap-1 whitespace-nowrap ${
                             isDarkMode ? "text-slate-500" : "text-gray-400"
                           }`}
                         >
-                          <AiOutlineClockCircle />
-                          {getTimeAgo(listing.createdAt)}
+                          <AiOutlineClockCircle className="flex-shrink-0 text-[10px] sm:text-xs" />
+                          <span className="truncate">
+                            {getTimeAgo(listing.createdAt)}
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -884,9 +902,9 @@ const MarketplacePage = () => {
               </div>
             )}
 
-            {/* List View */}
+            {/* List View - Hide on mobile, show on tablet+ */}
             {!loading && listings.length > 0 && viewMode === "list" && (
-              <div className="space-y-4">
+              <div className="hidden sm:block space-y-4">
                 {listings.map((listing) => (
                   <Link
                     key={listing.id}
@@ -1088,7 +1106,7 @@ const MarketplacePage = () => {
 
             {/* Pagination */}
             {!loading && pagination.totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-8">
+              <div className="flex justify-center gap-1.5 sm:gap-2 mt-6 sm:mt-8 flex-wrap px-2">
                 {Array.from(
                   { length: Math.min(pagination.totalPages, 5) },
                   (_, i) => i + 1,
@@ -1098,7 +1116,7 @@ const MarketplacePage = () => {
                     onClick={() => {
                       dispatch(fetchListings({ ...filters, page }));
                     }}
-                    className={`w-10 h-10 rounded-xl font-semibold transition-all ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-semibold transition-all text-xs sm:text-sm ${
                       pagination.page === page
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
@@ -1119,9 +1137,9 @@ const MarketplacePage = () => {
       {isLoggedIn && (
         <Link
           href="/marketplace/create"
-          className="fixed bottom-6 right-6 lg:hidden flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-2xl shadow-green-500/40 hover:scale-110 transition-transform z-50"
+          className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 lg:hidden flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-2xl shadow-green-500/40 hover:scale-110 transition-transform z-50"
         >
-          <FiPlus className="text-2xl" />
+          <FiPlus className="text-xl sm:text-2xl" />
         </Link>
       )}
     </div>

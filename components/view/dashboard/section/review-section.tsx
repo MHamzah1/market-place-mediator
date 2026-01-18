@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/context/ThemeContext";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FiStar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
@@ -8,6 +9,8 @@ const ReviewSection = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const router = useRouter();
 
   const reviews = [
     {
@@ -318,8 +321,8 @@ const ReviewSection = () => {
                         ? "w-12 bg-gradient-to-r from-cyan-500 to-blue-600"
                         : "w-12 bg-gradient-to-r from-blue-600 to-blue-700"
                       : isDarkMode
-                      ? "w-3 bg-slate-700 hover:bg-slate-600"
-                      : "w-3 bg-gray-300 hover:bg-gray-400"
+                        ? "w-3 bg-slate-700 hover:bg-slate-600"
+                        : "w-3 bg-gray-300 hover:bg-gray-400"
                   }`}
                 />
               ))}
@@ -400,8 +403,11 @@ const ReviewSection = () => {
                 ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
                 : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
             }`}
+            onClick={() => {
+              router.push("/marketplace");
+            }}
           >
-            <span>Mulai Sekarang</span>
+            <span>Mulai Sekarang </span>
             <span className="text-2xl">→</span>
           </button>
         </div>

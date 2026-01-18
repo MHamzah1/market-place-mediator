@@ -12,6 +12,7 @@ import Link from "next/link";
 import { LoginUser } from "@/lib/state/slice/authSlice";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import { useTheme } from "@/context/ThemeContext";
+import { MediatorLogo } from "@/components/ui/mediatorLogo";
 
 // Schema validasi dengan Zod
 const loginSchema = z.object({
@@ -26,7 +27,7 @@ const LoginComponent = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, error, isLoggedIn } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   // Gunakan useTheme hook dari context
@@ -92,9 +93,10 @@ const LoginComponent = () => {
         >
           {/* Logo & Title */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg mb-4">
-              <Lock className="w-8 h-8 text-white" />
+            <div className="flex justify-center mb-2">
+              <MediatorLogo />
             </div>
+
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Selamat Datang
             </h1>

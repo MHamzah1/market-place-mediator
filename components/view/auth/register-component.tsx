@@ -33,13 +33,17 @@ const registerSchema = z
       .string()
       .min(10, "Nomor telepon minimal 10 digit")
       .regex(/^\+?[0-9]+$/, "Nomor telepon tidak valid"),
+    whatsappNumber: z
+      .string()
+      .min(10, "Nomor WhatsApp minimal 10 digit")
+      .regex(/^\+?[0-9]+$/, "Nomor WhatsApp tidak valid"),
+    location: z.string().min(3, "Lokasi minimal 3 karakter"),
     password: z
       .string()
       .min(8, "Password minimal 8 karakter")
       .regex(/[A-Z]/, "Password harus mengandung huruf besar")
       .regex(/[0-9]/, "Password harus mengandung angka"),
     confirmPassword: z.string(),
-    role: z.enum(["customer", "salesman"]),
     agreeToTerms: z.boolean().refine((val) => val === true, {
       message: "Anda harus menyetujui syarat dan ketentuan",
     }),
@@ -58,7 +62,7 @@ const RegisterComponent = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, success, error } = useSelector(
-    (state: RootState) => state.Users
+    (state: RootState) => state.Users,
   );
 
   // Gunakan useTheme hook dari context
@@ -72,9 +76,6 @@ const RegisterComponent = () => {
     watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: "customer",
-    },
   });
 
   const password = watch("password");
@@ -96,7 +97,9 @@ const RegisterComponent = () => {
         password: data.password,
         fullName: data.fullName,
         phoneNumber: data.phoneNumber,
-        role: data.role,
+        whatsappNumber: data.whatsappNumber,
+        location: data.location,
+        role: "salesman", // Semua user default menjadi salesman
       };
       await dispatch(createUsers(payload)).unwrap();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,8 +184,8 @@ const RegisterComponent = () => {
                   step >= 1
                     ? "bg-blue-600 text-white"
                     : isDarkMode
-                    ? "bg-gray-600 text-gray-400"
-                    : "bg-gray-300 text-gray-600"
+                      ? "bg-gray-600 text-gray-400"
+                      : "bg-gray-300 text-gray-600"
                 }`}
               >
                 1
@@ -192,8 +195,8 @@ const RegisterComponent = () => {
                   step >= 2
                     ? "bg-blue-600"
                     : isDarkMode
-                    ? "bg-gray-600"
-                    : "bg-gray-300"
+                      ? "bg-gray-600"
+                      : "bg-gray-300"
                 }`}
               ></div>
             </div>
@@ -202,8 +205,8 @@ const RegisterComponent = () => {
                 step >= 2
                   ? "bg-blue-600 text-white"
                   : isDarkMode
-                  ? "bg-gray-600 text-gray-400"
-                  : "bg-gray-300 text-gray-600"
+                    ? "bg-gray-600 text-gray-400"
+                    : "bg-gray-300 text-gray-600"
               }`}
             >
               2
@@ -309,6 +312,72 @@ const RegisterComponent = () => {
                   {errors.phoneNumber && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.phoneNumber.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* WhatsApp Number */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="whatsappNumber"
+                    className={`block text-sm font-medium ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Nomor WhatsApp
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Phone className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="whatsappNumber"
+                      type="tel"
+                      {...register("whatsappNumber")}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                        isDarkMode
+                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                          : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
+                      } ${errors.whatsappNumber ? "border-red-500" : ""}`}
+                      placeholder="6281234567890"
+                    />
+                  </div>
+                  {errors.whatsappNumber && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.whatsappNumber.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Location */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="location"
+                    className={`block text-sm font-medium ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Lokasi
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="location"
+                      type="text"
+                      {...register("location")}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                        isDarkMode
+                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                          : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
+                      } ${errors.location ? "border-red-500" : ""}`}
+                      placeholder="Jakarta Selatan"
+                    />
+                  </div>
+                  {errors.location && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.location.message}
                     </p>
                   )}
                 </div>
@@ -465,85 +534,6 @@ const RegisterComponent = () => {
                       {errors.confirmPassword.message}
                     </p>
                   )}
-                </div>
-
-                {/* Role Selection */}
-                <div className="space-y-2">
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Daftar Sebagai
-                  </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <label
-                      className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-purple-500 ${
-                        isDarkMode ? "border-gray-600" : "border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        {...register("role")}
-                        value="customer"
-                        className="sr-only"
-                      />
-                      <div className="flex items-center space-x-3">
-                        <div className="shrink-0">
-                          <User className="w-6 h-6 text-purple-600" />
-                        </div>
-                        <div>
-                          <p
-                            className={`font-medium ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            Pembeli
-                          </p>
-                          <p
-                            className={`text-xs ${
-                              isDarkMode ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            Saya ingin berbelanja
-                          </p>
-                        </div>
-                      </div>
-                    </label>
-                    <label
-                      className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-purple-500 ${
-                        isDarkMode ? "border-gray-600" : "border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        {...register("role")}
-                        value="salesman"
-                        className="sr-only"
-                      />
-                      <div className="flex items-center space-x-3">
-                        <div className="shrink-0">
-                          <CheckCircle className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <p
-                            className={`font-medium ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            Penjual
-                          </p>
-                          <p
-                            className={`text-xs ${
-                              isDarkMode ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            Saya ingin berjualan
-                          </p>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
                 </div>
 
                 {/* Terms & Conditions */}
