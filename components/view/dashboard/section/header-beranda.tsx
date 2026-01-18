@@ -36,7 +36,7 @@ const slides = [
       "Pemeriksaan menyeluruh oleh mekanik bersertifikat. Lebih dari 150 titik inspeksi untuk memastikan kualitas mobil Anda.",
     image: "/image/cars2.png",
     buttonText: "Pesan Inspeksi",
-    buttonLink: "/inspeksi",
+    buttonLink: "/Inspeksi",
     accentColor: "from-emerald-500 to-teal-500",
   },
   {
@@ -158,7 +158,7 @@ const HeaderBeranda = () => {
                         <FiArrowRight className="group-hover:translate-x-2 transition-transform duration-300" />
                       </button>
 
-                      <button
+                      {/* <button
                         className={`group px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center gap-3 border-2 hover:scale-105 ${
                           isDarkMode
                             ? "border-white/40 text-white hover:bg-white/20 backdrop-blur-md hover:border-white/60"
@@ -167,7 +167,7 @@ const HeaderBeranda = () => {
                       >
                         <FiPlay className="text-xl group-hover:scale-125 transition-transform" />
                         Lihat Video
-                      </button>
+                      </button> */}
                     </div>
 
                     {/* Stats/Features */}
@@ -286,7 +286,7 @@ const HeaderBeranda = () => {
               {
                 title: "Inspeksi",
                 desc: "Cek Kualitas Mobil",
-                link: "/inspeksi",
+                link: "/Inspeksi",
                 icon: "🔍",
                 color: "from-emerald-500 to-teal-500",
               },

@@ -15,6 +15,8 @@ import {
   FiAward,
   FiClock,
 } from "react-icons/fi";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 const MarketingSection = () => {
   const { theme } = useTheme();
@@ -36,6 +38,7 @@ const MarketingSection = () => {
         ? "from-cyan-500 to-blue-600"
         : "from-blue-500 to-blue-700",
       iconBg: isDarkMode ? "bg-cyan-500/20" : "bg-blue-100",
+      link: "/marketplace",
     },
     {
       id: 2,
@@ -52,6 +55,7 @@ const MarketingSection = () => {
         ? "from-emerald-500 to-green-600"
         : "from-green-500 to-green-700",
       iconBg: isDarkMode ? "bg-emerald-500/20" : "bg-green-100",
+      link: "/Kalkulator",
     },
     {
       id: 3,
@@ -68,6 +72,7 @@ const MarketingSection = () => {
         ? "from-orange-500 to-red-600"
         : "from-orange-500 to-orange-700",
       iconBg: isDarkMode ? "bg-orange-500/20" : "bg-orange-100",
+      link: "/Inspeksi",
     },
   ];
 
@@ -128,6 +133,51 @@ const MarketingSection = () => {
     },
   ];
 
+  // Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
+  const floatingVariants = {
+    animate: {
+      y: [0, -20, 0],
+      transition: {
+        duration: 3,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
+  };
+
+  const scaleVariants = {
+    hover: {
+      scale: 1.05,
+      rotate: 5,
+      transition: {
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
   return (
     <section
       className={`py-20 transition-colors duration-300 ${
@@ -136,8 +186,20 @@ const MarketingSection = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-block mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+            className="inline-block mb-6"
+          >
             <span
               className={`px-6 py-3 rounded-full text-sm font-bold border-2 ${
                 isDarkMode
@@ -147,30 +209,46 @@ const MarketingSection = () => {
             >
               Fitur Unggulan
             </span>
-          </div>
-          <h2
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             className={`text-4xl md:text-5xl font-black mb-6 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Solusi Lengkap untuk Kebutuhan Otomotif Anda
-          </h2>
-          <p
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             className={`text-xl max-w-2xl mx-auto ${
               isDarkMode ? "text-slate-400" : "text-gray-600"
             }`}
           >
             Platform all-in-one untuk jual beli mobil, simulasi kredit, dan
             inspeksi kendaraan
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Main Features Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20">
-          {mainFeatures.map((feature) => (
-            <div
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20"
+        >
+          {mainFeatures.map((feature, index) => (
+            <motion.div
               key={feature.id}
-              className={`rounded-3xl shadow-2xl transition-all duration-500 overflow-hidden group hover:-translate-y-4 border-2 ${
+              variants={itemVariants}
+              whileHover="hover"
+              className={`rounded-3xl shadow-2xl transition-all duration-500 overflow-hidden group border-2 ${
                 isDarkMode
                   ? "bg-slate-800 border-slate-700 hover:border-cyan-500/50"
                   : "bg-white border-gray-200 hover:border-blue-500/50"
@@ -181,13 +259,39 @@ const MarketingSection = () => {
                 className={`bg-gradient-to-r ${feature.gradient} p-8 text-white relative overflow-hidden`}
               >
                 {/* Animated background circles */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360],
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"
+                ></motion.div>
+                <motion.div
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    rotate: [360, 180, 0],
+                  }}
+                  transition={{
+                    duration: 15,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl"
+                ></motion.div>
 
                 <div className="relative z-10">
-                  <div className="flex justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                  <motion.div
+                    variants={floatingVariants}
+                    animate="animate"
+                    className="flex justify-center mb-6"
+                  >
                     {feature.icon}
-                  </div>
+                  </motion.div>
                   <h3 className="text-2xl font-black text-center">
                     {feature.title}
                   </h3>
@@ -206,8 +310,15 @@ const MarketingSection = () => {
 
                 {/* Feature List */}
                 <ul className="space-y-4 mb-8">
-                  {feature.features.map((item, index) => (
-                    <li key={index} className="flex items-center text-sm">
+                  {feature.features.map((item, idx) => (
+                    <motion.li
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex items-center text-sm"
+                    >
                       <div
                         className={`w-6 h-6 rounded-full ${feature.iconBg} flex items-center justify-center mr-3 shrink-0`}
                       >
@@ -226,53 +337,78 @@ const MarketingSection = () => {
                       >
                         {item}
                       </span>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
 
                 {/* CTA Button */}
-                <button
-                  className={`w-full bg-gradient-to-r ${
-                    feature.gradient
-                  } text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl ${
-                    isDarkMode ? "shadow-cyan-500/20" : "shadow-blue-500/20"
-                  }`}
-                >
-                  Explore Sekarang
-                </button>
+                <Link href={feature.link}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`w-full bg-gradient-to-r ${
+                      feature.gradient
+                    } text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 shadow-xl ${
+                      isDarkMode ? "shadow-cyan-500/20" : "shadow-blue-500/20"
+                    }`}
+                  >
+                    Explore Sekarang
+                  </motion.button>
+                </Link>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Benefits Grid */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
           className={`rounded-3xl shadow-2xl p-10 md:p-16 border-2 ${
             isDarkMode
               ? "bg-slate-800 border-slate-700"
               : "bg-white border-gray-200"
           }`}
         >
-          <h3
+          <motion.h3
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
             className={`text-3xl md:text-4xl font-black text-center mb-14 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Mengapa Memilih CarMediator?
-          </h3>
+          </motion.h3>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8"
+          >
             {benefits.map((benefit, index) => (
-              <div key={index} className="text-center group cursor-pointer">
-                <div
-                  className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-3xl transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 ${
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                whileHover={{ scale: 1.1, y: -10 }}
+                className="text-center group cursor-pointer"
+              >
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                  className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-3xl transition-all duration-300 ${
                     isDarkMode
                       ? "bg-slate-900 group-hover:shadow-xl"
                       : "bg-gray-100 group-hover:shadow-xl"
                   } ${benefit.color} ${benefit.bgHover} group-hover:text-white`}
                 >
                   {benefit.icon}
-                </div>
+                </motion.div>
                 <h4
                   className={`font-black text-sm mb-2 ${
                     isDarkMode ? "text-white" : "text-gray-900"
@@ -287,13 +423,17 @@ const MarketingSection = () => {
                 >
                   {benefit.desc}
                 </p>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* CTA Banner */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
           className={`mt-20 rounded-3xl p-10 md:p-16 text-white relative overflow-hidden ${
             isDarkMode
               ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
@@ -302,11 +442,31 @@ const MarketingSection = () => {
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse"></div>
-            <div
-              className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-300 rounded-full blur-3xl animate-pulse"
-              style={{ animationDelay: "1s" }}
-            ></div>
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"
+            ></motion.div>
+            <motion.div
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-300 rounded-full blur-3xl"
+            ></motion.div>
           </div>
 
           {/* Grid overlay */}
@@ -322,41 +482,65 @@ const MarketingSection = () => {
           </div>
 
           <div className="relative z-10 text-center max-w-3xl mx-auto">
-            <h3 className="text-4xl md:text-5xl font-black mb-6">
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl md:text-5xl font-black mb-6"
+            >
               Siap Menemukan Mobil Impian Anda?
-            </h3>
-            <p
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
               className={`text-xl mb-10 ${
                 isDarkMode ? "text-slate-300" : "text-blue-100"
               }`}
             >
               Bergabunglah dengan ribuan pengguna yang sudah menemukan mobil
               terbaik mereka
-            </p>
-            <div className="flex flex-col sm:flex-row gap-5 justify-center">
-              <button
-                className={`font-bold py-5 px-10 rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-2xl hover:scale-105 ${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
-                    : "bg-white text-blue-600 hover:bg-blue-50 shadow-white/30"
-                }`}
-              >
-                <AiOutlineCar className="text-2xl" />
-                <span>Lihat Mobil</span>
-              </button>
-              <button
-                className={`font-bold py-5 px-10 rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-2xl hover:scale-105 ${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white shadow-yellow-500/30"
-                    : "bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-gray-900 shadow-yellow-500/30"
-                }`}
-              >
-                <AiOutlineCalculator className="text-2xl" />
-                <span>Hitung Kredit</span>
-              </button>
-            </div>
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-5 justify-center"
+            >
+              <Link href="/marketplace">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`font-bold py-5 px-10 rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-2xl ${
+                    isDarkMode
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
+                      : "bg-white text-blue-600 hover:bg-blue-50 shadow-white/30"
+                  }`}
+                >
+                  <AiOutlineCar className="text-2xl" />
+                  <span>Lihat Mobil</span>
+                </motion.button>
+              </Link>
+              <Link href="/Kalkulator">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`font-bold py-5 px-10 rounded-2xl transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-2xl ${
+                    isDarkMode
+                      ? "bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white shadow-yellow-500/30"
+                      : "bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-gray-900 shadow-yellow-500/30"
+                  }`}
+                >
+                  <AiOutlineCalculator className="text-2xl" />
+                  <span>Hitung Kalkulator</span>
+                </motion.button>
+              </Link>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

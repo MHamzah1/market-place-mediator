@@ -25,6 +25,7 @@ import { RootState, AppDispatch } from "@/lib/state/store";
 import toast from "react-hot-toast";
 import { LogoutUser } from "@/lib/state/slice/authSlice";
 import { useTheme } from "@/context/ThemeContext";
+import { MediatorLogo } from "../ui/mediatorLogo";
 
 const MainLayout = ({ children }: { children: ReactNode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,7 +39,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
   const isDarkMode = theme === "dark";
 
   const { loading, error, isLoggedIn, userInfo } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   // Handle scroll effect
@@ -103,7 +104,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
     },
     {
       name: "Inspeksi",
-      href: "/inspeksi",
+      href: "/Inspeksi",
       icon: <AiOutlineCheckCircle className="inline mr-1" />,
     },
     ...(userInfo?.role === "admin"
@@ -147,42 +148,14 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
               ? "bg-slate-900/95 backdrop-blur-xl shadow-xl shadow-black/20"
               : "bg-white/95 backdrop-blur-xl shadow-xl shadow-slate-200/50"
             : isDarkMode
-            ? "bg-slate-900/50 backdrop-blur-md"
-            : "bg-white/50 backdrop-blur-md"
+              ? "bg-slate-900/50 backdrop-blur-md"
+              : "bg-white/50 backdrop-blur-md"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
-                  isDarkMode
-                    ? "bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30"
-                    : "bg-gradient-to-br from-blue-600 to-blue-800 shadow-lg shadow-blue-500/30"
-                }`}
-              >
-                <AiOutlineCar className="text-white text-2xl" />
-              </div>
-              <div className="hidden sm:block">
-                <span
-                  className={`text-2xl font-black tracking-tight ${
-                    isDarkMode
-                      ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500"
-                      : "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800"
-                  }`}
-                >
-                  CarMediator
-                </span>
-                <div
-                  className={`text-xs font-medium ${
-                    isDarkMode ? "text-slate-500" : "text-slate-600"
-                  }`}
-                >
-                  Marketplace Terpercaya
-                </div>
-              </div>
-            </Link>
+            <MediatorLogo />
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-2">
@@ -196,7 +169,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                       : "text-slate-700 hover:text-blue-600"
                   }`}
                 >
-                  <span className="relative z-10 flex items-center gap-1">
+                  <span className="relative z-15 flex items-center gap-1 text-xl">
                     {item.icon}
                     {item.name}
                   </span>
@@ -211,29 +184,6 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
 
             {/* Right Icons */}
             <div className="hidden md:flex items-center space-x-3">
-              <button
-                className={`p-3 rounded-xl transition-all duration-200 ${
-                  isDarkMode
-                    ? "hover:bg-slate-800/50 text-slate-400 hover:text-cyan-400"
-                    : "hover:bg-blue-50 text-slate-600 hover:text-blue-600"
-                }`}
-              >
-                <FiSearch className="text-xl" />
-              </button>
-
-              <button
-                className={`p-3 rounded-xl transition-all duration-200 relative ${
-                  isDarkMode
-                    ? "hover:bg-slate-800/50 text-slate-400 hover:text-cyan-400"
-                    : "hover:bg-blue-50 text-slate-600 hover:text-blue-600"
-                }`}
-              >
-                <FiHeart className="text-xl" />
-                <span className="absolute top-1 right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold shadow-lg">
-                  3
-                </span>
-              </button>
-
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}

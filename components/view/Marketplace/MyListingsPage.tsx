@@ -40,7 +40,7 @@ const MyListingsPage = () => {
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
   const [activeTab, setActiveTab] = useState<"all" | "active" | "inactive">(
-    "all"
+    "all",
   );
 
   useEffect(() => {
@@ -63,10 +63,10 @@ const MyListingsPage = () => {
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
       await dispatch(
-        updateListing({ id, data: { isActive: !currentStatus } })
+        updateListing({ id, data: { isActive: !currentStatus } }),
       ).unwrap();
       toast.success(
-        currentStatus ? "Listing dinonaktifkan" : "Listing diaktifkan"
+        currentStatus ? "Listing dinonaktifkan" : "Listing diaktifkan",
       );
       dispatch(fetchMyListings({}));
     } catch (error: any) {
@@ -74,7 +74,9 @@ const MyListingsPage = () => {
     }
   };
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL_IMAGES;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL_IMAGES ||
+    "http://192.168.0.182:8080/uploads/";
 
   const handleDelete = async (id: string, title: string) => {
     const result = await Swal.fire({
@@ -222,8 +224,8 @@ const MyListingsPage = () => {
                 activeTab === tab.key
                   ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25"
                   : isDarkMode
-                  ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
+                    ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tab.label}
@@ -390,7 +392,7 @@ const MyListingsPage = () => {
                       onClick={() =>
                         handleDelete(
                           listing.id,
-                          `${listing.carModel?.brand?.name} ${listing.carModel?.modelName}`
+                          `${listing.carModel?.brand?.name} ${listing.carModel?.modelName}`,
                         )
                       }
                       className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"

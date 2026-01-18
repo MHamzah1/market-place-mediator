@@ -51,11 +51,13 @@ const ListingDetailPage = () => {
   const isDarkMode = theme === "dark";
 
   const { selectedListing, detailLoading, whatsappLink } = useSelector(
-    (state: RootState) => state.marketplace
+    (state: RootState) => state.marketplace,
   );
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL_IMAGES;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL_IMAGES ||
+    "http://192.168.0.182:8080/uploads/";
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -76,7 +78,7 @@ const ListingDetailPage = () => {
 
     try {
       const result = await dispatch(
-        getWhatsAppLink(params.id as string)
+        getWhatsAppLink(params.id as string),
       ).unwrap();
       window.open(result.whatsappUrl, "_blank");
     } catch (error) {
@@ -118,7 +120,7 @@ const ListingDetailPage = () => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
     );
     if (diffInDays === 0) return "Hari ini";
     if (diffInDays === 1) return "Kemarin";
@@ -212,8 +214,8 @@ const ListingDetailPage = () => {
                   isFavorite
                     ? "bg-red-500 text-white"
                     : isDarkMode
-                    ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
                 <FiHeart className={isFavorite ? "fill-current" : ""} />
@@ -262,7 +264,7 @@ const ListingDetailPage = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         setCurrentImageIndex((prev) =>
-                          prev === 0 ? images.length - 1 : prev - 1
+                          prev === 0 ? images.length - 1 : prev - 1,
                         );
                       }}
                       className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-all"
@@ -273,7 +275,7 @@ const ListingDetailPage = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         setCurrentImageIndex((prev) =>
-                          prev === images.length - 1 ? 0 : prev + 1
+                          prev === images.length - 1 ? 0 : prev + 1,
                         );
                       }}
                       className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-all"
@@ -312,8 +314,8 @@ const ListingDetailPage = () => {
                         currentImageIndex === idx
                           ? "border-cyan-500 ring-2 ring-cyan-500/30"
                           : isDarkMode
-                          ? "border-slate-700 hover:border-slate-600"
-                          : "border-gray-200 hover:border-gray-300"
+                            ? "border-slate-700 hover:border-slate-600"
+                            : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       <img
@@ -659,7 +661,7 @@ const ListingDetailPage = () => {
             onClick={(e) => {
               e.stopPropagation();
               setCurrentImageIndex((prev) =>
-                prev === 0 ? images.length - 1 : prev - 1
+                prev === 0 ? images.length - 1 : prev - 1,
               );
             }}
             className="absolute left-4 p-4 bg-white/10 rounded-full text-white hover:bg-white/20"
@@ -678,7 +680,7 @@ const ListingDetailPage = () => {
             onClick={(e) => {
               e.stopPropagation();
               setCurrentImageIndex((prev) =>
-                prev === images.length - 1 ? 0 : prev + 1
+                prev === images.length - 1 ? 0 : prev + 1,
               );
             }}
             className="absolute right-4 p-4 bg-white/10 rounded-full text-white hover:bg-white/20"

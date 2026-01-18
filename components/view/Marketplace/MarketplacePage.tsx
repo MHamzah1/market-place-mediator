@@ -49,12 +49,12 @@ const MarketplacePage = () => {
   const isDarkMode = theme === "dark";
 
   const { listings, loading, pagination, filters } = useSelector(
-    (state: RootState) => state.marketplace
+    (state: RootState) => state.marketplace,
   );
   const { data: brands } = useSelector((state: RootState) => state.brand);
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
   const { featuredListings, featuredLoading } = useSelector(
-    (state: RootState) => state.boost
+    (state: RootState) => state.boost,
   );
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -136,7 +136,9 @@ const MarketplacePage = () => {
     return new Intl.NumberFormat("id-ID").format(mileage) + " km";
   };
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL_IMAGES;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL_IMAGES ||
+    "http://192.168.0.182:8080/uploads/";
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -668,8 +670,8 @@ const MarketplacePage = () => {
                       viewMode === "grid"
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
-                        ? "bg-slate-800 text-slate-400"
-                        : "bg-gray-50 text-gray-600"
+                          ? "bg-slate-800 text-slate-400"
+                          : "bg-gray-50 text-gray-600"
                     }`}
                   >
                     <FiGrid />
@@ -680,8 +682,8 @@ const MarketplacePage = () => {
                       viewMode === "list"
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
-                        ? "bg-slate-800 text-slate-400"
-                        : "bg-gray-50 text-gray-600"
+                          ? "bg-slate-800 text-slate-400"
+                          : "bg-gray-50 text-gray-600"
                     }`}
                   >
                     <FiList />
@@ -1089,7 +1091,7 @@ const MarketplacePage = () => {
               <div className="flex justify-center gap-2 mt-8">
                 {Array.from(
                   { length: Math.min(pagination.totalPages, 5) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map((page) => (
                   <button
                     key={page}
@@ -1100,8 +1102,8 @@ const MarketplacePage = () => {
                       pagination.page === page
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
-                        ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
+                          ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     {page}

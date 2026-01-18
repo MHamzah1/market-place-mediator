@@ -39,11 +39,11 @@ const ROLE_BASED_ROUTES = {
 
   // Routes yang memerlukan login (any role)
   authenticated: [
-    "/dashboard",
+    "/Dashboard",
     "/profile",
-    "/settings",
-    "/kalkulator",
-    "/inspeksi",
+    "/Settings",
+    "/Kalkulator",
+    "/Inspeksi",
     "/favorites",
   ],
 
@@ -71,7 +71,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
   const pathname = usePathname();
   const router = useRouter();
   const { isLoggedIn, userInfo, loading } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const [isChecking, setIsChecking] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
@@ -84,7 +84,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
     const checkAccess = () => {
       // Check admin routes
       const isAdminRoute = ROLE_BASED_ROUTES.admin.some((route) =>
-        pathname.startsWith(route)
+        pathname.startsWith(route),
       );
 
       if (isAdminRoute) {
@@ -104,7 +104,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
 
       // Check salesman routes
       const isSalesmanRoute = ROLE_BASED_ROUTES.salesman.some((route) =>
-        pathname.startsWith(route)
+        pathname.startsWith(route),
       );
 
       if (isSalesmanRoute) {
@@ -123,7 +123,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
 
       // Check customer routes
       const isCustomerRoute = ROLE_BASED_ROUTES.customer.some((route) =>
-        pathname.startsWith(route)
+        pathname.startsWith(route),
       );
 
       if (isCustomerRoute) {
@@ -142,7 +142,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
 
       // Check authenticated routes (any logged in user)
       const isAuthRoute = ROLE_BASED_ROUTES.authenticated.some((route) =>
-        pathname.startsWith(route)
+        pathname.startsWith(route),
       );
 
       if (isAuthRoute) {
@@ -158,7 +158,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
 
       // Check guest only routes
       const isGuestRoute = ROLE_BASED_ROUTES.guest.some((route) =>
-        pathname.startsWith(route)
+        pathname.startsWith(route),
       );
 
       if (isGuestRoute) {
@@ -216,7 +216,7 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
  */
 export const hasRoleAccess = (
   userRole: UserRole | null,
-  pathname: string
+  pathname: string,
 ): boolean => {
   if (!userRole) return false;
 
