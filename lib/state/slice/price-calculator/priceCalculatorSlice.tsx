@@ -75,6 +75,7 @@ export interface YearsByVariant {
   modelName: string;
   brandName: string;
   years: number[];
+  basePrice?: number; // Base price untuk variant
 }
 
 interface PriceCalculatorState {
@@ -92,24 +93,32 @@ interface ErrorResponse {
   [key: string]: any;
 }
 
-// POST Calculate Price
+// POST Calculate Price (masih ada untuk fallback)
 export const calculatePrice = createAsyncThunk<
   CalculationResult,
   CalculateRequest,
   { rejectValue: string }
->("priceCalculator/calculatePrice", async (calculateRequest, { rejectWithValue }) => {
-  try {
-    const response = await instanceAxios.post("/price-calculator/calculate", calculateRequest, {
-      headers: getHeaders(),
-    });
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan saat menghitung harga"
-    );
-  }
-});
+>(
+  "priceCalculator/calculatePrice",
+  async (calculateRequest, { rejectWithValue }) => {
+    try {
+      const response = await instanceAxios.post(
+        "/price-calculator/calculate",
+        calculateRequest,
+        {
+          headers: getHeaders(),
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        axiosError.response?.data?.message ||
+          "Terjadi kesalahan saat menghitung harga",
+      );
+    }
+  },
+);
 
 // GET Quick Calculate
 export const quickCalculate = createAsyncThunk<
@@ -132,7 +141,7 @@ export const quickCalculate = createAsyncThunk<
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
     return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
+      axiosError.response?.data?.message || "Terjadi kesalahan",
     );
   }
 });
@@ -151,7 +160,7 @@ export const getCalculatorOptions = createAsyncThunk<
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
     return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
+      axiosError.response?.data?.message || "Terjadi kesalahan",
     );
   }
 });
@@ -163,14 +172,17 @@ export const getModelsByBrandForCalculator = createAsyncThunk<
   { rejectValue: string }
 >("priceCalculator/getModelsByBrand", async (brandId, { rejectWithValue }) => {
   try {
-    const response = await instanceAxios.get(`/price-calculator/brands/${brandId}/models`, {
-      headers: getHeaders(),
-    });
+    const response = await instanceAxios.get(
+      `/price-calculator/brands/${brandId}/models`,
+      {
+        headers: getHeaders(),
+      },
+    );
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
     return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
+      axiosError.response?.data?.message || "Terjadi kesalahan",
     );
   }
 });
@@ -180,19 +192,25 @@ export const getYearsByVariantForCalculator = createAsyncThunk<
   YearsByVariant,
   string,
   { rejectValue: string }
->("priceCalculator/getYearsByVariant", async (variantId, { rejectWithValue }) => {
-  try {
-    const response = await instanceAxios.get(`/price-calculator/variants/${variantId}/years`, {
-      headers: getHeaders(),
-    });
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
-    );
-  }
-});
+>(
+  "priceCalculator/getYearsByVariant",
+  async (variantId, { rejectWithValue }) => {
+    try {
+      const response = await instanceAxios.get(
+        `/price-calculator/variants/${variantId}/years`,
+        {
+          headers: getHeaders(),
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        axiosError.response?.data?.message || "Terjadi kesalahan",
+      );
+    }
+  },
+);
 
 const initialState: PriceCalculatorState = {
   calculationResult: null,
@@ -230,6 +248,12 @@ const priceCalculatorSlice = createSlice({
       state.yearsByVariant = null;
       state.error = null;
     },
+    // NEW: Client-side calculation reducer
+    setCalculationResult: (state, action: PayloadAction<CalculationResult>) => {
+      state.calculationResult = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -238,10 +262,13 @@ const priceCalculatorSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(calculatePrice.fulfilled, (state, action: PayloadAction<CalculationResult>) => {
-        state.loading = false;
-        state.calculationResult = action.payload;
-      })
+      .addCase(
+        calculatePrice.fulfilled,
+        (state, action: PayloadAction<CalculationResult>) => {
+          state.loading = false;
+          state.calculationResult = action.payload;
+        },
+      )
       .addCase(calculatePrice.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -252,10 +279,13 @@ const priceCalculatorSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(quickCalculate.fulfilled, (state, action: PayloadAction<QuickCalculateResult>) => {
-        state.loading = false;
-        state.quickResult = action.payload;
-      })
+      .addCase(
+        quickCalculate.fulfilled,
+        (state, action: PayloadAction<QuickCalculateResult>) => {
+          state.loading = false;
+          state.quickResult = action.payload;
+        },
+      )
       .addCase(quickCalculate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -266,10 +296,13 @@ const priceCalculatorSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getCalculatorOptions.fulfilled, (state, action: PayloadAction<CalculatorOptions>) => {
-        state.loading = false;
-        state.options = action.payload;
-      })
+      .addCase(
+        getCalculatorOptions.fulfilled,
+        (state, action: PayloadAction<CalculatorOptions>) => {
+          state.loading = false;
+          state.options = action.payload;
+        },
+      )
       .addCase(getCalculatorOptions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -280,10 +313,13 @@ const priceCalculatorSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getModelsByBrandForCalculator.fulfilled, (state, action: PayloadAction<ModelsByBrand>) => {
-        state.loading = false;
-        state.modelsByBrand = action.payload;
-      })
+      .addCase(
+        getModelsByBrandForCalculator.fulfilled,
+        (state, action: PayloadAction<ModelsByBrand>) => {
+          state.loading = false;
+          state.modelsByBrand = action.payload;
+        },
+      )
       .addCase(getModelsByBrandForCalculator.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -294,10 +330,13 @@ const priceCalculatorSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getYearsByVariantForCalculator.fulfilled, (state, action: PayloadAction<YearsByVariant>) => {
-        state.loading = false;
-        state.yearsByVariant = action.payload;
-      })
+      .addCase(
+        getYearsByVariantForCalculator.fulfilled,
+        (state, action: PayloadAction<YearsByVariant>) => {
+          state.loading = false;
+          state.yearsByVariant = action.payload;
+        },
+      )
       .addCase(getYearsByVariantForCalculator.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -305,12 +344,13 @@ const priceCalculatorSlice = createSlice({
   },
 });
 
-export const { 
-  clearError, 
-  clearCalculationResult, 
-  clearQuickResult, 
-  clearModelsByBrand, 
+export const {
+  clearError,
+  clearCalculationResult,
+  clearQuickResult,
+  clearModelsByBrand,
   clearYearsByVariant,
-  resetCalculator 
+  resetCalculator,
+  setCalculationResult,
 } = priceCalculatorSlice.actions;
 export default priceCalculatorSlice.reducer;

@@ -10,11 +10,11 @@ export interface PriceAdjustment {
   modelId: string;
   modelName?: string;
   brandName?: string;
-  category: 'transmission' | 'ownership' | 'color';
+  category: "transmission" | "ownership" | "color";
   code: string;
   name: string;
   colorHex?: string;
-  adjustmentType: 'fixed' | 'percentage';
+  adjustmentType: "fixed" | "percentage";
   adjustmentValue: number;
   description?: string;
   sortOrder: number;
@@ -38,6 +38,7 @@ export interface AdjustmentsByModel {
   modelName: string;
   brandName: string;
   adjustments: {
+    feature: boolean;
     transmission: AdjustmentItem[];
     ownership: AdjustmentItem[];
     color: AdjustmentItem[];
@@ -79,7 +80,7 @@ interface GetPriceAdjustmentsParams {
   page?: number;
   perPage?: number;
   modelId?: string;
-  category?: 'transmission' | 'ownership' | 'color';
+  category?: "transmission" | "ownership" | "color";
   isActive?: boolean;
   isInfiniteScroll?: boolean;
   [key: string]: any;
@@ -91,7 +92,7 @@ interface UpdatePriceAdjustmentPayload {
 }
 
 interface BulkCreateAdjustmentItem {
-  category: 'transmission' | 'ownership' | 'color';
+  category: "transmission" | "ownership" | "color";
   code: string;
   name: string;
   colorHex?: string;
@@ -118,7 +119,10 @@ export const getAllPriceAdjustments = createAsyncThunk<
   { rejectValue: ErrorResponse }
 >(
   "priceAdjustment/getAllPriceAdjustments",
-  async ({ page = 1, perPage = 10, isInfiniteScroll = false, ...filters }, { rejectWithValue }) => {
+  async (
+    { page = 1, perPage = 10, isInfiniteScroll = false, ...filters },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await instanceAxios.get(`/price-adjustments`, {
         params: { page, perPage, ...filters },
@@ -132,10 +136,12 @@ export const getAllPriceAdjustments = createAsyncThunk<
     } catch (error) {
       const axiosError = error as AxiosError<ErrorResponse>;
       return rejectWithValue(
-        axiosError.response?.data || { message: "Terjadi kesalahan saat mengambil data" }
+        axiosError.response?.data || {
+          message: "Terjadi kesalahan saat mengambil data",
+        },
       );
     }
-  }
+  },
 );
 
 // GET Price Adjustments by Model ID (ENDPOINT UTAMA)
@@ -147,17 +153,22 @@ export const getAdjustmentsByModelId = createAsyncThunk<
   "priceAdjustment/getAdjustmentsByModelId",
   async (modelId, { rejectWithValue }) => {
     try {
-      const response = await instanceAxios.get(`/car-models/${modelId}/price-adjustments`, {
-        headers: getHeaders(),
-      });
+      const response = await instanceAxios.get(
+        `/car-models/${modelId}/price-adjustments`,
+        {
+          headers: getHeaders(),
+        },
+      );
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ErrorResponse>;
       return rejectWithValue(
-        axiosError.response?.data || { message: "Terjadi kesalahan saat mengambil data" }
+        axiosError.response?.data || {
+          message: "Terjadi kesalahan saat mengambil data",
+        },
       );
     }
-  }
+  },
 );
 
 // GET Price Adjustment by ID
@@ -174,7 +185,7 @@ export const getPriceAdjustmentById = createAsyncThunk<
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
     return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
+      axiosError.response?.data?.message || "Terjadi kesalahan",
     );
   }
 });
@@ -184,59 +195,80 @@ export const createPriceAdjustment = createAsyncThunk<
   PriceAdjustment,
   any,
   { rejectValue: string }
->("priceAdjustment/createPriceAdjustment", async (adjustmentData, { rejectWithValue }) => {
-  try {
-    const response = await instanceAxios.post("/price-adjustments", adjustmentData, {
-      headers: getHeaders(),
-    });
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
-    );
-  }
-});
+>(
+  "priceAdjustment/createPriceAdjustment",
+  async (adjustmentData, { rejectWithValue }) => {
+    try {
+      const response = await instanceAxios.post(
+        "/price-adjustments",
+        adjustmentData,
+        {
+          headers: getHeaders(),
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        axiosError.response?.data?.message || "Terjadi kesalahan",
+      );
+    }
+  },
+);
 
 // POST Bulk Create Price Adjustments for Model
 export const bulkCreatePriceAdjustments = createAsyncThunk<
   any,
   BulkCreatePriceAdjustmentPayload,
   { rejectValue: string }
->("priceAdjustment/bulkCreatePriceAdjustments", async ({ modelId, adjustments }, { rejectWithValue }) => {
-  try {
-    const response = await instanceAxios.post(`/car-models/${modelId}/price-adjustments/bulk`, {
-      adjustments,
-    }, {
-      headers: getHeaders(),
-    });
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
-    );
-  }
-});
+>(
+  "priceAdjustment/bulkCreatePriceAdjustments",
+  async ({ modelId, adjustments }, { rejectWithValue }) => {
+    try {
+      const response = await instanceAxios.post(
+        `/car-models/${modelId}/price-adjustments/bulk`,
+        {
+          adjustments,
+        },
+        {
+          headers: getHeaders(),
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        axiosError.response?.data?.message || "Terjadi kesalahan",
+      );
+    }
+  },
+);
 
 // PUT Update Price Adjustment
 export const updatePriceAdjustment = createAsyncThunk<
   { message: string; data: PriceAdjustment },
   UpdatePriceAdjustmentPayload,
   { rejectValue: string }
->("priceAdjustment/updatePriceAdjustment", async ({ id, adjustmentData }, { rejectWithValue }) => {
-  try {
-    const response = await instanceAxios.put(`/price-adjustments/${id}`, adjustmentData, {
-      headers: getHeaders(),
-    });
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
-    );
-  }
-});
+>(
+  "priceAdjustment/updatePriceAdjustment",
+  async ({ id, adjustmentData }, { rejectWithValue }) => {
+    try {
+      const response = await instanceAxios.put(
+        `/price-adjustments/${id}`,
+        adjustmentData,
+        {
+          headers: getHeaders(),
+        },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        axiosError.response?.data?.message || "Terjadi kesalahan",
+      );
+    }
+  },
+);
 
 // DELETE Price Adjustment
 export const deletePriceAdjustment = createAsyncThunk<
@@ -252,7 +284,7 @@ export const deletePriceAdjustment = createAsyncThunk<
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
     return rejectWithValue(
-      axiosError.response?.data?.message || "Terjadi kesalahan"
+      axiosError.response?.data?.message || "Terjadi kesalahan",
     );
   }
 });
@@ -299,13 +331,16 @@ const priceAdjustmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAllPriceAdjustments.fulfilled, (state, action: PayloadAction<PriceAdjustmentResponse>) => {
-        state.loading = false;
-        state.data = action.payload.data || [];
-        state.totalItems = action.payload.pagination?.totalRecords || 0;
-        state.totalPages = action.payload.pagination?.totalPages || 1;
-        state.currentPage = action.payload.pagination?.page || 1;
-      })
+      .addCase(
+        getAllPriceAdjustments.fulfilled,
+        (state, action: PayloadAction<PriceAdjustmentResponse>) => {
+          state.loading = false;
+          state.data = action.payload.data || [];
+          state.totalItems = action.payload.pagination?.totalRecords || 0;
+          state.totalPages = action.payload.pagination?.totalPages || 1;
+          state.currentPage = action.payload.pagination?.page || 1;
+        },
+      )
       .addCase(getAllPriceAdjustments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Terjadi kesalahan";
@@ -316,10 +351,13 @@ const priceAdjustmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAdjustmentsByModelId.fulfilled, (state, action: PayloadAction<AdjustmentsByModel>) => {
-        state.loading = false;
-        state.adjustmentsByModel = action.payload;
-      })
+      .addCase(
+        getAdjustmentsByModelId.fulfilled,
+        (state, action: PayloadAction<AdjustmentsByModel>) => {
+          state.loading = false;
+          state.adjustmentsByModel = action.payload;
+        },
+      )
       .addCase(getAdjustmentsByModelId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Terjadi kesalahan";
@@ -330,10 +368,13 @@ const priceAdjustmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getPriceAdjustmentById.fulfilled, (state, action: PayloadAction<PriceAdjustment>) => {
-        state.loading = false;
-        state.selectedAdjustment = action.payload;
-      })
+      .addCase(
+        getPriceAdjustmentById.fulfilled,
+        (state, action: PayloadAction<PriceAdjustment>) => {
+          state.loading = false;
+          state.selectedAdjustment = action.payload;
+        },
+      )
       .addCase(getPriceAdjustmentById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -345,11 +386,14 @@ const priceAdjustmentSlice = createSlice({
         state.error = null;
         state.success = false;
       })
-      .addCase(createPriceAdjustment.fulfilled, (state, action: PayloadAction<PriceAdjustment>) => {
-        state.loading = false;
-        state.data.push(action.payload);
-        state.success = true;
-      })
+      .addCase(
+        createPriceAdjustment.fulfilled,
+        (state, action: PayloadAction<PriceAdjustment>) => {
+          state.loading = false;
+          state.data.push(action.payload);
+          state.success = true;
+        },
+      )
       .addCase(createPriceAdjustment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -380,7 +424,9 @@ const priceAdjustmentSlice = createSlice({
       })
       .addCase(updatePriceAdjustment.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.data.findIndex((pa) => pa.id === action.payload.data.id);
+        const index = state.data.findIndex(
+          (pa) => pa.id === action.payload.data.id,
+        );
         if (index !== -1) {
           state.data[index] = action.payload.data;
         }
@@ -398,11 +444,14 @@ const priceAdjustmentSlice = createSlice({
         state.error = null;
         state.success = false;
       })
-      .addCase(deletePriceAdjustment.fulfilled, (state, action: PayloadAction<{ id: string }>) => {
-        state.loading = false;
-        state.data = state.data.filter((pa) => pa.id !== action.payload.id);
-        state.success = true;
-      })
+      .addCase(
+        deletePriceAdjustment.fulfilled,
+        (state, action: PayloadAction<{ id: string }>) => {
+          state.loading = false;
+          state.data = state.data.filter((pa) => pa.id !== action.payload.id);
+          state.success = true;
+        },
+      )
       .addCase(deletePriceAdjustment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Terjadi kesalahan";
@@ -411,11 +460,11 @@ const priceAdjustmentSlice = createSlice({
   },
 });
 
-export const { 
-  clearError, 
-  clearSuccess, 
-  clearSelectedAdjustment, 
-  clearAdjustmentsByModel, 
-  resetDataPriceAdjustment 
+export const {
+  clearError,
+  clearSuccess,
+  clearSelectedAdjustment,
+  clearAdjustmentsByModel,
+  resetDataPriceAdjustment,
 } = priceAdjustmentSlice.actions;
 export default priceAdjustmentSlice.reducer;
