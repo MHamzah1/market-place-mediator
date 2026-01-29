@@ -19,6 +19,10 @@ help:
 	@echo "  make prod         - Start production server"
 	@echo "  make prod-nginx   - Start production server with Nginx"
 	@echo ""
+	@echo "Tailscale:"
+	@echo "  make prod-tailscale  - Start with Tailscale sidecar container"
+	@echo "  make prod-host       - Start with host network (Tailscale on host)"
+	@echo ""
 	@echo "Management:"
 	@echo "  make stop         - Stop all containers"
 	@echo "  make clean        - Remove containers, images, and volumes"
@@ -61,6 +65,18 @@ prod-nginx:
 # Rebuild and start production
 prod-build:
 	docker-compose up -d --build
+
+# ================================
+# Tailscale Commands
+# ================================
+
+# Start with Tailscale sidecar container
+prod-tailscale:
+	docker-compose --profile with-tailscale up -d --build
+
+# Start with host network (requires Tailscale on host)
+prod-host:
+	docker-compose --profile host-network up -d --build
 
 # ================================
 # Management Commands
