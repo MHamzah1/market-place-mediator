@@ -55,12 +55,71 @@ make prod-build
 
 ## ⚙️ Environment Variables
 
-| Variable                   | Default                          | Description            |
-| -------------------------- | -------------------------------- | ---------------------- |
-| `NODE_ENV`                 | `production`                     | Environment mode       |
-| `NEXT_PUBLIC_API_URL`      | `http://localhost:9090/api`      | Backend API URL        |
-| `NEXT_PUBLIC_API_URL_FOTO` | `http://localhost:9090/uploads/` | URL untuk foto/uploads |
-| `PORT`                     | `9090`                           | Application port       |
+| Variable                     | Default                                           | Description                   |
+| ---------------------------- | ------------------------------------------------- | ----------------------------- |
+| `NODE_ENV`                   | `production`                                      | Environment mode              |
+| `NEXT_PUBLIC_API_URL`        | `http://mediator-api-3.taila71da3.ts.net/api`     | Backend API URL (Tailscale)   |
+| `NEXT_PUBLIC_API_URL_FOTO`   | `http://mediator-api-3.taila71da3.ts.net/uploads` | URL untuk foto/uploads        |
+| `NEXT_PUBLIC_API_URL_IMAGES` | `http://mediator-api-3.taila71da3.ts.net/uploads` | URL untuk images              |
+| `PORT`                       | `9090`                                            | Application port              |
+| `TS_AUTHKEY`                 | -                                                 | Tailscale Auth Key (opsional) |
+
+## 🔗 Tailscale Integration
+
+Aplikasi ini mendukung koneksi ke backend via Tailscale. Ada 3 mode yang tersedia:
+
+### Mode 1: Standard (Tailscale di Host) - RECOMMENDED
+
+Jika host machine sudah terinstall Tailscale dan terhubung ke jaringan:
+
+```bash
+# Pastikan Tailscale sudah running di host
+tailscale status
+
+# Jalankan container (menggunakan extra_hosts untuk resolve DNS)
+docker-compose up -d --build
+
+# Atau menggunakan Makefile
+make prod-build
+```
+
+### Mode 2: Host Network
+
+Menggunakan network host sehingga container bisa mengakses Tailscale dari host:
+
+```bash
+# Jalankan dengan host network mode
+docker-compose --profile host-network up -d --build
+```
+
+> ⚠️ **Note**: Mode ini tidak bekerja di Windows/macOS karena Docker berjalan di VM.
+
+### Mode 3: Tailscale Sidecar Container
+
+Menjalankan Tailscale dalam container terpisah:
+
+```bash
+# 1. Dapatkan Tailscale Auth Key dari:
+#    https://login.tailscale.com/admin/settings/keys
+#    - Centang "Reusable"
+#    - Centang "Ephemeral" (opsional)
+
+# 2. Set auth key di .env
+echo "TS_AUTHKEY=tskey-auth-xxxxx" >> .env
+
+# 3. Jalankan dengan profile tailscale
+docker-compose --profile with-tailscale up -d --build
+```
+
+### Verifikasi Koneksi Tailscale
+
+```bash
+# Cek apakah container bisa resolve DNS Tailscale
+docker exec marketplace-mediator-app ping -c 3 mediator-api-3.taila71da3.ts.net
+
+# Cek koneksi ke API
+docker exec marketplace-mediator-app wget -qO- http://mediator-api-3.taila71da3.ts.net/api/health
+```
 
 ## 🔧 Available Commands
 

@@ -13,8 +13,8 @@ import {
   Sparkles,
   TrendingUp,
   Info,
-  Loader2,
   RefreshCw,
+  Star,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { AppDispatch, RootState } from "@/lib/state/store";
@@ -22,11 +22,12 @@ import {
   getCalculatorOptions,
   getModelsByBrandForCalculator,
   getYearsByVariantForCalculator,
-  calculatePrice,
   resetCalculator,
+  setCalculationResult,
 } from "@/lib/state/slice/price-calculator/priceCalculatorSlice";
 import { getVariantsByModelId } from "@/lib/state/slice/variant/variantSlice";
 import { getAdjustmentsByModelId } from "@/lib/state/slice/price-adjustment/priceAdjustmentSlice";
+import { calculatePriceClientSide } from "@/components/utils/CalculateClientSide";
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("id-ID", {
@@ -37,7 +38,6 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-// Format compact untuk mobile
 const formatCompact = (value: number): string => {
   if (Math.abs(value) >= 1000000000) {
     return `${value < 0 ? "-" : ""}${(Math.abs(value) / 1000000000).toFixed(1)}M`;
@@ -61,7 +61,7 @@ const Kalkulator = () => {
     loading,
     error,
   } = useSelector((state: RootState) => state.priceCalculator);
-  const { data: variants, loading: variantsLoading } = useSelector(
+  const { data: variants = [], loading: variantsLoading } = useSelector(
     (state: RootState) => state.variant,
   );
   const { adjustmentsByModel, loading: adjustmentsLoading } = useSelector(
@@ -72,10 +72,14 @@ const Kalkulator = () => {
   const [selectedModelId, setSelectedModelId] = useState<string>("");
   const [selectedVariantId, setSelectedVariantId] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedTransmission, setSelectedTransmission] = useState<string>("");
   const [selectedOwnership, setSelectedOwnership] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [showResult, setShowResult] = useState(false);
+
+  // Get selected variant transmission
+  const selectedVariant = variants.find((v) => v.id === selectedVariantId);
+  const transmissionCode = selectedVariant?.transmissionType || "";
 
   useEffect(() => {
     dispatch(getCalculatorOptions());
@@ -87,9 +91,9 @@ const Kalkulator = () => {
       setSelectedModelId("");
       setSelectedVariantId("");
       setSelectedYear(null);
-      setSelectedTransmission("");
       setSelectedOwnership("");
       setSelectedColor("");
+      setSelectedFeatures([]);
       setShowResult(false);
     }
   }, [selectedBrandId, dispatch]);
@@ -100,9 +104,9 @@ const Kalkulator = () => {
       dispatch(getAdjustmentsByModelId(selectedModelId));
       setSelectedVariantId("");
       setSelectedYear(null);
-      setSelectedTransmission("");
       setSelectedOwnership("");
       setSelectedColor("");
+      setSelectedFeatures([]);
       setShowResult(false);
     }
   }, [selectedModelId, dispatch]);
@@ -115,26 +119,51 @@ const Kalkulator = () => {
     }
   }, [selectedVariantId, dispatch]);
 
+  const handleFeatureToggle = (featureCode: string) => {
+    setSelectedFeatures((prev) => {
+      if (prev.includes(featureCode)) {
+        return prev.filter((code) => code !== featureCode);
+      }
+      return [...prev, featureCode];
+    });
+    setShowResult(false);
+  };
+
+  // CLIENT-SIDE CALCULATION - No POST request!
   const handleCalculate = () => {
     if (
       !selectedVariantId ||
       !selectedYear ||
-      !selectedTransmission ||
+      !transmissionCode ||
       !selectedOwnership ||
-      !selectedColor
+      !selectedColor ||
+      !yearsByVariant ||
+      !adjustmentsByModel ||
+      !selectedVariant
     ) {
       return;
     }
-    dispatch(
-      calculatePrice({
-        variantId: selectedVariantId,
-        year: selectedYear,
-        transmissionCode: selectedTransmission,
+
+    try {
+      // Calculate price on client side
+      const result = calculatePriceClientSide({
+        yearsByVariant,
+        adjustmentsByModel,
+        selectedYear,
+        transmissionCode,
         ownershipCode: selectedOwnership,
         colorCode: selectedColor,
-      }),
-    );
-    setShowResult(true);
+        selectedFeatureIds: selectedFeatures,
+        variantId: selectedVariantId,
+        variantName: selectedVariant.variantName,
+      });
+
+      // Dispatch result to Redux
+      dispatch(setCalculationResult(result));
+      setShowResult(true);
+    } catch (error) {
+      console.error("Error calculating price:", error);
+    }
   };
 
   const handleReset = () => {
@@ -142,9 +171,9 @@ const Kalkulator = () => {
     setSelectedModelId("");
     setSelectedVariantId("");
     setSelectedYear(null);
-    setSelectedTransmission("");
     setSelectedOwnership("");
     setSelectedColor("");
+    setSelectedFeatures([]);
     setShowResult(false);
     dispatch(resetCalculator());
   };
@@ -152,11 +181,10 @@ const Kalkulator = () => {
   const isFormComplete =
     selectedVariantId &&
     selectedYear &&
-    selectedTransmission &&
+    transmissionCode &&
     selectedOwnership &&
     selectedColor;
 
-  // Dynamic classes based on theme
   const selectClass = `w-full px-3 sm:px-4 py-2.5 sm:py-3 ${
     isDarkMode
       ? "bg-slate-800 border-slate-700 text-white"
@@ -275,7 +303,7 @@ const Kalkulator = () => {
                         >
                           Pilih Merek
                         </option>
-                        {options?.brands.map((brand) => (
+                        {options?.brands?.map((brand) => (
                           <option
                             key={brand.id}
                             value={brand.id}
@@ -312,7 +340,7 @@ const Kalkulator = () => {
                         >
                           Pilih Model
                         </option>
-                        {modelsByBrand?.models.map((model) => (
+                        {modelsByBrand?.models?.map((model) => (
                           <option
                             key={model.id}
                             value={model.id}
@@ -349,13 +377,19 @@ const Kalkulator = () => {
                         >
                           Pilih Tipe
                         </option>
-                        {variants.map((variant) => (
+                        {variants?.map((variant) => (
                           <option
                             key={variant.id}
                             value={variant.id}
                             className={isDarkMode ? "bg-slate-900" : "bg-white"}
                           >
-                            {variant.variantName}
+                            {variant.variantName} (
+                            {variant.transmissionType === "matic"
+                              ? "Matic"
+                              : variant.transmissionType === "manual"
+                                ? "Manual"
+                                : "Both"}
+                            )
                           </option>
                         ))}
                       </select>
@@ -388,7 +422,7 @@ const Kalkulator = () => {
                         >
                           Pilih Tahun
                         </option>
-                        {yearsByVariant?.years.map((year) => (
+                        {yearsByVariant?.years?.map((year) => (
                           <option
                             key={year}
                             value={year}
@@ -406,24 +440,24 @@ const Kalkulator = () => {
                     </div>
                   </div>
 
-                  {/* Transmisi */}
+                  {/* Kepemilikan */}
                   <div className="sm:col-span-2">
                     <label className={labelClass}>
-                      <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      Transmisi
+                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Kepemilikan
                     </label>
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      {adjustmentsByModel?.adjustments.transmission.map(
-                        (trans) => (
+                      {adjustmentsByModel?.adjustments?.ownership?.map(
+                        (own) => (
                           <button
-                            key={trans.code}
+                            key={own.code}
                             onClick={() => {
-                              setSelectedTransmission(trans.code);
+                              setSelectedOwnership(own.code);
                               setShowResult(false);
                             }}
                             disabled={!selectedModelId || adjustmentsLoading}
                             className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm ${
-                              selectedTransmission === trans.code
+                              selectedOwnership === own.code
                                 ? isDarkMode
                                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white"
                                   : "bg-gradient-to-r from-blue-600 to-blue-700 border-blue-500 text-white"
@@ -432,65 +466,24 @@ const Kalkulator = () => {
                                   : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
                             }`}
                           >
-                            <span>{trans.code === "matic" ? "⚙️" : "🔧"}</span>
-                            <span className="font-medium">{trans.name}</span>
-                            {trans.adjustmentValue !== 0 && (
+                            <span>
+                              {own.code === "atas-nama-orang" ? "👤" : "🏢"}
+                            </span>
+                            <span className="font-medium">{own.name}</span>
+                            {own.adjustmentValue !== 0 && (
                               <span
                                 className={`text-[10px] sm:text-xs hidden sm:inline ${
-                                  trans.adjustmentValue < 0
+                                  own.adjustmentValue < 0
                                     ? "text-red-400"
                                     : "text-green-400"
                                 }`}
                               >
-                                ({formatCompact(trans.adjustmentValue)})
+                                ({formatCompact(own.adjustmentValue)})
                               </span>
                             )}
                           </button>
                         ),
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Kepemilikan */}
-                  <div className="sm:col-span-2">
-                    <label className={labelClass}>
-                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      Kepemilikan
-                    </label>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      {adjustmentsByModel?.adjustments.ownership.map((own) => (
-                        <button
-                          key={own.code}
-                          onClick={() => {
-                            setSelectedOwnership(own.code);
-                            setShowResult(false);
-                          }}
-                          disabled={!selectedModelId || adjustmentsLoading}
-                          className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm ${
-                            selectedOwnership === own.code
-                              ? isDarkMode
-                                ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white"
-                                : "bg-gradient-to-r from-blue-600 to-blue-700 border-blue-500 text-white"
-                              : isDarkMode
-                                ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                                : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          <span>{own.code === "personal" ? "👤" : "🏢"}</span>
-                          <span className="font-medium">{own.name}</span>
-                          {own.adjustmentValue !== 0 && (
-                            <span
-                              className={`text-[10px] sm:text-xs hidden sm:inline ${
-                                own.adjustmentValue < 0
-                                  ? "text-red-400"
-                                  : "text-green-400"
-                              }`}
-                            >
-                              ({formatCompact(own.adjustmentValue)})
-                            </span>
-                          )}
-                        </button>
-                      ))}
+                      ) || null}
                     </div>
                   </div>
 
@@ -501,7 +494,7 @@ const Kalkulator = () => {
                       Warna
                     </label>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
-                      {adjustmentsByModel?.adjustments.color.map((color) => (
+                      {adjustmentsByModel?.adjustments?.color?.map((color) => (
                         <button
                           key={color.code}
                           onClick={() => {
@@ -533,28 +526,73 @@ const Kalkulator = () => {
                             {color.name}
                           </span>
                         </button>
-                      ))}
+                      )) || null}
                     </div>
                   </div>
+
+                  {/* Fitur Tambahan (Optional) */}
+                  {adjustmentsByModel?.adjustments?.feature &&
+                    adjustmentsByModel.adjustments.feature.length > 0 && (
+                      <div className="sm:col-span-2">
+                        <label className={labelClass}>
+                          <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          Fitur Tambahan (Opsional)
+                        </label>
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                          {adjustmentsByModel.adjustments.feature.map(
+                            (feature) => (
+                              <button
+                                key={feature.id}
+                                onClick={() => handleFeatureToggle(feature.id)}
+                                disabled={
+                                  !selectedModelId || adjustmentsLoading
+                                }
+                                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm ${
+                                  selectedFeatures.includes(feature.id)
+                                    ? isDarkMode
+                                      ? "bg-gradient-to-r from-amber-600 to-orange-600 border-amber-500 text-white"
+                                      : "bg-gradient-to-r from-amber-500 to-orange-500 border-amber-500 text-white"
+                                    : isDarkMode
+                                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                                      : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                                }`}
+                              >
+                                <span>✨</span>
+                                <span className="font-medium">
+                                  {feature.name}
+                                </span>
+                                {feature.adjustmentValue !== 0 && (
+                                  <span
+                                    className={`text-[10px] sm:text-xs hidden sm:inline ${
+                                      feature.adjustmentValue < 0
+                                        ? "text-red-400"
+                                        : "text-green-400"
+                                    }`}
+                                  >
+                                    (+{formatCompact(feature.adjustmentValue)})
+                                  </span>
+                                )}
+                              </button>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
                 </div>
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8">
                   <button
                     onClick={handleCalculate}
-                    disabled={!isFormComplete || loading}
+                    disabled={!isFormComplete}
                     className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 font-semibold rounded-xl transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base ${
                       isDarkMode
                         ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-purple-500/30"
                         : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
                     }`}
                   >
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                    ) : (
-                      <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
-                    )}
-                    {loading ? "Menghitung..." : "Hitung Harga"}
+                    <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Hitung Harga
                   </button>
                   <button
                     onClick={handleReset}
@@ -574,7 +612,6 @@ const Kalkulator = () => {
             {/* Result Sidebar */}
             <div className="lg:col-span-1">
               <div className="lg:sticky lg:top-20 space-y-4 sm:space-y-6">
-                {/* Estimasi Harga Card */}
                 <div
                   className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border ${
                     isDarkMode
@@ -595,7 +632,6 @@ const Kalkulator = () => {
 
                   {showResult && calculationResult ? (
                     <div className="space-y-4 sm:space-y-6">
-                      {/* Car Info */}
                       <div
                         className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 border ${
                           isDarkMode
@@ -630,7 +666,6 @@ const Kalkulator = () => {
                         </p>
                       </div>
 
-                      {/* Price Breakdown */}
                       <div className="space-y-2 sm:space-y-3">
                         <div
                           className={`flex justify-between items-center py-2 border-b ${
@@ -696,7 +731,6 @@ const Kalkulator = () => {
                         )}
                       </div>
 
-                      {/* Final Price */}
                       <div
                         className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 border ${
                           isDarkMode
@@ -720,7 +754,6 @@ const Kalkulator = () => {
                         </p>
                       </div>
 
-                      {/* Price Range */}
                       <div
                         className={`rounded-xl p-3 sm:p-4 border ${
                           isDarkMode
@@ -750,7 +783,6 @@ const Kalkulator = () => {
                         </div>
                       </div>
 
-                      {/* Note */}
                       <div
                         className={`flex items-start gap-2 p-3 rounded-xl border ${
                           isDarkMode
@@ -796,7 +828,6 @@ const Kalkulator = () => {
                   )}
                 </div>
 
-                {/* Tips Card */}
                 <div
                   className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 border ${
                     isDarkMode
