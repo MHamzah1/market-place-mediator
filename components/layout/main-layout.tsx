@@ -85,6 +85,11 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
         return "/marketplace/my-listings";
       case "customer":
         return "/marketplace/my-listings";
+      case "showroom_owner":
+      case "warehouse_admin":
+      case "inspector":
+      case "mechanic":
+        return "/warehouse/dashboard";
       default:
         return "/dashboard";
     }
@@ -107,6 +112,19 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
       href: "/Inspeksi",
       icon: <AiOutlineCheckCircle className="inline mr-1" />,
     },
+    ...(userInfo?.role === "admin" ||
+      userInfo?.role === "showroom_owner" ||
+      userInfo?.role === "warehouse_admin" ||
+      userInfo?.role === "inspector" ||
+      userInfo?.role === "mechanic"
+      ? [
+          {
+            name: "Warehouse",
+            href: "/warehouse/dashboard",
+            icon: <AiOutlineSetting className="inline mr-1" />,
+          },
+        ]
+      : []),
     ...(userInfo?.role === "admin"
       ? [
           {

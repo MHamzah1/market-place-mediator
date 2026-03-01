@@ -14,6 +14,8 @@ import priceCalculatorSlice from "./slice/price-calculator/priceCalculatorSlice"
 import marketplaceSlice from "./slice/marketplace/marketplaceSlice";
 // Boost slice
 import boostSlice from "./slice/boost/boostSlice";
+// Warehouse slice
+import warehouseSlice from "./slice/warehouse/warehouseSlice";
 
 const store = configureStore({
   reducer: {
@@ -33,6 +35,8 @@ const store = configureStore({
     marketplace: marketplaceSlice,
     // Boost
     boost: boostSlice,
+    // Warehouse
+    warehouse: warehouseSlice,
   },
 });
 

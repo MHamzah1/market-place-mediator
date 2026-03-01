@@ -12,7 +12,15 @@ interface UserInfo {
   phoneNumber: string | null;
   whatsappNumber: string | null;
   location: string | null;
-  role: "customer" | "admin" | "salesman" | null;
+  role:
+    | "customer"
+    | "admin"
+    | "salesman"
+    | "showroom_owner"
+    | "warehouse_admin"
+    | "inspector"
+    | "mechanic"
+    | null;
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -45,7 +53,14 @@ interface ProfileResponse {
   phoneNumber: string;
   whatsappNumber: string | null;
   location: string | null;
-  role: "customer" | "admin" | "salesman";
+  role:
+    | "customer"
+    | "admin"
+    | "salesman"
+    | "showroom_owner"
+    | "warehouse_admin"
+    | "inspector"
+    | "mechanic";
   createdAt: string;
   updatedAt: string;
 }
@@ -214,7 +229,15 @@ const initialState: AuthState = {
       typeof window !== "undefined" ? Cookies.get("location") || null : null,
     role:
       typeof window !== "undefined"
-        ? (Cookies.get("role") as "customer" | "admin" | "salesman" | null)
+        ? (Cookies.get("role") as
+            | "customer"
+            | "admin"
+            | "salesman"
+            | "showroom_owner"
+            | "warehouse_admin"
+            | "inspector"
+            | "mechanic"
+            | null)
         : null,
     createdAt:
       typeof window !== "undefined" ? Cookies.get("createdAt") || null : null,

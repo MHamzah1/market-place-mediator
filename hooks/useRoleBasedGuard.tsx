@@ -6,7 +6,14 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/lib/state/store";
 
 // Define role types
-export type UserRole = "customer" | "admin" | "salesman";
+export type UserRole =
+  | "customer"
+  | "admin"
+  | "salesman"
+  | "showroom_owner"
+  | "warehouse_admin"
+  | "inspector"
+  | "mechanic";
 
 // Konfigurasi route berdasarkan role
 const ROLE_BASED_ROUTES = {
@@ -36,6 +43,9 @@ const ROLE_BASED_ROUTES = {
     "/customer/my-cars",
     "/customer/bookings",
   ],
+
+  // Warehouse routes (showroom_owner, warehouse_admin, inspector, mechanic)
+  warehouse: ["/warehouse"],
 
   // Routes yang memerlukan login (any role)
   authenticated: [
@@ -140,6 +150,33 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
         return;
       }
 
+      // Check warehouse routes
+      const isWarehouseRoute = ROLE_BASED_ROUTES.warehouse.some((route) =>
+        pathname.startsWith(route),
+      );
+
+      if (isWarehouseRoute) {
+        if (!isLoggedIn) {
+          router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
+          setIsAllowed(false);
+        } else if (
+          ![
+            "admin",
+            "showroom_owner",
+            "warehouse_admin",
+            "inspector",
+            "mechanic",
+          ].includes(userRole || "")
+        ) {
+          redirectToRoleBasedDashboard(userRole);
+          setIsAllowed(false);
+        } else {
+          setIsAllowed(true);
+        }
+        setIsChecking(false);
+        return;
+      }
+
       // Check authenticated routes (any logged in user)
       const isAuthRoute = ROLE_BASED_ROUTES.authenticated.some((route) =>
         pathname.startsWith(route),
@@ -194,6 +231,12 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
         break;
       case "customer":
         router.push("/customer/dashboard");
+        break;
+      case "showroom_owner":
+      case "warehouse_admin":
+      case "inspector":
+      case "mechanic":
+        router.push("/warehouse/dashboard");
         break;
       default:
         router.push("/dashboard"); // Fallback
