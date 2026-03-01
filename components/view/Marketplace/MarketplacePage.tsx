@@ -138,7 +138,7 @@ const MarketplacePage = () => {
 
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL_IMAGES ||
-    "http://192.168.2.100:8080/uploads/";
+    "http://192.168.0.182:8080/uploads/";
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);

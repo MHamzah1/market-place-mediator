@@ -2,7 +2,74 @@ version: "3.8"
 
 services:
   # ================================
-  # Next.js Application
+  # Tailscale Sidecar Container
+  # ================================
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: marketplace-mediator-tailscale
+    hostname: marketplace-frontend
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=tskey-auth-kQCtFP3dw821CNTRL-ERXL8Y8pW4BnMpndAzkQ5BPessTRfUQqh
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_EXTRA_ARGS=--accept-routes
+    networks:
+      - marketplace-network
+    profiles:
+      - with-tailscale
+
+  # ================================
+  # Next.js Application (with Tailscale)
+  # ================================
+  app-tailscale:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: marketplace-mediator-app-ts
+    restart: unless-stopped
+    # ports:
+    #   - "9090:9090"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://mediator-api-3.taila71da3.ts.net/api}
+      - NEXT_PUBLIC_API_URL_FOTO=${NEXT_PUBLIC_API_URL_FOTO:-http://mediator-api-3.taila71da3.ts.net/uploads}
+      - NEXT_PUBLIC_API_URL_IMAGES=${NEXT_PUBLIC_API_URL_FOTO:-http://mediator-api-3.taila71da3.ts.net/uploads}
+    network_mode: service:tailscale
+    depends_on:
+      - tailscale
+    profiles:
+      - with-tailscale
+
+  # ================================
+  # Next.js Application (Host Network - Simple Mode)
+  # ================================
+  app-host:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: marketplace-mediator-app-host
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - NODE_ENV=production
+      - PORT=9090
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://mediator-api-3.taila71da3.ts.net/api}
+      - NEXT_PUBLIC_API_URL_FOTO=${NEXT_PUBLIC_API_URL_FOTO:-http://mediator-api-3.taila71da3.ts.net/uploads}
+      - NEXT_PUBLIC_API_URL_IMAGES=${NEXT_PUBLIC_API_URL_FOTO:-http://mediator-api-3.taila71da3.ts.net/uploads}
+    profiles:
+      - host-network
+
+  # ================================
+  # Next.js Application (Standard - No Tailscale in Container)
   # ================================
   app:
     build:
@@ -12,11 +79,14 @@ services:
     container_name: marketplace-mediator-app
     restart: unless-stopped
     ports:
-      - "9090:9090" # Akses via localhost:9090, internal tetap 9090
+      - "9090:9090"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://192.168.1.4:8080/api}
-      - NEXT_PUBLIC_API_URL_IMAGES=${NEXT_PUBLIC_API_URL_IMAGES:-http://192.168.1.4:8080/uploads/}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://mediator-api-3.taila71da3.ts.net/api}
+      - NEXT_PUBLIC_API_URL_FOTO=${NEXT_PUBLIC_API_URL_FOTO:-http://mediator-api-3.taila71da3.ts.net/uploads}
+      - NEXT_PUBLIC_API_URL_IMAGES=${NEXT_PUBLIC_API_URL_FOTO:-http://mediator-api-3.taila71da3.ts.net/uploads}
+    extra_hosts:
+      - "mediator-api-3.taila71da3.ts.net:100.104.28.7"
     networks:
       - marketplace-network
     healthcheck:
@@ -27,7 +97,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://192.168.1.4:9090/",
+          "http://localhost:9090/",
         ]
       interval: 30s
       timeout: 10s
@@ -57,3 +127,6 @@ services:
 networks:
   marketplace-network:
     driver: bridge
+
+volumes:
+  tailscale-state:

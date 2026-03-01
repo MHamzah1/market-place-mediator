@@ -76,7 +76,7 @@ const MyListingsPage = () => {
 
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL_IMAGES ||
-    "http://192.168.2.100:8080/uploads/";
+    "http://192.168.100.247:8080/uploads/";
 
   const handleDelete = async (id: string, title: string) => {
     const result = await Swal.fire({
