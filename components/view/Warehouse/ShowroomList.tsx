@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { FiPlus, FiEdit, FiTrash2, FiMapPin, FiPhone } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { useTheme } from "@/context/ThemeContext";
+import { encryptSlug } from "@/lib/slug/slug";
 
 const ShowroomList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -132,7 +133,7 @@ const ShowroomList = () => {
                 className={`flex gap-2 mt-4 pt-4 border-t ${isDark ? "border-slate-700/50" : "border-slate-200"}`}
               >
                 <Link
-                  href={`/warehouse/showrooms/create?edit=${s.id}`}
+                  href={`/warehouse/showrooms/edit/${encryptSlug(s.id)}`}
                   className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${isDark ? "bg-slate-700/50 hover:bg-slate-700 text-slate-300" : "bg-slate-100 hover:bg-slate-200 text-slate-700"}`}
                 >
                   <FiEdit className="text-base" /> Edit
