@@ -89,7 +89,7 @@ const WarehouseDashboard = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
           Dashboard Warehouse
         </h1>
         <p className={`${textSecondary} text-sm mt-1`}>
@@ -264,7 +264,7 @@ const WarehouseDashboard = () => {
                         className={`w-full rounded-full h-2 ${isDark ? "bg-slate-700" : "bg-slate-200"}`}
                       >
                         <div
-                          className="bg-linear-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
+                          className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
                           style={{
                             width: `${Math.min((zs.vehicleCount / zs.zone.capacity) * 100, 100)}%`,
                           }}
@@ -305,7 +305,7 @@ function StatCard({
     >
       <div className="flex items-center gap-3">
         <div
-          className={`w-12 h-12 rounded-xl bg-linear-to-br ${gradient} flex items-center justify-center shadow-lg`}
+          className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}
         >
           <Icon className="text-white text-xl" />
         </div>
