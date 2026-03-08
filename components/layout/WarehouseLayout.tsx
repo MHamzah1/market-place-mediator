@@ -11,6 +11,7 @@ import {
   setSelectedShowroom,
   Showroom,
 } from "@/lib/state/slice/warehouse/warehouseSlice";
+import { useTheme } from "@/context/ThemeContext";
 import {
   FiHome,
   FiMenu,
@@ -42,8 +43,11 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [showroomDropdownOpen, setShowroomDropdownOpen] = useState(false);
+
+  // Use ThemeContext so dark class on <html> stays in sync
+  const { theme, toggleTheme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const { showrooms, selectedShowroom } = useSelector(
     (state: RootState) => state.warehouse,
@@ -59,17 +63,6 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
       dispatch(setSelectedShowroom(showrooms[0]));
     }
   }, [showrooms, selectedShowroom, dispatch]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) setIsDarkMode(savedTheme === "dark");
-  }, []);
-
-  const toggleTheme = () => {
-    const next = !isDarkMode;
-    setIsDarkMode(next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
 
   const handleLogout = () => {
     [
@@ -128,12 +121,12 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
         <div
           className={`h-20 flex items-center px-4 border-b ${isDarkMode ? "border-slate-800/50" : "border-slate-200"}`}
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="w-10 h-10 bg-lineart-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shrink-0">
             <BsBarChartFill className="text-white text-xl" />
           </div>
           {sidebarOpen && (
             <div className="ml-3">
-              <span className="text-lg font-black bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+              <span className="text-lg font-black bg-lineart-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
                 Warehouse
               </span>
               <p
@@ -211,7 +204,7 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 relative overflow-hidden ${
                   active
-                    ? `bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border ${
+                    ? `bg-lineart-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border ${
                         isDarkMode
                           ? "border-emerald-500/30"
                           : "border-emerald-500/50"
@@ -221,7 +214,7 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
               >
-                <item.icon className="text-xl flex-shrink-0" />
+                <item.icon className="text-xl shrink-0" />
                 {sidebarOpen && (
                   <span className="font-semibold text-sm">{item.label}</span>
                 )}
@@ -242,7 +235,7 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
               <div
                 className={`flex items-center gap-3 p-3 rounded-xl ${isDarkMode ? "bg-slate-800/50" : "bg-slate-100"}`}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
+                <div className="w-10 h-10 bg-lineart-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center font-bold text-white text-sm shrink-0">
                   {getInitials(userInfo?.fullName || "U")}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -284,7 +277,7 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center font-bold text-white text-sm">
+              <div className="w-10 h-10 bg-lineart-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center font-bold text-white text-sm">
                 {getInitials(userInfo?.fullName || "U")}
               </div>
               <button

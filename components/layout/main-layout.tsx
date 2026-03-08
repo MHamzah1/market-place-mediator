@@ -113,10 +113,10 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
       icon: <AiOutlineCheckCircle className="inline mr-1" />,
     },
     ...(userInfo?.role === "admin" ||
-      userInfo?.role === "showroom_owner" ||
-      userInfo?.role === "warehouse_admin" ||
-      userInfo?.role === "inspector" ||
-      userInfo?.role === "mechanic"
+    userInfo?.role === "showroom_owner" ||
+    userInfo?.role === "warehouse_admin" ||
+    userInfo?.role === "inspector" ||
+    userInfo?.role === "mechanic"
       ? [
           {
             name: "Warehouse",
@@ -142,8 +142,8 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
     <div
       className={`min-h-screen flex flex-col transition-colors duration-300 ${
         isDarkMode
-          ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
-          : "bg-gradient-to-br from-slate-50 via-white to-blue-50"
+          ? "bg-linear-to-br from-slate-950 via-slate-900 to-slate-950"
+          : "bg-linear-to-br from-slate-50 via-white to-blue-50"
       }`}
     >
       {/* Decorative background elements - Optimized for mobile */}
@@ -211,8 +211,8 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                 onClick={toggleTheme}
                 className={`p-2.5 lg:p-3 rounded-xl transition-all duration-300 ${
                   isDarkMode
-                    ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 hover:from-yellow-500/30 hover:to-orange-500/30"
-                    : "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-600 hover:from-blue-500/20 hover:to-purple-500/20"
+                    ? "bg-linear-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 hover:from-yellow-500/30 hover:to-orange-500/30"
+                    : "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-blue-600 hover:from-blue-500/20 hover:to-purple-500/20"
                 }`}
                 title={isDarkMode ? "Mode Terang" : "Mode Gelap"}
               >
@@ -228,8 +228,8 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                 <button
                   className={`px-4 lg:px-6 py-2 lg:py-2.5 rounded-xl font-bold transition-all duration-200 flex items-center space-x-2 shadow-lg text-sm lg:text-base ${
                     isDarkMode
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
-                      : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
+                      ? "bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-cyan-500/30"
+                      : "bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-blue-500/30"
                   }`}
                   onClick={() => router.push("/auth/login")}
                 >
@@ -245,7 +245,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                       isDarkMode ? "hover:bg-slate-800/50" : "hover:bg-blue-50"
                     }`}
                   >
-                    <div className="w-10 h-10 lg:w-11 lg:h-11 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/30 font-bold text-white text-base lg:text-lg hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 lg:w-11 lg:h-11 bg-linear-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/30 font-bold text-white text-base lg:text-lg hover:scale-110 transition-transform">
                       {userInfo?.fullName?.charAt(0).toUpperCase() ||
                         userInfo?.email?.charAt(0).toUpperCase() ||
                         "U"}
@@ -253,7 +253,6 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                   </button>
 
                   {isDropdownOpen && (
-                    // ...existing dropdown menu code...
                     <div
                       className={`absolute right-0 mt-3 w-72 rounded-2xl shadow-2xl border backdrop-blur-xl overflow-hidden animate-fadeIn ${
                         isDarkMode
@@ -261,7 +260,86 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                           : "bg-white/95 border-slate-200"
                       }`}
                     >
-                      {/* ...existing dropdown content... */}
+                      {/* User Info Header */}
+                      <div
+                        className={`px-5 py-4 border-b ${
+                          isDarkMode
+                            ? "bg-linear-to-r from-cyan-500/10 to-blue-500/10 border-slate-700/50"
+                            : "bg-linear-to-r from-blue-50 to-purple-50 border-slate-200"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          {/* <div className="w-12 h-12 bg-linear-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg font-bold text-white text-lg">
+                            {userInfo?.fullName?.charAt(0).toUpperCase() ||
+                              userInfo?.email?.charAt(0).toUpperCase() ||
+                              "U"}
+                          </div> */}
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className={`font-bold text-base truncate ${
+                                isDarkMode ? "text-white" : "text-slate-900"
+                              }`}
+                            >
+                              {userInfo?.fullName || "User"}
+                            </p>
+                            <p
+                              className={`text-sm truncate ${
+                                isDarkMode ? "text-slate-400" : "text-slate-600"
+                              }`}
+                            >
+                              {userInfo?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="py-2">
+                        {[
+                          {
+                            icon: AiOutlineCar,
+                            label: "Dashboard",
+                            href: getRoleDashboard(),
+                          },
+                          { icon: FiUser, label: "Profil", href: "/profile" },
+                          {
+                            icon: FiHeart,
+                            label: "Favorit",
+                            href: "/favorites",
+                          },
+                        ].map((item, index) => (
+                          <Link
+                            key={index}
+                            href={item.href}
+                            className={`flex items-center space-x-3 px-5 py-3 transition-all duration-200 ${
+                              isDarkMode
+                                ? "hover:bg-slate-700/50 text-slate-300 hover:text-cyan-400"
+                                : "hover:bg-blue-50 text-slate-700 hover:text-blue-600"
+                            }`}
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            <item.icon className="text-xl" />
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+
+                      {/* Logout Button */}
+                      <div
+                        className={`border-t px-3 py-3 ${
+                          isDarkMode
+                            ? "border-slate-700/50"
+                            : "border-slate-200"
+                        }`}
+                      >
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-500 w-full transition-all duration-200 font-semibold"
+                        >
+                          <FiLogOut className="text-xl" />
+                          <span>Keluar</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -343,12 +421,12 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className={`px-3 py-3 rounded-xl ${
                       isDarkMode
-                        ? "bg-gradient-to-r from-cyan-500/10 to-blue-500/10"
-                        : "bg-gradient-to-r from-blue-50 to-purple-50"
+                        ? "bg-linear-to-r from-cyan-500/10 to-blue-500/10"
+                        : "bg-linear-to-r from-blue-50 to-purple-50"
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-11 h-11 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg font-bold text-white text-base flex-shrink-0">
+                      <div className="w-11 h-11 bg-linear-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg font-bold text-white text-base flex-shrink-0">
                         {userInfo?.fullName?.charAt(0).toUpperCase() ||
                           userInfo?.email?.charAt(0).toUpperCase() ||
                           "U"}
@@ -413,8 +491,8 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                 <button
                   className={`w-full px-4 py-2.5 rounded-lg font-bold transition-all duration-200 shadow-lg text-sm ${
                     isDarkMode
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-                      : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                      ? "bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                      : "bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
                   }`}
                   onClick={() => {
                     router.push("/auth/login");
@@ -436,8 +514,8 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
       <footer
         className={`relative z-10 ${
           isDarkMode
-            ? "bg-gradient-to-b from-slate-900 to-black text-slate-300"
-            : "bg-gradient-to-b from-slate-900 to-slate-950 text-slate-300"
+            ? "bg-linear-to-b from-slate-900 to-black text-slate-300"
+            : "bg-linear-to-b from-slate-900 to-slate-950 text-slate-300"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
@@ -445,11 +523,11 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
             {/* Company Info */}
             <div className="col-span-1 sm:col-span-2 md:col-span-1">
               <div className="flex items-center space-x-3 mb-4 lg:mb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30 flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30 flex-shrink-0">
                   <AiOutlineCar className="text-white text-xl sm:text-2xl" />
                 </div>
                 <div>
-                  <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                  <span className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
                     CarMediator
                   </span>
                 </div>
@@ -465,8 +543,8 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
                     href="#"
                     className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
                       isDarkMode
-                        ? "bg-slate-800 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 hover:shadow-lg hover:shadow-cyan-500/30"
-                        : "bg-slate-800 hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:shadow-blue-500/30"
+                        ? "bg-slate-800 hover:bg-linear-to-r hover:from-cyan-500 hover:to-blue-600 hover:shadow-lg hover:shadow-cyan-500/30"
+                        : "bg-slate-800 hover:bg-linear-to-r hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:shadow-blue-500/30"
                     }`}
                   >
                     <span className="text-xs sm:text-sm font-bold">

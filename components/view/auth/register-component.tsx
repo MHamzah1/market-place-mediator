@@ -18,6 +18,7 @@ import {
   Sun,
   UserPlus,
   CheckCircle,
+  MapPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { createUsers } from "@/lib/state/slice/user/userSlice";
@@ -32,12 +33,14 @@ const registerSchema = z
     email: z.string().email("Email tidak valid").min(1, "Email wajib diisi"),
     phoneNumber: z
       .string()
-      .min(10, "Nomor telepon minimal 10 digit")
-      .regex(/^\+?[0-9]+$/, "Nomor telepon tidak valid"),
+      .min(8, "Nomor telepon minimal 8 digit (tanpa +62)")
+      .max(13, "Nomor telepon maksimal 13 digit (tanpa +62)")
+      .regex(/^[0-9]+$/, "Nomor telepon hanya boleh angka"),
     whatsappNumber: z
       .string()
-      .min(10, "Nomor WhatsApp minimal 10 digit")
-      .regex(/^\+?[0-9]+$/, "Nomor WhatsApp tidak valid"),
+      .min(8, "Nomor WhatsApp minimal 8 digit (tanpa +62)")
+      .max(13, "Nomor WhatsApp maksimal 13 digit (tanpa +62)")
+      .regex(/^[0-9]+$/, "Nomor WhatsApp hanya boleh angka"),
     location: z.string().min(3, "Lokasi minimal 3 karakter"),
     password: z
       .string()
@@ -53,6 +56,14 @@ const registerSchema = z
     message: "Password tidak cocok",
     path: ["confirmPassword"],
   });
+
+// helper normalisasi nomor Indonesia
+const normalizeTo62 = (raw: string) => {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.startsWith("62")) return `${digits}`;
+  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
+  return `62${digits}`;
+};
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -97,8 +108,8 @@ const RegisterComponent = () => {
         email: data.email,
         password: data.password,
         fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        whatsappNumber: data.whatsappNumber,
+        phoneNumber: normalizeTo62(data.phoneNumber),
+        whatsappNumber: normalizeTo62(data.whatsappNumber),
         location: data.location,
         role: "salesman", // Semua user default menjadi salesman
       };
@@ -136,8 +147,8 @@ const RegisterComponent = () => {
     <div
       className={`min-h-screen flex items-center justify-center transition-colors duration-300 p-4 py-12 ${
         isDarkMode
-          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
-          : "bg-gradient-to-br from-purple-50 via-white to-blue-50"
+          ? "bg-linear-to-br from-gray-900 via-gray-800 to-gray-900"
+          : "bg-linear-to-br from-purple-50 via-white to-blue-50"
       }`}
     >
       {/* Theme Toggle Button */}
@@ -166,10 +177,10 @@ const RegisterComponent = () => {
         >
           {/* Logo & Title */}
           <div className="text-center space-y-2">
-            <div className="flex justify-center mb-2">
+            {/* <div className="flex justify-center mb-2">
               <MediatorLogo />
-            </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            </div> */}
+            <h1 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               Buat Akun Baru
             </h1>
             <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
@@ -294,20 +305,27 @@ const RegisterComponent = () => {
                   >
                     Nomor Telepon
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-gray-400" />
-                    </div>
+                  <div className="flex">
+                    <span
+                      className={`inline-flex items-center px-3 rounded-l-lg border border-r-0 ${
+                        isDarkMode
+                          ? "bg-gray-700 border-gray-600 text-gray-300"
+                          : "bg-gray-100 border-gray-300 text-gray-700"
+                      }`}
+                    >
+                      +62
+                    </span>
                     <input
                       id="phoneNumber"
                       type="tel"
+                      inputMode="numeric"
                       {...register("phoneNumber")}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                      className={`w-full px-4 py-3 border rounded-r-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
                         isDarkMode
                           ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                           : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
                       } ${errors.phoneNumber ? "border-red-500" : ""}`}
-                      placeholder="+628123456789"
+                      placeholder="8123456789"
                     />
                   </div>
                   {errors.phoneNumber && (
@@ -327,20 +345,27 @@ const RegisterComponent = () => {
                   >
                     Nomor WhatsApp
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-gray-400" />
-                    </div>
+                  <div className="flex">
+                    <span
+                      className={`inline-flex items-center px-3 rounded-l-lg border border-r-0 ${
+                        isDarkMode
+                          ? "bg-gray-700 border-gray-600 text-gray-300"
+                          : "bg-gray-100 border-gray-300 text-gray-700"
+                      }`}
+                    >
+                      +62
+                    </span>
                     <input
                       id="whatsappNumber"
                       type="tel"
+                      inputMode="numeric"
                       {...register("whatsappNumber")}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                      className={`w-full px-4 py-3 border rounded-r-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
                         isDarkMode
                           ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                           : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
                       } ${errors.whatsappNumber ? "border-red-500" : ""}`}
-                      placeholder="6281234567890"
+                      placeholder="81234567890"
                     />
                   </div>
                   {errors.whatsappNumber && (
@@ -362,7 +387,7 @@ const RegisterComponent = () => {
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-gray-400" />
+                      <MapPlus className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                       id="location"
@@ -387,7 +412,7 @@ const RegisterComponent = () => {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  className="w-full py-3 px-4 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   Lanjut
                 </button>
@@ -597,7 +622,7 @@ const RegisterComponent = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="flex-1 py-3 px-4 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center">
