@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import {
-  registerVehicle,
+  fetchVehicleDetail,
+  updateVehicle,
   clearError,
   clearSuccess,
 } from "@/lib/state/slice/warehouse/warehouseSlice";
@@ -25,7 +26,6 @@ interface CarModelItem {
   id: string;
   brandId: string;
   modelName: string;
-  brand?: { name: string };
 }
 interface VariantItem {
   id: string;
@@ -38,15 +38,20 @@ interface YearPriceItem {
   variantId: string;
   year: number;
   basePrice: string;
-  variant?: { variantName: string };
 }
 
-const VehicleRegisterForm = () => {
+interface VehicleEditFormProps {
+  paramsPromise: Promise<{ id: string }>;
+}
+
+const VehicleEditForm = ({ paramsPromise }: VehicleEditFormProps) => {
+  const { id } = use(paramsPromise);
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const router = useRouter();
-  const { actionLoading, error, successMessage, selectedShowroom } =
+
+  const { actionLoading, error, successMessage, selectedVehicle, loading } =
     useSelector((state: RootState) => state.warehouse);
 
   const [form, setForm] = useState({
@@ -69,43 +74,77 @@ const VehicleRegisterForm = () => {
     sellerPhone: "",
   });
 
-  // display labels for cascaded selects
+  // display state for cascaded selects
   const [selectedBrandId, setSelectedBrandId] = useState("");
   const [selectedModelId, setSelectedModelId] = useState("");
+  const [initialized, setInitialized] = useState(false);
 
+  // Fetch vehicle on mount
   useEffect(() => {
-    if (selectedShowroom)
-      setForm((f) => ({ ...f, showroomId: selectedShowroom.id }));
-  }, [selectedShowroom]);
+    dispatch(fetchVehicleDetail(id));
+  }, [id, dispatch]);
+
+  // Pre-fill form once vehicle is loaded
+  useEffect(() => {
+    if (selectedVehicle && selectedVehicle.id === id && !initialized) {
+      setForm({
+        showroomId: selectedVehicle.showroomId ?? "",
+        carModelId: selectedVehicle.carModelId ?? "",
+        variantId: selectedVehicle.variantId ?? "",
+        variantName: "",
+        yearPriceId: selectedVehicle.yearPriceId ?? "",
+        brandName: selectedVehicle.brandName ?? "",
+        modelName: selectedVehicle.modelName ?? "",
+        year: selectedVehicle.year ?? new Date().getFullYear(),
+        color: selectedVehicle.color ?? "",
+        licensePlate: selectedVehicle.licensePlate ?? "",
+        chassisNumber: selectedVehicle.chassisNumber ?? "",
+        engineNumber: selectedVehicle.engineNumber ?? "",
+        mileage: selectedVehicle.mileage ?? 0,
+        fuelType: selectedVehicle.fuelType ?? "bensin",
+        askingPrice: selectedVehicle.askingPrice ?? 0,
+        sellerName: selectedVehicle.sellerName ?? "",
+        sellerPhone: selectedVehicle.sellerPhone ?? "",
+      });
+      // Restore cascade context from existing carModelId
+      if (selectedVehicle.carModelId) {
+        setSelectedModelId(selectedVehicle.carModelId);
+      }
+      setInitialized(true);
+    }
+  }, [selectedVehicle, id, initialized]);
 
   useEffect(() => {
     if (successMessage) {
       toast.success(successMessage);
       dispatch(clearSuccess());
-      router.push("/warehouse/vehicles");
+      router.push(`/warehouse/vehicles/${id}`);
     }
     if (error) {
       toast.error(error);
       dispatch(clearError());
     }
-  }, [successMessage, error, dispatch, router]);
+  }, [successMessage, error, dispatch, router, id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(
-      registerVehicle({
-        showroomId: form.showroomId,
-        variantId: form.variantId,
-        yearPriceId: form.yearPriceId,
-        color: form.color,
-        licensePlate: form.licensePlate,
-        chassisNumber: form.chassisNumber,
-        engineNumber: form.engineNumber,
-        mileage: Number(form.mileage),
-        fuelType: form.fuelType,
-        askingPrice: Number(form.askingPrice),
-        sellerName: form.sellerName,
-        sellerPhone: form.sellerPhone,
+      updateVehicle({
+        id,
+        data: {
+          showroomId: form.showroomId,
+          variantId: form.variantId,
+          yearPriceId: form.yearPriceId,
+          color: form.color,
+          licensePlate: form.licensePlate,
+          chassisNumber: form.chassisNumber,
+          engineNumber: form.engineNumber,
+          mileage: Number(form.mileage),
+          fuelType: form.fuelType,
+          askingPrice: Number(form.askingPrice),
+          sellerName: form.sellerName,
+          sellerPhone: form.sellerPhone,
+        },
       }),
     );
   };
@@ -129,7 +168,6 @@ const VehicleRegisterForm = () => {
       carModelId: "",
       modelName: "",
       variantId: "",
-      variantName: "",
       yearPriceId: "",
       year: new Date().getFullYear(),
     }));
@@ -169,11 +207,19 @@ const VehicleRegisterForm = () => {
     }));
   };
 
+  if (loading && !initialized) {
+    return (
+      <div className="max-w-3xl mx-auto flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <Link
-          href="/warehouse/vehicles"
+          href={`/warehouse/vehicles/${id}`}
           className={`p-2 rounded-xl transition-colors ${isDark ? "bg-slate-800/50 hover:bg-slate-800 text-slate-400" : "bg-slate-100 hover:bg-slate-200 text-slate-600"}`}
         >
           <FiArrowLeft className="text-xl" />
@@ -182,12 +228,12 @@ const VehicleRegisterForm = () => {
           <h1
             className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}
           >
-            Register Kendaraan
+            Edit Kendaraan
           </h1>
           <p
             className={`text-sm mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}
           >
-            Daftarkan kendaraan baru ke warehouse
+            Perbarui data kendaraan yang sudah terdaftar
           </p>
         </div>
       </div>
@@ -229,7 +275,7 @@ const VehicleRegisterForm = () => {
               placeholder={
                 selectedBrandId ? "Pilih model..." : "Pilih merek dulu"
               }
-              disabled={!selectedBrandId}
+              disabled={!selectedBrandId && !form.carModelId}
               required
             />
 
@@ -249,7 +295,7 @@ const VehicleRegisterForm = () => {
               placeholder={
                 selectedModelId ? "Pilih varian..." : "Pilih model dulu"
               }
-              disabled={!selectedModelId}
+              disabled={!selectedModelId && !form.variantId}
               required
             />
 
@@ -374,13 +420,13 @@ const VehicleRegisterForm = () => {
         <button
           type="submit"
           disabled={actionLoading}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50"
         >
           {actionLoading ? (
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
           ) : (
             <>
-              <FiSave /> Register Kendaraan
+              <FiSave /> Simpan Perubahan
             </>
           )}
         </button>
@@ -389,4 +435,4 @@ const VehicleRegisterForm = () => {
   );
 };
 
-export default VehicleRegisterForm;
+export default VehicleEditForm;

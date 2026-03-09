@@ -39,6 +39,8 @@ export interface WarehouseVehicle {
   showroom?: Showroom;
   sellerId: string;
   carModelId?: string;
+  variantId?: string;
+  yearPriceId?: string;
   barcode: string;
   brandName: string;
   modelName: string;
@@ -235,22 +237,17 @@ export interface CreateShowroomData {
 
 export interface CreateVehicleData {
   showroomId: string;
-  brandName: string;
-  modelName: string;
-  year: number;
+  variantId: string;
+  yearPriceId: string;
   color: string;
   licensePlate: string;
   chassisNumber: string;
   engineNumber: string;
   mileage: number;
-  transmission: string;
   fuelType: string;
   askingPrice: number;
   sellerName: string;
   sellerPhone: string;
-  sellerKtp?: string;
-  notes?: string;
-  carModelId?: string;
 }
 
 export interface CreateInspectionData {
@@ -572,9 +569,23 @@ export const registerVehicle = createAsyncThunk<
     return res.data?.data ?? res.data;
   } catch (e) {
     const err = e as AxiosError<ErrorResponse>;
-    return rejectWithValue(
-      err.response?.data?.message || "Gagal mendaftarkan kendaraan",
-    );
+    return rejectWithValue(err.message || "Gagal mendaftarkan kendaraan");
+  }
+});
+
+export const updateVehicle = createAsyncThunk<
+  WarehouseVehicle,
+  { id: string; data: CreateVehicleData },
+  { rejectValue: string }
+>("warehouse/updateVehicle", async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.put(`/warehouse/vehicles/${id}`, data, {
+      headers: getHeaders(),
+    });
+    return res.data?.data ?? res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(err.message || "Gagal mengupdate kendaraan");
   }
 });
 
@@ -1078,6 +1089,22 @@ const warehouseSlice = createSlice({
         state.successMessage = "Kendaraan berhasil didaftarkan!";
       })
       .addCase(registerVehicle.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(updateVehicle.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(updateVehicle.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        const idx = state.vehicles.findIndex((v) => v.id === action.payload.id);
+        if (idx !== -1) state.vehicles[idx] = action.payload;
+        if (state.selectedVehicle?.id === action.payload.id)
+          state.selectedVehicle = action.payload;
+        state.successMessage = "Kendaraan berhasil diupdate!";
+      })
+      .addCase(updateVehicle.rejected, (state, action) => {
         state.actionLoading = false;
         state.error = action.payload as string;
       })
