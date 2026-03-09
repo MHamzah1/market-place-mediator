@@ -76,8 +76,7 @@ const MyListingsPage = () => {
   };
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL_IMAGES ||
-    "http://192.168.100.247:8080/uploads/";
+    process.env.NEXT_PUBLIC_API_URL_IMAGES
 
   const handleDelete = async (id: string, title: string) => {
     const result = await Swal.fire({
@@ -124,11 +123,10 @@ const MyListingsPage = () => {
     >
       {/* Header */}
       <div
-        className={`${
-          isDarkMode
+        className={`${isDarkMode
             ? "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"
             : "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
@@ -232,13 +230,12 @@ const MyListingsPage = () => {
             <button
               key={tab.key}
               onClick={() => handleTabChange(tab.key as any)}
-              className={`px-4 sm:px-5 md:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                activeTab === tab.key
+              className={`px-4 sm:px-5 md:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base whitespace-nowrap ${activeTab === tab.key
                   ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25"
                   : isDarkMode
                     ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -255,26 +252,22 @@ const MyListingsPage = () => {
         {/* Empty State */}
         {!loading && myListings.length === 0 && (
           <div
-            className={`text-center py-12 sm:py-16 md:py-20 rounded-2xl sm:rounded-3xl ${
-              isDarkMode ? "bg-slate-900" : "bg-white"
-            } shadow-xl`}
+            className={`text-center py-12 sm:py-16 md:py-20 rounded-2xl sm:rounded-3xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+              } shadow-xl`}
           >
             <AiOutlineCar
-              className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl mx-auto mb-3 sm:mb-4 md:mb-6 ${
-                isDarkMode ? "text-slate-700" : "text-gray-300"
-              }`}
+              className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl mx-auto mb-3 sm:mb-4 md:mb-6 ${isDarkMode ? "text-slate-700" : "text-gray-300"
+                }`}
             />
             <h3
-              className={`text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+              className={`text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 ${isDarkMode ? "text-white" : "text-gray-900"
+                }`}
             >
               Belum ada listing
             </h3>
             <p
-              className={`text-xs sm:text-sm md:text-base ${
-                isDarkMode ? "text-slate-400" : "text-gray-600"
-              }`}
+              className={`text-xs sm:text-sm md:text-base ${isDarkMode ? "text-slate-400" : "text-gray-600"
+                }`}
             >
               Mulai jual mobil Anda sekarang
             </p>
@@ -294,9 +287,8 @@ const MyListingsPage = () => {
             {myListings.map((listing) => (
               <div
                 key={listing.id}
-                className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl ${
-                  isDarkMode ? "bg-slate-900" : "bg-white"
-                } ${!listing.isActive ? "opacity-75" : ""} transition-all hover:scale-[1.02]`}
+                className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                  } ${!listing.isActive ? "opacity-75" : ""} transition-all hover:scale-[1.02]`}
               >
                 {/* Image */}
                 <div className="relative aspect-[4/3]">
@@ -310,11 +302,10 @@ const MyListingsPage = () => {
                   {/* Status Badge */}
                   <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
                     <span
-                      className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full ${
-                        listing.isActive
+                      className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full ${listing.isActive
                           ? "bg-green-500 text-white"
                           : "bg-gray-500 text-white"
-                      }`}
+                        }`}
                     >
                       {listing.isActive ? "Aktif" : "Nonaktif"}
                     </span>
@@ -338,17 +329,15 @@ const MyListingsPage = () => {
                 {/* Content */}
                 <div className="p-3 sm:p-4">
                   <h3
-                    className={`font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 line-clamp-1 ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                    className={`font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 line-clamp-1 ${isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
                   >
                     {listing.carModel?.brand?.name}{" "}
                     {listing.carModel?.modelName}
                   </h3>
                   <p
-                    className={`text-[10px] sm:text-xs md:text-sm ${
-                      isDarkMode ? "text-slate-400" : "text-gray-500"
-                    }`}
+                    className={`text-[10px] sm:text-xs md:text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                      }`}
                   >
                     {listing.year} • {formatMileage(listing.mileage)}
                   </p>
@@ -365,11 +354,10 @@ const MyListingsPage = () => {
                       onClick={() =>
                         handleToggleActive(listing.id, listing.isActive)
                       }
-                      className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold transition-all ${
-                        listing.isActive
+                      className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold transition-all ${listing.isActive
                           ? "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20"
                           : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                      }`}
+                        }`}
                     >
                       {listing.isActive ? (
                         <>
@@ -402,11 +390,10 @@ const MyListingsPage = () => {
 
                     <Link
                       href={`/marketplace/${encryptSlug(listing.id)}`}
-                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all ${
-                        isDarkMode
+                      className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all ${isDarkMode
                           ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
+                        }`}
                     >
                       <FiEye className="text-xs sm:text-sm md:text-base" />
                     </Link>

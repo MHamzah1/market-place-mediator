@@ -68,11 +68,10 @@ export interface FilterParams {
 }
 
 export interface CreateListingData {
-  carModelId: string;
-  year: number;
+  variantId: string;
+  yearPriceId: string;
   price: number;
   mileage: number;
-  transmission: string;
   fuelType: string;
   color: string;
   locationCity: string;
@@ -267,11 +266,10 @@ export const createListing = createAsyncThunk<
       const formData = new FormData();
 
       // Append all text fields
-      formData.append("carModelId", data.carModelId);
-      formData.append("year", String(data.year));
+      formData.append("variantId", data.variantId);
+      formData.append("yearPriceId", data.yearPriceId);
       formData.append("price", String(data.price));
       formData.append("mileage", String(data.mileage));
-      formData.append("transmission", data.transmission);
       formData.append("fuelType", data.fuelType);
       formData.append("color", data.color);
       formData.append("locationCity", data.locationCity);

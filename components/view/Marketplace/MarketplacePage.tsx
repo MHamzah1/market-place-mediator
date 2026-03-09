@@ -138,8 +138,7 @@ const MarketplacePage = () => {
   };
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL_IMAGES ||
-    "http://192.168.0.182:8080/uploads/";
+    process.env.NEXT_PUBLIC_API_URL_IMAGES
 
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -162,11 +161,10 @@ const MarketplacePage = () => {
     >
       {/* Hero Section */}
       <div
-        className={`relative overflow-hidden ${
-          isDarkMode
+        className={`relative overflow-hidden ${isDarkMode
             ? "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"
             : "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800"
-        }`}
+          }`}
       >
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('/pattern.svg')] bg-repeat"></div>
@@ -185,26 +183,23 @@ const MarketplacePage = () => {
             {/* Search Bar */}
             <div className="max-w-3xl mx-auto px-2 sm:px-4">
               <div
-                className={`flex flex-col sm:flex-row items-stretch sm:items-center rounded-2xl overflow-hidden shadow-2xl ${
-                  isDarkMode ? "bg-slate-800" : "bg-white"
-                }`}
+                className={`flex flex-col sm:flex-row items-stretch sm:items-center rounded-2xl overflow-hidden shadow-2xl ${isDarkMode ? "bg-slate-800" : "bg-white"
+                  }`}
               >
                 <div className="flex-1 flex items-center px-4 sm:px-6 py-3 sm:py-4">
                   <FiSearch
-                    className={`text-lg sm:text-xl flex-shrink-0 ${
-                      isDarkMode ? "text-slate-400" : "text-gray-400"
-                    }`}
+                    className={`text-lg sm:text-xl flex-shrink-0 ${isDarkMode ? "text-slate-400" : "text-gray-400"
+                      }`}
                   />
                   <input
                     type="text"
                     placeholder="Cari mobil, merk, atau model..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full ml-3 sm:ml-4 text-sm sm:text-base lg:text-lg outline-none ${
-                      isDarkMode
+                    className={`w-full ml-3 sm:ml-4 text-sm sm:text-base lg:text-lg outline-none ${isDarkMode
                         ? "bg-transparent text-white placeholder-slate-500"
                         : "bg-transparent text-gray-800 placeholder-gray-400"
-                    }`}
+                      }`}
                   />
                 </div>
                 <button
@@ -248,36 +243,31 @@ const MarketplacePage = () => {
       {/* Featured Listings Section */}
       {featuredListings && featuredListings.length > 0 && (
         <div
-          className={`py-6 sm:py-8 ${
-            isDarkMode ? "bg-slate-900/50" : "bg-yellow-50/50"
-          }`}
+          className={`py-6 sm:py-8 ${isDarkMode ? "bg-slate-900/50" : "bg-yellow-50/50"
+            }`}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
               <div className="flex items-center gap-3">
                 <div
-                  className={`p-2 rounded-xl ${
-                    isDarkMode ? "bg-yellow-500/20" : "bg-yellow-100"
-                  }`}
+                  className={`p-2 rounded-xl ${isDarkMode ? "bg-yellow-500/20" : "bg-yellow-100"
+                    }`}
                 >
                   <FiStar
-                    className={`text-lg sm:text-xl ${
-                      isDarkMode ? "text-yellow-400" : "text-yellow-600"
-                    }`}
+                    className={`text-lg sm:text-xl ${isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                      }`}
                   />
                 </div>
                 <div>
                   <h2
-                    className={`text-lg sm:text-xl font-bold ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                    className={`text-lg sm:text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
                   >
                     Mobil Unggulan
                   </h2>
                   <p
-                    className={`text-xs sm:text-sm ${
-                      isDarkMode ? "text-slate-400" : "text-gray-500"
-                    }`}
+                    className={`text-xs sm:text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                      }`}
                   >
                     Pilihan terbaik dengan eksposur tertinggi
                   </p>
@@ -290,11 +280,10 @@ const MarketplacePage = () => {
                 <Link
                   key={listing.id}
                   href={`/marketplace/${encryptSlug(listing.id)}`}
-                  className={`group rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-                    isDarkMode
+                  className={`group rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${isDarkMode
                       ? "bg-slate-800 border border-yellow-500/20"
                       : "bg-white border border-yellow-200"
-                  }`}
+                    }`}
                 >
                   <div className="relative h-28 sm:h-36">
                     {listing.images && listing.images[0] ? (
@@ -305,9 +294,8 @@ const MarketplacePage = () => {
                       />
                     ) : (
                       <div
-                        className={`w-full h-full flex items-center justify-center ${
-                          isDarkMode ? "bg-slate-700" : "bg-gray-100"
-                        }`}
+                        className={`w-full h-full flex items-center justify-center ${isDarkMode ? "bg-slate-700" : "bg-gray-100"
+                          }`}
                       >
                         <span className="text-3xl sm:text-4xl">🚗</span>
                       </div>
@@ -326,25 +314,22 @@ const MarketplacePage = () => {
                   </div>
                   <div className="p-2 sm:p-3">
                     <h3
-                      className={`font-bold text-xs sm:text-sm truncate ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
+                      className={`font-bold text-xs sm:text-sm truncate ${isDarkMode ? "text-white" : "text-gray-900"
+                        }`}
                     >
                       {listing.carModel?.brand?.name}{" "}
                       {listing.carModel?.modelName}
                     </h3>
                     <div
-                      className={`text-[10px] sm:text-xs ${
-                        isDarkMode ? "text-slate-400" : "text-gray-500"
-                      }`}
+                      className={`text-[10px] sm:text-xs ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                        }`}
                     >
                       {listing.year} •{" "}
                       {listing.transmission === "automatic" ? "AT" : "MT"}
                     </div>
                     <div
-                      className={`mt-1 sm:mt-2 font-bold text-xs sm:text-sm ${
-                        isDarkMode ? "text-yellow-400" : "text-yellow-600"
-                      }`}
+                      className={`mt-1 sm:mt-2 font-bold text-xs sm:text-sm ${isDarkMode ? "text-yellow-400" : "text-yellow-600"
+                        }`}
                     >
                       {formatPrice(listing.price)}
                     </div>
@@ -361,26 +346,22 @@ const MarketplacePage = () => {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters - Desktop */}
           <div
-            className={`hidden lg:block w-72 flex-shrink-0 ${
-              showFilters ? "" : "hidden"
-            }`}
+            className={`hidden lg:block w-72 flex-shrink-0 ${showFilters ? "" : "hidden"
+              }`}
           >
             <div
-              className={`sticky top-24 rounded-2xl shadow-xl overflow-hidden ${
-                isDarkMode ? "bg-slate-900" : "bg-white"
-              }`}
+              className={`sticky top-24 rounded-2xl shadow-xl overflow-hidden ${isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
             >
               {/* Filter Header */}
               <div
-                className={`px-6 py-4 border-b ${
-                  isDarkMode ? "border-slate-800" : "border-gray-100"
-                }`}
+                className={`px-6 py-4 border-b ${isDarkMode ? "border-slate-800" : "border-gray-100"
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <h3
-                    className={`font-bold text-lg ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                    className={`font-bold text-lg ${isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
                   >
                     <FiFilter className="inline mr-2" />
                     Filter
@@ -399,9 +380,8 @@ const MarketplacePage = () => {
                 {/* Brand Filter */}
                 <div>
                   <label
-                    className={`block text-sm font-semibold mb-2 ${
-                      isDarkMode ? "text-slate-300" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                   >
                     <AiOutlineCar className="inline mr-2" />
                     Brand
@@ -414,11 +394,10 @@ const MarketplacePage = () => {
                         brandId: e.target.value,
                       })
                     }
-                    className={`w-full px-4 py-3 rounded-xl border transition-all ${
-                      isDarkMode
+                    className={`w-full px-4 py-3 rounded-xl border transition-all ${isDarkMode
                         ? "bg-slate-800 border-slate-700 text-white focus:border-cyan-500"
                         : "bg-gray-50 border-gray-200 text-gray-800 focus:border-blue-500"
-                    }`}
+                      }`}
                   >
                     <option value="">Semua Brand</option>
                     {brands?.map((brand: any) => (
@@ -432,9 +411,8 @@ const MarketplacePage = () => {
                 {/* Price Range */}
                 <div>
                   <label
-                    className={`block text-sm font-semibold mb-2 ${
-                      isDarkMode ? "text-slate-300" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                   >
                     <FiDollarSign className="inline mr-2" />
                     Rentang Harga
@@ -450,11 +428,10 @@ const MarketplacePage = () => {
                           minPrice: e.target.value,
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border text-sm ${
-                        isDarkMode
+                      className={`w-full px-3 py-2 rounded-xl border text-sm ${isDarkMode
                           ? "bg-slate-800 border-slate-700 text-white"
                           : "bg-gray-50 border-gray-200 text-gray-800"
-                      }`}
+                        }`}
                     />
                     <input
                       type="number"
@@ -466,11 +443,10 @@ const MarketplacePage = () => {
                           maxPrice: e.target.value,
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border text-sm ${
-                        isDarkMode
+                      className={`w-full px-3 py-2 rounded-xl border text-sm ${isDarkMode
                           ? "bg-slate-800 border-slate-700 text-white"
                           : "bg-gray-50 border-gray-200 text-gray-800"
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>
@@ -478,9 +454,8 @@ const MarketplacePage = () => {
                 {/* Year Range */}
                 <div>
                   <label
-                    className={`block text-sm font-semibold mb-2 ${
-                      isDarkMode ? "text-slate-300" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                   >
                     <FiCalendar className="inline mr-2" />
                     Tahun
@@ -496,11 +471,10 @@ const MarketplacePage = () => {
                           yearMin: e.target.value,
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border text-sm ${
-                        isDarkMode
+                      className={`w-full px-3 py-2 rounded-xl border text-sm ${isDarkMode
                           ? "bg-slate-800 border-slate-700 text-white"
                           : "bg-gray-50 border-gray-200 text-gray-800"
-                      }`}
+                        }`}
                     />
                     <input
                       type="number"
@@ -512,11 +486,10 @@ const MarketplacePage = () => {
                           yearMax: e.target.value,
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border text-sm ${
-                        isDarkMode
+                      className={`w-full px-3 py-2 rounded-xl border text-sm ${isDarkMode
                           ? "bg-slate-800 border-slate-700 text-white"
                           : "bg-gray-50 border-gray-200 text-gray-800"
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>
@@ -524,9 +497,8 @@ const MarketplacePage = () => {
                 {/* Transmission */}
                 <div>
                   <label
-                    className={`block text-sm font-semibold mb-2 ${
-                      isDarkMode ? "text-slate-300" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                   >
                     <TbManualGearbox className="inline mr-2" />
                     Transmisi
@@ -539,11 +511,10 @@ const MarketplacePage = () => {
                         transmission: e.target.value,
                       })
                     }
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      isDarkMode
+                    className={`w-full px-4 py-3 rounded-xl border ${isDarkMode
                         ? "bg-slate-800 border-slate-700 text-white"
                         : "bg-gray-50 border-gray-200 text-gray-800"
-                    }`}
+                      }`}
                   >
                     <option value="">Semua</option>
                     <option value="automatic">Automatic</option>
@@ -554,9 +525,8 @@ const MarketplacePage = () => {
                 {/* Fuel Type */}
                 <div>
                   <label
-                    className={`block text-sm font-semibold mb-2 ${
-                      isDarkMode ? "text-slate-300" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                   >
                     <BsFuelPump className="inline mr-2" />
                     Bahan Bakar
@@ -569,11 +539,10 @@ const MarketplacePage = () => {
                         fuelType: e.target.value,
                       })
                     }
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      isDarkMode
+                    className={`w-full px-4 py-3 rounded-xl border ${isDarkMode
                         ? "bg-slate-800 border-slate-700 text-white"
                         : "bg-gray-50 border-gray-200 text-gray-800"
-                    }`}
+                      }`}
                   >
                     <option value="">Semua</option>
                     <option value="bensin">Bensin</option>
@@ -586,9 +555,8 @@ const MarketplacePage = () => {
                 {/* Condition */}
                 <div>
                   <label
-                    className={`block text-sm font-semibold mb-2 ${
-                      isDarkMode ? "text-slate-300" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                   >
                     <AiOutlineSafety className="inline mr-2" />
                     Kondisi
@@ -601,11 +569,10 @@ const MarketplacePage = () => {
                         condition: e.target.value,
                       })
                     }
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      isDarkMode
+                    className={`w-full px-4 py-3 rounded-xl border ${isDarkMode
                         ? "bg-slate-800 border-slate-700 text-white"
                         : "bg-gray-50 border-gray-200 text-gray-800"
-                    }`}
+                      }`}
                   >
                     <option value="">Semua</option>
                     <option value="baru">Baru</option>
@@ -628,15 +595,13 @@ const MarketplacePage = () => {
           <div className="flex-1 min-w-0">
             {/* Toolbar */}
             <div
-              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl gap-3 sm:gap-4 ${
-                isDarkMode ? "bg-slate-900" : "bg-white"
-              } shadow-lg`}
+              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl gap-3 sm:gap-4 ${isDarkMode ? "bg-slate-900" : "bg-white"
+                } shadow-lg`}
             >
               <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <span
-                  className={`text-xs sm:text-sm ${
-                    isDarkMode ? "text-slate-400" : "text-gray-600"
-                  }`}
+                  className={`text-xs sm:text-sm ${isDarkMode ? "text-slate-400" : "text-gray-600"
+                    }`}
                 >
                   <span className="hidden sm:inline">Menampilkan </span>
                   <strong>{listings.length}</strong> dari{" "}
@@ -655,11 +620,10 @@ const MarketplacePage = () => {
                     });
                     setTimeout(handleApplyFilters, 100);
                   }}
-                  className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs sm:text-sm flex-1 sm:flex-initial ${
-                    isDarkMode
+                  className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs sm:text-sm flex-1 sm:flex-initial ${isDarkMode
                       ? "bg-slate-800 border-slate-700 text-white"
                       : "bg-gray-50 border-gray-200 text-gray-800"
-                  }`}
+                    }`}
                 >
                   <option value="newest">Terbaru</option>
                   <option value="oldest">Terlama</option>
@@ -670,31 +634,28 @@ const MarketplacePage = () => {
 
                 {/* View Mode */}
                 <div
-                  className={`flex rounded-xl overflow-hidden border ${
-                    isDarkMode ? "border-slate-700" : "border-gray-200"
-                  }`}
+                  className={`flex rounded-xl overflow-hidden border ${isDarkMode ? "border-slate-700" : "border-gray-200"
+                    }`}
                 >
                   <button
                     onClick={() => setViewMode("grid")}
-                    className={`p-1.5 sm:p-2 ${
-                      viewMode === "grid"
+                    className={`p-1.5 sm:p-2 ${viewMode === "grid"
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
                           ? "bg-slate-800 text-slate-400"
                           : "bg-gray-50 text-gray-600"
-                    }`}
+                      }`}
                   >
                     <FiGrid className="text-sm sm:text-base" />
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
-                    className={`p-1.5 sm:p-2 ${
-                      viewMode === "list"
+                    className={`p-1.5 sm:p-2 ${viewMode === "list"
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
                           ? "bg-slate-800 text-slate-400"
                           : "bg-gray-50 text-gray-600"
-                    }`}
+                      }`}
                   >
                     <FiList className="text-sm sm:text-base" />
                   </button>
@@ -723,26 +684,22 @@ const MarketplacePage = () => {
             {/* Empty State */}
             {!loading && listings.length === 0 && (
               <div
-                className={`text-center py-20 rounded-2xl ${
-                  isDarkMode ? "bg-slate-900" : "bg-white"
-                }`}
+                className={`text-center py-20 rounded-2xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                  }`}
               >
                 <AiOutlineCar
-                  className={`text-8xl mx-auto mb-6 ${
-                    isDarkMode ? "text-slate-700" : "text-gray-300"
-                  }`}
+                  className={`text-8xl mx-auto mb-6 ${isDarkMode ? "text-slate-700" : "text-gray-300"
+                    }`}
                 />
                 <h3
-                  className={`text-2xl font-bold mb-2 ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`text-2xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   Tidak ada mobil ditemukan
                 </h3>
                 <p
-                  className={`${
-                    isDarkMode ? "text-slate-400" : "text-gray-600"
-                  }`}
+                  className={`${isDarkMode ? "text-slate-400" : "text-gray-600"
+                    }`}
                 >
                   Coba ubah filter pencarian Anda
                 </p>
@@ -762,9 +719,8 @@ const MarketplacePage = () => {
                   <Link
                     key={listing.id}
                     href={`/marketplace/${encryptSlug(listing.id)}`}
-                    className={`group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${
-                      isDarkMode ? "bg-slate-900" : "bg-white"
-                    }`}
+                    className={`group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${isDarkMode ? "bg-slate-900" : "bg-white"
+                      }`}
                   >
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden">
@@ -819,17 +775,15 @@ const MarketplacePage = () => {
                     <div className="p-3 sm:p-4">
                       {/* Title */}
                       <h3
-                        className={`font-bold text-sm sm:text-base lg:text-lg mb-1 truncate ${
-                          isDarkMode ? "text-white" : "text-gray-900"
-                        }`}
+                        className={`font-bold text-sm sm:text-base lg:text-lg mb-1 truncate ${isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
                       >
                         {listing.carModel?.brand?.name}{" "}
                         {listing.carModel?.modelName}
                       </h3>
                       <p
-                        className={`text-xs sm:text-sm mb-2 sm:mb-3 ${
-                          isDarkMode ? "text-slate-400" : "text-gray-500"
-                        }`}
+                        className={`text-xs sm:text-sm mb-2 sm:mb-3 ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                          }`}
                       >
                         {listing.year} • {listing.color}
                       </p>
@@ -837,11 +791,10 @@ const MarketplacePage = () => {
                       {/* Specs */}
                       <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                         <span
-                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${
-                            isDarkMode
+                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${isDarkMode
                               ? "bg-slate-800 text-slate-300"
                               : "bg-gray-100 text-gray-600"
-                          }`}
+                            }`}
                         >
                           <BsSpeedometer2 className="text-[10px] sm:text-xs flex-shrink-0" />
                           <span className="truncate max-w-[60px] sm:max-w-none">
@@ -849,11 +802,10 @@ const MarketplacePage = () => {
                           </span>
                         </span>
                         <span
-                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${
-                            isDarkMode
+                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${isDarkMode
                               ? "bg-slate-800 text-slate-300"
                               : "bg-gray-100 text-gray-600"
-                          }`}
+                            }`}
                         >
                           <TbManualGearbox className="text-[10px] sm:text-xs flex-shrink-0" />
                           <span className="whitespace-nowrap">
@@ -861,11 +813,10 @@ const MarketplacePage = () => {
                           </span>
                         </span>
                         <span
-                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${
-                            isDarkMode
+                          className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${isDarkMode
                               ? "bg-slate-800 text-slate-300"
                               : "bg-gray-100 text-gray-600"
-                          }`}
+                            }`}
                         >
                           <BsFuelPump className="text-[10px] sm:text-xs flex-shrink-0" />
                           <span className="truncate max-w-[50px] sm:max-w-none capitalize">
@@ -877,9 +828,8 @@ const MarketplacePage = () => {
                       {/* Location & Time */}
                       <div className="flex items-center justify-between text-[10px] sm:text-xs gap-2">
                         <span
-                          className={`flex items-center gap-0.5 sm:gap-1 truncate max-w-[60%] ${
-                            isDarkMode ? "text-slate-400" : "text-gray-500"
-                          }`}
+                          className={`flex items-center gap-0.5 sm:gap-1 truncate max-w-[60%] ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                            }`}
                         >
                           <FiMapPin className="flex-shrink-0 text-[10px] sm:text-xs" />
                           <span className="truncate">
@@ -887,9 +837,8 @@ const MarketplacePage = () => {
                           </span>
                         </span>
                         <span
-                          className={`flex items-center gap-0.5 sm:gap-1 whitespace-nowrap ${
-                            isDarkMode ? "text-slate-500" : "text-gray-400"
-                          }`}
+                          className={`flex items-center gap-0.5 sm:gap-1 whitespace-nowrap ${isDarkMode ? "text-slate-500" : "text-gray-400"
+                            }`}
                         >
                           <AiOutlineClockCircle className="flex-shrink-0 text-[10px] sm:text-xs" />
                           <span className="truncate">
@@ -910,9 +859,8 @@ const MarketplacePage = () => {
                   <Link
                     key={listing.id}
                     href={`/marketplace/${encryptSlug(listing.id)}`}
-                    className={`group flex gap-6 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                      isDarkMode ? "bg-slate-900" : "bg-white"
-                    }`}
+                    className={`group flex gap-6 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ${isDarkMode ? "bg-slate-900" : "bg-white"
+                      }`}
                   >
                     {/* Image */}
                     <div className="relative w-72 flex-shrink-0">
@@ -937,17 +885,15 @@ const MarketplacePage = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3
-                            className={`font-bold text-xl mb-1 ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`font-bold text-xl mb-1 ${isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {listing.carModel?.brand?.name}{" "}
                             {listing.carModel?.modelName}
                           </h3>
                           <p
-                            className={`text-sm ${
-                              isDarkMode ? "text-slate-400" : "text-gray-500"
-                            }`}
+                            className={`text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                              }`}
                           >
                             {listing.year} • {listing.color} •{" "}
                             {listing.ownershipStatus || "N/A"}
@@ -958,9 +904,8 @@ const MarketplacePage = () => {
                             {formatPrice(listing.price)}
                           </div>
                           <p
-                            className={`text-xs ${
-                              isDarkMode ? "text-slate-500" : "text-gray-400"
-                            }`}
+                            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-gray-400"
+                              }`}
                           >
                             {listing.taxStatus || "Status pajak tidak tersedia"}
                           </p>
@@ -970,103 +915,87 @@ const MarketplacePage = () => {
                       {/* Specs Grid */}
                       <div className="grid grid-cols-4 gap-4 mb-4">
                         <div
-                          className={`text-center p-3 rounded-xl ${
-                            isDarkMode ? "bg-slate-800" : "bg-gray-50"
-                          }`}
+                          className={`text-center p-3 rounded-xl ${isDarkMode ? "bg-slate-800" : "bg-gray-50"
+                            }`}
                         >
                           <BsSpeedometer2
-                            className={`text-xl mx-auto mb-1 ${
-                              isDarkMode ? "text-cyan-400" : "text-blue-500"
-                            }`}
+                            className={`text-xl mx-auto mb-1 ${isDarkMode ? "text-cyan-400" : "text-blue-500"
+                              }`}
                           />
                           <div
-                            className={`text-sm font-semibold ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {formatMileage(listing.mileage)}
                           </div>
                           <div
-                            className={`text-xs ${
-                              isDarkMode ? "text-slate-500" : "text-gray-500"
-                            }`}
+                            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-gray-500"
+                              }`}
                           >
                             Kilometer
                           </div>
                         </div>
                         <div
-                          className={`text-center p-3 rounded-xl ${
-                            isDarkMode ? "bg-slate-800" : "bg-gray-50"
-                          }`}
+                          className={`text-center p-3 rounded-xl ${isDarkMode ? "bg-slate-800" : "bg-gray-50"
+                            }`}
                         >
                           <TbManualGearbox
-                            className={`text-xl mx-auto mb-1 ${
-                              isDarkMode ? "text-cyan-400" : "text-blue-500"
-                            }`}
+                            className={`text-xl mx-auto mb-1 ${isDarkMode ? "text-cyan-400" : "text-blue-500"
+                              }`}
                           />
                           <div
-                            className={`text-sm font-semibold ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {listing.transmission === "automatic"
                               ? "Automatic"
                               : "Manual"}
                           </div>
                           <div
-                            className={`text-xs ${
-                              isDarkMode ? "text-slate-500" : "text-gray-500"
-                            }`}
+                            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-gray-500"
+                              }`}
                           >
                             Transmisi
                           </div>
                         </div>
                         <div
-                          className={`text-center p-3 rounded-xl ${
-                            isDarkMode ? "bg-slate-800" : "bg-gray-50"
-                          }`}
+                          className={`text-center p-3 rounded-xl ${isDarkMode ? "bg-slate-800" : "bg-gray-50"
+                            }`}
                         >
                           <BsFuelPump
-                            className={`text-xl mx-auto mb-1 ${
-                              isDarkMode ? "text-cyan-400" : "text-blue-500"
-                            }`}
+                            className={`text-xl mx-auto mb-1 ${isDarkMode ? "text-cyan-400" : "text-blue-500"
+                              }`}
                           />
                           <div
-                            className={`text-sm font-semibold capitalize ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`text-sm font-semibold capitalize ${isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {listing.fuelType}
                           </div>
                           <div
-                            className={`text-xs ${
-                              isDarkMode ? "text-slate-500" : "text-gray-500"
-                            }`}
+                            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-gray-500"
+                              }`}
                           >
                             Bahan Bakar
                           </div>
                         </div>
                         <div
-                          className={`text-center p-3 rounded-xl ${
-                            isDarkMode ? "bg-slate-800" : "bg-gray-50"
-                          }`}
+                          className={`text-center p-3 rounded-xl ${isDarkMode ? "bg-slate-800" : "bg-gray-50"
+                            }`}
                         >
                           <FiEye
-                            className={`text-xl mx-auto mb-1 ${
-                              isDarkMode ? "text-cyan-400" : "text-blue-500"
-                            }`}
+                            className={`text-xl mx-auto mb-1 ${isDarkMode ? "text-cyan-400" : "text-blue-500"
+                              }`}
                           />
                           <div
-                            className={`text-sm font-semibold ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {listing.viewCount}
                           </div>
                           <div
-                            className={`text-xs ${
-                              isDarkMode ? "text-slate-500" : "text-gray-500"
-                            }`}
+                            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-gray-500"
+                              }`}
                           >
                             Dilihat
                           </div>
@@ -1076,9 +1005,8 @@ const MarketplacePage = () => {
                       {/* Footer */}
                       <div className="flex items-center justify-between">
                         <div
-                          className={`flex items-center gap-4 text-sm ${
-                            isDarkMode ? "text-slate-400" : "text-gray-500"
-                          }`}
+                          className={`flex items-center gap-4 text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                            }`}
                         >
                           <span className="flex items-center gap-1">
                             <FiMapPin />
@@ -1117,13 +1045,12 @@ const MarketplacePage = () => {
                     onClick={() => {
                       dispatch(fetchListings({ ...filters, page }));
                     }}
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-semibold transition-all text-xs sm:text-sm ${
-                      pagination.page === page
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-semibold transition-all text-xs sm:text-sm ${pagination.page === page
                         ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                         : isDarkMode
                           ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                           : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>

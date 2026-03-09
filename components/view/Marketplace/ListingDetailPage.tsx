@@ -60,8 +60,7 @@ const ListingDetailPage = () => {
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL_IMAGES ||
-    "http://192.168.0.182:8080/uploads/";
+    process.env.NEXT_PUBLIC_API_URL_IMAGES
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -134,9 +133,8 @@ const ListingDetailPage = () => {
   if (detailLoading) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${
-          isDarkMode ? "bg-slate-950" : "bg-gray-50"
-        }`}
+        className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-slate-950" : "bg-gray-50"
+          }`}
       >
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-500 border-t-transparent mx-auto mb-4"></div>
@@ -151,20 +149,17 @@ const ListingDetailPage = () => {
   if (!selectedListing) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${
-          isDarkMode ? "bg-slate-950" : "bg-gray-50"
-        }`}
+        className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-slate-950" : "bg-gray-50"
+          }`}
       >
         <div className="text-center">
           <AiOutlineCar
-            className={`text-8xl mx-auto mb-4 ${
-              isDarkMode ? "text-slate-700" : "text-gray-300"
-            }`}
+            className={`text-8xl mx-auto mb-4 ${isDarkMode ? "text-slate-700" : "text-gray-300"
+              }`}
           />
           <h2
-            className={`text-2xl font-bold mb-2 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
+            className={`text-2xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"
+              }`}
           >
             Listing tidak ditemukan
           </h2>
@@ -190,21 +185,19 @@ const ListingDetailPage = () => {
     >
       {/* Header */}
       <div
-        className={`sticky top-0 z-40 ${
-          isDarkMode
+        className={`sticky top-0 z-40 ${isDarkMode
             ? "bg-slate-900/95 backdrop-blur-xl"
             : "bg-white/95 backdrop-blur-xl"
-        } shadow-lg`}
+          } shadow-lg`}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.back()}
-              className={`flex items-center gap-1.5 sm:gap-2 font-semibold text-sm sm:text-base ${
-                isDarkMode
+              className={`flex items-center gap-1.5 sm:gap-2 font-semibold text-sm sm:text-base ${isDarkMode
                   ? "text-slate-300 hover:text-white"
                   : "text-gray-700 hover:text-gray-900"
-              }`}
+                }`}
             >
               <FiArrowLeft className="text-lg sm:text-xl" />
               <span className="hidden sm:inline">Kembali</span>
@@ -213,13 +206,12 @@ const ListingDetailPage = () => {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className={`p-2 sm:p-3 rounded-xl transition-all ${
-                  isFavorite
+                className={`p-2 sm:p-3 rounded-xl transition-all ${isFavorite
                     ? "bg-red-500 text-white"
                     : isDarkMode
                       ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 <FiHeart
                   className={`text-base sm:text-lg ${isFavorite ? "fill-current" : ""}`}
@@ -227,11 +219,10 @@ const ListingDetailPage = () => {
               </button>
               <button
                 onClick={handleShare}
-                className={`p-2 sm:p-3 rounded-xl ${
-                  isDarkMode
+                className={`p-2 sm:p-3 rounded-xl ${isDarkMode
                     ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 <FiShare2 className="text-base sm:text-lg" />
               </button>
@@ -246,9 +237,8 @@ const ListingDetailPage = () => {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Image Gallery */}
             <div
-              className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl ${
-                isDarkMode ? "bg-slate-900" : "bg-white"
-              }`}
+              className={`rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
             >
               {/* Main Image */}
               <div
@@ -314,13 +304,12 @@ const ListingDetailPage = () => {
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
-                      className={`flex-shrink-0 w-14 h-14 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${
-                        currentImageIndex === idx
+                      className={`flex-shrink-0 w-14 h-14 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${currentImageIndex === idx
                           ? "border-cyan-500 ring-2 ring-cyan-500/30"
                           : isDarkMode
                             ? "border-slate-700 hover:border-slate-600"
                             : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <img
                         src={`${baseUrl}${img}`}
@@ -335,24 +324,21 @@ const ListingDetailPage = () => {
 
             {/* Car Title & Basic Info */}
             <div
-              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${
-                isDarkMode ? "bg-slate-900" : "bg-white"
-              }`}
+              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
             >
               <div className="flex flex-col sm:flex-row items-start justify-between mb-3 sm:mb-4 gap-3">
                 <div className="flex-1">
                   <h1
-                    className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2 ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2 ${isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
                   >
                     {listing.carModel?.brand?.name}{" "}
                     {listing.carModel?.modelName}
                   </h1>
                   <p
-                    className={`text-sm sm:text-base lg:text-lg ${
-                      isDarkMode ? "text-slate-400" : "text-gray-600"
-                    }`}
+                    className={`text-sm sm:text-base lg:text-lg ${isDarkMode ? "text-slate-400" : "text-gray-600"
+                      }`}
                   >
                     {listing.year} • {listing.color}
                   </p>
@@ -366,9 +352,8 @@ const ListingDetailPage = () => {
 
               {/* Stats Bar */}
               <div
-                className={`flex flex-wrap items-center gap-3 sm:gap-6 py-3 sm:py-4 border-t border-b ${
-                  isDarkMode ? "border-slate-800" : "border-gray-100"
-                }`}
+                className={`flex flex-wrap items-center gap-3 sm:gap-6 py-3 sm:py-4 border-t border-b ${isDarkMode ? "border-slate-800" : "border-gray-100"
+                  }`}
               >
                 <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
                   <FiEye
@@ -417,14 +402,12 @@ const ListingDetailPage = () => {
 
             {/* Specifications */}
             <div
-              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${
-                isDarkMode ? "bg-slate-900" : "bg-white"
-              }`}
+              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
             >
               <h2
-                className={`text-base sm:text-lg lg:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}
+                className={`text-base sm:text-lg lg:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 ${isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
               >
                 <BsGear className="text-lg sm:text-xl text-cyan-500" />
                 Spesifikasi
@@ -476,26 +459,22 @@ const ListingDetailPage = () => {
                 ].map((spec, idx) => (
                   <div
                     key={idx}
-                    className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl text-center ${
-                      isDarkMode ? "bg-slate-800/50" : "bg-gray-50"
-                    }`}
+                    className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl text-center ${isDarkMode ? "bg-slate-800/50" : "bg-gray-50"
+                      }`}
                   >
                     <spec.icon
-                      className={`text-lg sm:text-xl lg:text-2xl mx-auto mb-1 sm:mb-2 ${
-                        isDarkMode ? "text-cyan-400" : "text-blue-500"
-                      }`}
+                      className={`text-lg sm:text-xl lg:text-2xl mx-auto mb-1 sm:mb-2 ${isDarkMode ? "text-cyan-400" : "text-blue-500"
+                        }`}
                     />
                     <div
-                      className={`text-[10px] sm:text-xs lg:text-sm ${
-                        isDarkMode ? "text-slate-500" : "text-gray-500"
-                      }`}
+                      className={`text-[10px] sm:text-xs lg:text-sm ${isDarkMode ? "text-slate-500" : "text-gray-500"
+                        }`}
                     >
                       {spec.label}
                     </div>
                     <div
-                      className={`font-bold text-xs sm:text-sm lg:text-base ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
+                      className={`font-bold text-xs sm:text-sm lg:text-base ${isDarkMode ? "text-white" : "text-gray-900"
+                        }`}
                     >
                       {spec.value}
                     </div>
@@ -506,22 +485,19 @@ const ListingDetailPage = () => {
 
             {/* Description */}
             <div
-              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${
-                isDarkMode ? "bg-slate-900" : "bg-white"
-              }`}
+              className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                }`}
             >
               <h2
-                className={`text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}
+                className={`text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 ${isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
               >
                 <TbFileDescription className="text-lg sm:text-xl text-cyan-500" />
                 Deskripsi
               </h2>
               <p
-                className={`whitespace-pre-line leading-relaxed text-xs sm:text-sm lg:text-base ${
-                  isDarkMode ? "text-slate-300" : "text-gray-700"
-                }`}
+                className={`whitespace-pre-line leading-relaxed text-xs sm:text-sm lg:text-base ${isDarkMode ? "text-slate-300" : "text-gray-700"
+                  }`}
               >
                 {listing.description}
               </p>
@@ -534,14 +510,12 @@ const ListingDetailPage = () => {
             <div className="lg:sticky lg:top-24 space-y-4 sm:space-y-6">
               {/* Seller Card */}
               <div
-                className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${
-                  isDarkMode ? "bg-slate-900" : "bg-white"
-                }`}
+                className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                  }`}
               >
                 <h2
-                  className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   Informasi Penjual
                 </h2>
@@ -552,16 +526,14 @@ const ListingDetailPage = () => {
                   </div>
                   <div>
                     <div
-                      className={`font-bold text-sm sm:text-base lg:text-lg ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
+                      className={`font-bold text-sm sm:text-base lg:text-lg ${isDarkMode ? "text-white" : "text-gray-900"
+                        }`}
                     >
                       {listing.seller?.fullName || "Penjual"}
                     </div>
                     <div
-                      className={`text-xs sm:text-sm ${
-                        isDarkMode ? "text-slate-400" : "text-gray-500"
-                      }`}
+                      className={`text-xs sm:text-sm ${isDarkMode ? "text-slate-400" : "text-gray-500"
+                        }`}
                     >
                       {listing.seller?.location || listing.locationCity}
                     </div>
@@ -583,11 +555,10 @@ const ListingDetailPage = () => {
                     onClick={() => {
                       window.location.href = `tel:${listing.sellerWhatsapp}`;
                     }}
-                    className={`w-full flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold transition-all text-sm sm:text-base ${
-                      isDarkMode
+                    className={`w-full flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold transition-all text-sm sm:text-base ${isDarkMode
                         ? "bg-slate-800 text-white hover:bg-slate-700"
                         : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     <FiPhone className="text-lg sm:text-xl" />
                     Telepon
@@ -597,22 +568,19 @@ const ListingDetailPage = () => {
 
               {/* Safety Tips */}
               <div
-                className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${
-                  isDarkMode ? "bg-slate-900" : "bg-white"
-                }`}
+                className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl ${isDarkMode ? "bg-slate-900" : "bg-white"
+                  }`}
               >
                 <h3
-                  className={`font-bold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`font-bold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <FiShield className="text-base sm:text-lg text-cyan-500" />
                   Tips Keamanan
                 </h3>
                 <ul
-                  className={`space-y-2 sm:space-y-3 text-xs sm:text-sm ${
-                    isDarkMode ? "text-slate-400" : "text-gray-600"
-                  }`}
+                  className={`space-y-2 sm:space-y-3 text-xs sm:text-sm ${isDarkMode ? "text-slate-400" : "text-gray-600"
+                    }`}
                 >
                   <li className="flex items-start gap-1.5 sm:gap-2">
                     <FiCheck className="text-green-500 mt-0.5 flex-shrink-0 text-xs sm:text-sm" />
@@ -635,11 +603,10 @@ const ListingDetailPage = () => {
 
               {/* Report */}
               <button
-                className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-medium rounded-lg sm:rounded-xl transition-all ${
-                  isDarkMode
+                className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-medium rounded-lg sm:rounded-xl transition-all ${isDarkMode
                     ? "text-slate-500 hover:text-red-400 hover:bg-red-500/10"
                     : "text-gray-500 hover:text-red-500 hover:bg-red-50"
-                }`}
+                  }`}
               >
                 Laporkan Listing Ini
               </button>
@@ -700,9 +667,8 @@ const ListingDetailPage = () => {
                   e.stopPropagation();
                   setCurrentImageIndex(idx);
                 }}
-                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${
-                  currentImageIndex === idx ? "bg-white" : "bg-white/40"
-                }`}
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${currentImageIndex === idx ? "bg-white" : "bg-white/40"
+                  }`}
               />
             ))}
           </div>

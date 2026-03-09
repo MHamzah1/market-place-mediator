@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import instanceAxios from "@/lib/axiosInstance/instanceAxios";
-import { getHeaders } from "@/lib/headers/headers";
+import { getHeaders, getHeadersFormData } from "@/lib/headers/headers";
 import { AxiosError } from "axios";
 
 // ============================================================
@@ -56,7 +56,14 @@ export interface WarehouseVehicle {
   images?: string[];
   sellerName: string;
   sellerPhone: string;
+  sellerWhatsapp?: string;
   sellerKtp?: string;
+  description?: string;
+  condition?: string;
+  ownershipStatus?: string;
+  taxStatus?: string;
+  locationCity?: string;
+  locationProvince?: string;
   status: VehicleStatus;
   listingId?: string;
   notes?: string;
@@ -248,6 +255,16 @@ export interface CreateVehicleData {
   askingPrice: number;
   sellerName: string;
   sellerPhone: string;
+  sellerWhatsapp?: string;
+  sellerKtp?: string;
+  description?: string;
+  condition?: string;
+  ownershipStatus?: string;
+  taxStatus?: string;
+  locationCity?: string;
+  locationProvince?: string;
+  notes?: string;
+  images?: File[];
 }
 
 export interface CreateInspectionData {
@@ -563,8 +580,40 @@ export const registerVehicle = createAsyncThunk<
   { rejectValue: string }
 >("warehouse/registerVehicle", async (data, { rejectWithValue }) => {
   try {
-    const res = await instanceAxios.post("/warehouse/vehicles", data, {
-      headers: getHeaders(),
+    const formData = new FormData();
+    formData.append("showroomId", data.showroomId);
+    formData.append("variantId", data.variantId);
+    formData.append("yearPriceId", data.yearPriceId);
+    formData.append("color", data.color);
+    formData.append("licensePlate", data.licensePlate);
+    formData.append("chassisNumber", data.chassisNumber);
+    formData.append("engineNumber", data.engineNumber);
+    formData.append("mileage", String(data.mileage));
+    formData.append("fuelType", data.fuelType);
+    formData.append("askingPrice", String(data.askingPrice));
+    formData.append("sellerName", data.sellerName);
+    formData.append("sellerPhone", data.sellerPhone);
+    
+    // Optional fields
+    if (data.sellerWhatsapp) formData.append("sellerWhatsapp", data.sellerWhatsapp);
+    if (data.sellerKtp) formData.append("sellerKtp", data.sellerKtp);
+    if (data.description) formData.append("description", data.description);
+    if (data.condition) formData.append("condition", data.condition);
+    if (data.ownershipStatus) formData.append("ownershipStatus", data.ownershipStatus);
+    if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
+    if (data.locationCity) formData.append("locationCity", data.locationCity);
+    if (data.locationProvince) formData.append("locationProvince", data.locationProvince);
+    if (data.notes) formData.append("notes", data.notes);
+    
+    // Images
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
+    const res = await instanceAxios.post("/warehouse/vehicles", formData, {
+      headers: getHeadersFormData(),
     });
     return res.data?.data ?? res.data;
   } catch (e) {
@@ -579,8 +628,40 @@ export const updateVehicle = createAsyncThunk<
   { rejectValue: string }
 >("warehouse/updateVehicle", async ({ id, data }, { rejectWithValue }) => {
   try {
-    const res = await instanceAxios.put(`/warehouse/vehicles/${id}`, data, {
-      headers: getHeaders(),
+    const formData = new FormData();
+    formData.append("showroomId", data.showroomId);
+    formData.append("variantId", data.variantId);
+    formData.append("yearPriceId", data.yearPriceId);
+    formData.append("color", data.color);
+    formData.append("licensePlate", data.licensePlate);
+    formData.append("chassisNumber", data.chassisNumber);
+    formData.append("engineNumber", data.engineNumber);
+    formData.append("mileage", String(data.mileage));
+    formData.append("fuelType", data.fuelType);
+    formData.append("askingPrice", String(data.askingPrice));
+    formData.append("sellerName", data.sellerName);
+    formData.append("sellerPhone", data.sellerPhone);
+    
+    // Optional fields
+    if (data.sellerWhatsapp) formData.append("sellerWhatsapp", data.sellerWhatsapp);
+    if (data.sellerKtp) formData.append("sellerKtp", data.sellerKtp);
+    if (data.description) formData.append("description", data.description);
+    if (data.condition) formData.append("condition", data.condition);
+    if (data.ownershipStatus) formData.append("ownershipStatus", data.ownershipStatus);
+    if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
+    if (data.locationCity) formData.append("locationCity", data.locationCity);
+    if (data.locationProvince) formData.append("locationProvince", data.locationProvince);
+    if (data.notes) formData.append("notes", data.notes);
+    
+    // Images
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
+    const res = await instanceAxios.put(`/warehouse/vehicles/${id}`, formData, {
+      headers: getHeadersFormData(),
     });
     return res.data?.data ?? res.data;
   } catch (e) {
@@ -599,7 +680,7 @@ export const updateVehicleStatus = createAsyncThunk<
     try {
       const res = await instanceAxios.patch(
         `/warehouse/vehicles/${id}/status`,
-        null,
+        {},
         {
           params: { status },
           headers: getHeaders(),

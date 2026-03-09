@@ -10,7 +10,7 @@ import {
 } from "@/lib/state/slice/warehouse/warehouseSlice";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { FiArrowLeft, FiSave } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiUpload, FiX } from "react-icons/fi";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import PaginatedSelectField from "@/components/ui/paginated-select-field";
@@ -41,6 +41,16 @@ interface YearPriceItem {
   variant?: { variantName: string };
 }
 
+// Allowed image types
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILES = 10;
+
 const VehicleRegisterForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
@@ -67,11 +77,26 @@ const VehicleRegisterForm = () => {
     askingPrice: 0,
     sellerName: "",
     sellerPhone: "",
+    sellerWhatsapp: "",
+    sellerKtp: "",
+    description: "",
+    condition: "bekas",
+    ownershipStatus: "Tangan Pertama",
+    taxStatus: "Pajak Hidup",
+    locationCity: "",
+    locationProvince: "",
+    notes: "",
   });
 
   // display labels for cascaded selects
   const [selectedBrandId, setSelectedBrandId] = useState("");
   const [selectedModelId, setSelectedModelId] = useState("");
+
+  // Storage for images
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (selectedShowroom)
@@ -90,6 +115,85 @@ const VehicleRegisterForm = () => {
     }
   }, [successMessage, error, dispatch, router]);
 
+  // Clean up preview URLs
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
+
+  // Validasi & Image Handlers
+  const validateFile = (file: File): string | null => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return `File "${file.name}" tidak valid. Hanya JPG, PNG, WEBP.`;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      return `File "${file.name}" terlalu besar. Max ${MAX_FILE_SIZE_MB}MB.`;
+    }
+    return null;
+  };
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles: File[] = [];
+    const newPreviews: string[] = [];
+    const errors: string[] = [];
+
+    if (imageFiles.length >= MAX_FILES) {
+      toast.error(`Maksimal ${MAX_FILES} gambar`);
+      return;
+    }
+
+    const remainingSlots = MAX_FILES - imageFiles.length;
+    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+    filesToProcess.forEach((file) => {
+      const error = validateFile(file);
+      if (error) {
+        errors.push(error);
+      } else {
+        newFiles.push(file);
+        newPreviews.push(URL.createObjectURL(file));
+      }
+    });
+
+    if (errors.length > 0) {
+      errors.forEach((err) => toast.error(err));
+    }
+    if (newFiles.length > 0) {
+      setImageFiles((prev) => [...prev, ...newFiles]);
+      setImagePreviews((prev) => [...prev, ...newPreviews]);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(
@@ -106,6 +210,16 @@ const VehicleRegisterForm = () => {
         askingPrice: Number(form.askingPrice),
         sellerName: form.sellerName,
         sellerPhone: form.sellerPhone,
+        sellerWhatsapp: form.sellerWhatsapp,
+        sellerKtp: form.sellerKtp,
+        description: form.description,
+        condition: form.condition,
+        ownershipStatus: form.ownershipStatus,
+        taxStatus: form.taxStatus,
+        locationCity: form.locationCity,
+        locationProvince: form.locationProvince,
+        notes: form.notes,
+        images: imageFiles,
       }),
     );
   };
@@ -340,6 +454,100 @@ const VehicleRegisterForm = () => {
               onChange={handleChange}
               required
             />
+
+            <div>
+              <label
+                className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+              >
+                Kondisi
+              </label>
+              <select
+                name="condition"
+                value={form.condition}
+                onChange={handleChange}
+                className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              >
+                <option value="bekas">Bekas</option>
+                <option value="baru">Baru</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+              >
+                Status Kepemilikan
+              </label>
+              <select
+                name="ownershipStatus"
+                value={form.ownershipStatus}
+                onChange={handleChange}
+                className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              >
+                <option value="Tangan Pertama">Tangan Pertama</option>
+                <option value="Tangan Kedua">Tangan Kedua</option>
+                <option value="Tangan Ketiga+">Tangan Ketiga+</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+              >
+                Status Pajak
+              </label>
+              <select
+                name="taxStatus"
+                value={form.taxStatus}
+                onChange={handleChange}
+                className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              >
+                <option value="Pajak Hidup">Pajak Hidup</option>
+                <option value="Pajak Mati">Pajak Mati</option>
+              </select>
+            </div>
+
+            <InputField
+              label="Kota Lokasi"
+              name="locationCity"
+              value={form.locationCity}
+              onChange={handleChange}
+            />
+            <InputField
+              label="Provinsi Lokasi"
+              name="locationProvince"
+              value={form.locationProvince}
+              onChange={handleChange}
+            />
+
+            <div className="md:col-span-2">
+              <label
+                className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+              >
+                Deskripsi
+              </label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows={4}
+                className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label
+                className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+              >
+                Catatan Internal (Notes)
+              </label>
+              <textarea
+                name="notes"
+                value={form.notes}
+                onChange={handleChange}
+                rows={2}
+                className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              />
+            </div>
           </div>
         </div>
 
@@ -368,7 +576,111 @@ const VehicleRegisterForm = () => {
               placeholder="08123456789"
               required
             />
+            <InputField
+              label="WhatsApp Penjual"
+              name="sellerWhatsapp"
+              value={form.sellerWhatsapp || ""}
+              onChange={handleChange}
+              placeholder="628123456789"
+            />
+            <InputField
+              label="KTP Penjual"
+              name="sellerKtp"
+              value={form.sellerKtp || ""}
+              onChange={handleChange}
+            />
           </div>
+        </div>
+
+        {/* Upload Gambar */}
+        <div
+          className={`${isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white border-slate-200 shadow-sm"} border rounded-2xl p-6`}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2
+              className={`text-lg font-semibold ${isDark ? "text-white" : "text-slate-900"}`}
+            >
+              Upload Gambar
+            </h2>
+            <span
+              className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}
+            >
+              {imageFiles.length} / {MAX_FILES} gambar
+            </span>
+          </div>
+
+          <div
+            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer ${
+              dragActive
+                ? "border-emerald-500 bg-emerald-500/5"
+                : isDark
+                  ? "border-slate-700 hover:border-emerald-500/50 hover:bg-slate-800"
+                  : "border-slate-300 hover:border-emerald-500/50 hover:bg-slate-50"
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept={ALLOWED_IMAGE_TYPES.join(",")}
+              onChange={(e) => handleFileSelect(e.target.files)}
+              className="hidden"
+            />
+            <div
+              className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                isDark ? "bg-slate-800" : "bg-white shadow-sm"
+              }`}
+            >
+              <FiUpload
+                className={`text-2xl ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              />
+            </div>
+            <p
+              className={`text-base font-medium mb-2 ${isDark ? "text-white" : "text-slate-900"}`}
+            >
+              Klik atau tarik gambar ke sini
+            </p>
+            <p
+              className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}
+            >
+              Format: JPG, PNG, WEBP (Max: {MAX_FILE_SIZE_MB}MB)
+            </p>
+          </div>
+
+          {/* Image Previews */}
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-6">
+              {imagePreviews.map((url, index) => (
+                <div key={index} className="relative aspect-[4/3] group">
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage(index);
+                    }}
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110 shadow-lg"
+                  >
+                    <FiX />
+                  </button>
+                  {index === 0 && (
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium rounded-lg">
+                      Utama
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <button
