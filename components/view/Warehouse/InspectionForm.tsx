@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
+import { decryptQueryParam, encryptSlug } from "@/lib/slug/slug";
 
 const InspectionForm = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,7 +21,7 @@ const InspectionForm = () => {
   const isDark = theme === "dark";
   const router = useRouter();
   const searchParams = useSearchParams();
-  const vehicleId = searchParams.get("vehicleId") || "";
+  const vehicleId = decryptQueryParam(searchParams.get("vehicleId"));
   const { actionLoading, error, successMessage } = useSelector(
     (state: RootState) => state.warehouse,
   );
@@ -54,7 +55,7 @@ const InspectionForm = () => {
       dispatch(clearSuccess());
       router.push(
         vehicleId
-          ? `/warehouse/vehicles/${vehicleId}`
+          ? `/warehouse/vehicles/${encryptSlug(vehicleId)}`
           : "/warehouse/inspections",
       );
     }

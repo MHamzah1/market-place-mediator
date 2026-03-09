@@ -41,6 +41,7 @@ import { TbManualGearbox } from "react-icons/tb";
 import { getBrandsWithFilters } from "@/lib/state/slice/brand/brandSlice";
 import FeaturedBadge from "@/components/view/Boost/FeaturedBadge";
 import { projectTraceSource } from "next/dist/build/swc/generated-native";
+import { encryptSlug } from "@/lib/slug/slug";
 
 const MarketplacePage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -288,7 +289,7 @@ const MarketplacePage = () => {
               {featuredListings.slice(0, 4).map((listing) => (
                 <Link
                   key={listing.id}
-                  href={`/marketplace/${listing.id}`}
+                  href={`/marketplace/${encryptSlug(listing.id)}`}
                   className={`group rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
                     isDarkMode
                       ? "bg-slate-800 border border-yellow-500/20"
@@ -760,7 +761,7 @@ const MarketplacePage = () => {
                 {listings.map((listing) => (
                   <Link
                     key={listing.id}
-                    href={`/marketplace/${listing.id}`}
+                    href={`/marketplace/${encryptSlug(listing.id)}`}
                     className={`group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${
                       isDarkMode ? "bg-slate-900" : "bg-white"
                     }`}
@@ -908,7 +909,7 @@ const MarketplacePage = () => {
                 {listings.map((listing) => (
                   <Link
                     key={listing.id}
-                    href={`/marketplace/${listing.id}`}
+                    href={`/marketplace/${encryptSlug(listing.id)}`}
                     className={`group flex gap-6 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ${
                       isDarkMode ? "bg-slate-900" : "bg-white"
                     }`}

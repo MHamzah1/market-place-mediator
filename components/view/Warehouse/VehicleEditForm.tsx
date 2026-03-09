@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import {
@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import PaginatedSelectField from "@/components/ui/paginated-select-field";
 import { CurrencyInputField, InputField } from "@/components/ui";
+import { encryptSlug } from "@/lib/slug/slug";
 
 // ── helper types ──────────────────────────────────────────────
 interface BrandItem {
@@ -41,11 +42,10 @@ interface YearPriceItem {
 }
 
 interface VehicleEditFormProps {
-  paramsPromise: Promise<{ id: string }>;
+  id: string;
 }
 
-const VehicleEditForm = ({ paramsPromise }: VehicleEditFormProps) => {
-  const { id } = use(paramsPromise);
+const VehicleEditForm = ({ id }: VehicleEditFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -118,7 +118,7 @@ const VehicleEditForm = ({ paramsPromise }: VehicleEditFormProps) => {
     if (successMessage) {
       toast.success(successMessage);
       dispatch(clearSuccess());
-      router.push(`/warehouse/vehicles/${id}`);
+      router.push(`/warehouse/vehicles/${encryptSlug(id)}`);
     }
     if (error) {
       toast.error(error);
@@ -219,7 +219,7 @@ const VehicleEditForm = ({ paramsPromise }: VehicleEditFormProps) => {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <Link
-          href={`/warehouse/vehicles/${id}`}
+          href={`/warehouse/vehicles/${encryptSlug(id)}`}
           className={`p-2 rounded-xl transition-colors ${isDark ? "bg-slate-800/50 hover:bg-slate-800 text-slate-400" : "bg-slate-100 hover:bg-slate-200 text-slate-600"}`}
         >
           <FiArrowLeft className="text-xl" />

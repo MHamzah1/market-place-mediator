@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, use } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/state/store";
 import {
@@ -26,6 +26,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { useTheme } from "@/context/ThemeContext";
+import { encryptSlug, generateUrlWithEncryptedParams } from "@/lib/slug/slug";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   inspecting: {
@@ -62,12 +63,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   },
 };
 
-const VehicleDetail = ({
-  paramsPromise,
-}: {
-  paramsPromise: Promise<{ id: string }>;
-}) => {
-  const params = use(paramsPromise);
+const VehicleDetail = ({ id }: { id: string }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -82,22 +78,22 @@ const VehicleDetail = ({
   } = useSelector((state: RootState) => state.warehouse);
 
   useEffect(() => {
-    dispatch(fetchVehicleDetail(params.id));
-    dispatch(fetchInspectionsByVehicle(params.id));
-    dispatch(fetchRepairsByVehicle(params.id));
-  }, [dispatch, params.id]);
+    dispatch(fetchVehicleDetail(id));
+    dispatch(fetchInspectionsByVehicle(id));
+    dispatch(fetchRepairsByVehicle(id));
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (successMessage) {
       toast.success(successMessage);
       dispatch(clearSuccess());
-      dispatch(fetchVehicleDetail(params.id));
+      dispatch(fetchVehicleDetail(id));
     }
     if (error) {
       toast.error(error);
       dispatch(clearError());
     }
-  }, [successMessage, error, dispatch, params.id]);
+  }, [successMessage, error, dispatch, id]);
 
   const formatPrice = (n: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -160,7 +156,10 @@ const VehicleDetail = ({
       <div className="flex flex-wrap gap-2">
         {vehicle.status === "inspecting" && (
           <Link
-            href={`/warehouse/inspections/create?vehicleId=${vehicle.id}`}
+            href={generateUrlWithEncryptedParams(
+              "/warehouse/inspections/create",
+              { vehicleId: vehicle.id },
+            )}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500/20 text-yellow-400 font-medium text-sm hover:bg-yellow-500/30 transition-colors border border-yellow-500/30"
           >
             <FiClipboard /> Submit Inspeksi
@@ -179,7 +178,10 @@ const VehicleDetail = ({
           vehicle.status === "in_repair") && (
           <>
             <Link
-              href={`/warehouse/repairs/create?vehicleId=${vehicle.id}`}
+              href={generateUrlWithEncryptedParams(
+                "/warehouse/repairs/create",
+                { vehicleId: vehicle.id },
+              )}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 text-orange-400 font-medium text-sm hover:bg-orange-500/30 transition-colors border border-orange-500/30"
             >
               <FiTool /> Buat Repair Order

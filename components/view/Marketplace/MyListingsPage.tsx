@@ -28,6 +28,7 @@ import { AiOutlineCar, AiOutlineWhatsApp } from "react-icons/ai";
 import { BsSpeedometer2 } from "react-icons/bs";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { encryptSlug, generateUrlWithEncryptedParams } from "@/lib/slug/slug";
 
 const MyListingsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -388,7 +389,10 @@ const MyListingsPage = () => {
                     {/* Boost Button */}
                     {listing.isActive && (
                       <Link
-                        href={`/marketplace/boost?listingId=${listing.id}`}
+                        href={generateUrlWithEncryptedParams(
+                          "/marketplace/boost",
+                          { listingId: listing.id },
+                        )}
                         className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-500 hover:from-yellow-500/30 hover:to-orange-500/30 transition-all"
                         title="Boost Listing"
                       >
@@ -397,7 +401,7 @@ const MyListingsPage = () => {
                     )}
 
                     <Link
-                      href={`/marketplace/${listing.id}`}
+                      href={`/marketplace/${encryptSlug(listing.id)}`}
                       className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all ${
                         isDarkMode
                           ? "bg-slate-800 text-slate-300 hover:bg-slate-700"

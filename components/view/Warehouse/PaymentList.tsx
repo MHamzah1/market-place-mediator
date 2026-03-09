@@ -7,6 +7,7 @@ import { fetchVehicles } from "@/lib/state/slice/warehouse/warehouseSlice";
 import Link from "next/link";
 import { FiDollarSign } from "react-icons/fi";
 import { useTheme } from "@/context/ThemeContext";
+import { encryptSlug } from "@/lib/slug/slug";
 
 const PaymentList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -86,7 +87,7 @@ const PaymentList = () => {
                   </p>
                 </div>
                 <Link
-                  href={`/warehouse/vehicles/${v.id}`}
+                  href={`/warehouse/vehicles/${encryptSlug(v.id)}`}
                   className="px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 font-medium text-sm hover:bg-blue-500/30 transition-colors border border-blue-500/30"
                 >
                   <FiDollarSign className="inline mr-1" /> Proses Bayar

@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import PaginatedSelectField from "@/components/ui/paginated-select-field";
 import CurrencyInputField from "@/components/ui/currency-input-field";
+import { decryptQueryParam } from "@/lib/slug/slug";
 
 // helper type for the API items
 interface VehicleItem {
@@ -52,7 +53,7 @@ const RepairForm = () => {
   const isDark = theme === "dark";
   const router = useRouter();
   const searchParams = useSearchParams();
-  const vehicleIdFromUrl = searchParams.get("vehicleId") || "";
+  const vehicleIdFromUrl = decryptQueryParam(searchParams.get("vehicleId"));
 
   const {
     selectedVehicle,

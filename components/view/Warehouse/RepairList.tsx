@@ -14,6 +14,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { FiPlus, FiTool } from "react-icons/fi";
 import { useTheme } from "@/context/ThemeContext";
+import { encryptSlug } from "@/lib/slug/slug";
 
 const RepairList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -122,7 +123,7 @@ const RepairList = () => {
                     </p>
                   </div>
                   <Link
-                    href={`/warehouse/vehicles/${v.id}`}
+                    href={`/warehouse/vehicles/${encryptSlug(v.id)}`}
                     className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-medium hover:bg-emerald-500/20 transition-colors"
                   >
                     Detail

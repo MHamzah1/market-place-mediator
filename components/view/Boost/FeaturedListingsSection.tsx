@@ -17,6 +17,7 @@ import { AiOutlineCar, AiOutlineWhatsApp } from "react-icons/ai";
 import { BsSpeedometer2, BsFuelPump } from "react-icons/bs";
 import { TbManualGearbox } from "react-icons/tb";
 import FeaturedBadge from "./FeaturedBadge";
+import { encryptSlug } from "@/lib/slug/slug";
 
 interface FeaturedListingsSectionProps {
   limit?: number;
@@ -158,7 +159,7 @@ const FeaturedListingsSection: React.FC<FeaturedListingsSectionProps> = ({
             {filteredListings.map((car) => (
               <Link
                 key={car.id}
-                href={`/marketplace/${car.id}`}
+                href={`/marketplace/${encryptSlug(car.id)}`}
                 className={`rounded-xl sm:rounded-2xl md:rounded-3xl shadow-lg sm:shadow-xl md:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer border-2 ${
                   isDarkMode
                     ? "bg-slate-900 border-slate-800 hover:border-yellow-500/50"

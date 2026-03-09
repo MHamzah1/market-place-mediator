@@ -43,7 +43,7 @@ const xorEncrypt = (text: string, key: string): string => {
   let result = "";
   for (let i = 0; i < text.length; i++) {
     result += String.fromCharCode(
-      text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+      text.charCodeAt(i) ^ key.charCodeAt(i % key.length),
     );
   }
   return result;
@@ -119,10 +119,37 @@ export const isValidSlug = (slug: string): boolean => {
  */
 export const generateEditUrl = (
   basePath: string,
-  id: string | number
+  id: string | number,
 ): string => {
   const encryptedSlug = encryptSlug(id);
   return `${basePath}/${encryptedSlug}`;
+};
+
+/**
+ * Generate URL dengan query params yang terenkripsi
+ * @param basePath - Base path (contoh: "/warehouse/inspections/create")
+ * @param params - Object query params { key: value }
+ * @returns Full URL path dengan encrypted query params
+ */
+export const generateUrlWithEncryptedParams = (
+  basePath: string,
+  params: Record<string, string | number>,
+): string => {
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    searchParams.set(key, encryptSlug(value));
+  }
+  return `${basePath}?${searchParams.toString()}`;
+};
+
+/**
+ * Dekripsi query param dari searchParams
+ * @param value - Encrypted value dari searchParams
+ * @returns Decrypted value
+ */
+export const decryptQueryParam = (value: string | null): string => {
+  if (!value) return "";
+  return decryptSlug(value);
 };
 
 // ============================================
@@ -144,4 +171,14 @@ export const generateEditUrl = (
 //   const userId = decryptSlug(params.slug);
 //   // Gunakan userId untuk fetch data
 // };
+//
+// Untuk URL dengan query params:
+// import { generateUrlWithEncryptedParams, decryptQueryParam } from "@/lib/slug/slug";
+//
+// // Generate URL
+// const url = generateUrlWithEncryptedParams("/warehouse/inspections/create", { vehicleId: "123" });
+// // Result: /warehouse/inspections/create?vehicleId=xyz...
+//
+// // Read params
+// const vehicleId = decryptQueryParam(searchParams.get("vehicleId"));
 // ============================================

@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { FiPlus, FiClipboard } from "react-icons/fi";
 import { useTheme } from "@/context/ThemeContext";
+import { generateUrlWithEncryptedParams } from "@/lib/slug/slug";
 
 const InspectionList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -110,7 +111,10 @@ const InspectionList = () => {
                     Riwayat
                   </button>
                   <Link
-                    href={`/warehouse/inspections/create?vehicleId=${v.id}`}
+                    href={generateUrlWithEncryptedParams(
+                      "/warehouse/inspections/create",
+                      { vehicleId: v.id },
+                    )}
                     className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs font-medium transition-colors"
                   >
                     Inspeksi

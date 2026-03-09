@@ -26,6 +26,7 @@ import {
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import BoostStatisticsChart from "./BoostStatisticsChart";
+import { encryptSlug } from "@/lib/slug/slug";
 
 const BoostHistoryPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -406,7 +407,7 @@ const BoostHistoryPage = () => {
                           <button
                             onClick={() =>
                               router.push(
-                                `/marketplace/${transaction.listingId}`,
+                                `/marketplace/${encryptSlug(transaction.listingId)}`,
                               )
                             }
                             className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors ${

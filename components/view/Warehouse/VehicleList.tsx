@@ -13,6 +13,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { FiPlus, FiEye, FiSearch, FiFilter } from "react-icons/fi";
 import { useTheme } from "@/context/ThemeContext";
+import { encryptSlug } from "@/lib/slug/slug";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   inspecting: {
@@ -260,7 +261,7 @@ const VehicleList = () => {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <Link
-                          href={`/warehouse/vehicles/${v.id}`}
+                          href={`/warehouse/vehicles/${encryptSlug(v.id)}`}
                           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-medium transition-colors"
                         >
                           <FiEye /> Detail

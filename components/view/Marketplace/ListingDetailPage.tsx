@@ -42,13 +42,17 @@ import {
 } from "react-icons/tb";
 import { HiOutlineDocumentText } from "react-icons/hi";
 import toast from "react-hot-toast";
+import { decryptSlug } from "@/lib/slug/slug";
 
 const ListingDetailPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const params = useParams();
+  const rawParams = useParams();
   const router = useRouter();
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // Decrypt the param ID
+  const id = rawParams.id ? decryptSlug(rawParams.id as string) : null;
 
   const { selectedListing, detailLoading, whatsappLink } = useSelector(
     (state: RootState) => state.marketplace,
@@ -64,22 +68,20 @@ const ListingDetailPage = () => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    if (params.id) {
-      dispatch(fetchListingDetail(params.id as string));
+    if (id) {
+      dispatch(fetchListingDetail(id));
     }
 
     return () => {
       dispatch(clearSelectedListing());
     };
-  }, [dispatch, params.id]);
+  }, [dispatch, id]);
 
   const handleWhatsApp = async () => {
-    if (!params.id) return;
+    if (!id) return;
 
     try {
-      const result = await dispatch(
-        getWhatsAppLink(params.id as string),
-      ).unwrap();
+      const result = await dispatch(getWhatsAppLink(id)).unwrap();
       window.open(result.whatsappUrl, "_blank");
     } catch (error) {
       toast.error("Gagal membuka WhatsApp");

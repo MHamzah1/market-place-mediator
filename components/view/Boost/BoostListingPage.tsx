@@ -25,12 +25,13 @@ import toast from "react-hot-toast";
 import BoostPackageCard from "./BoostPackageCard";
 import BoostPreview from "./BoostPreview";
 import PaymentModal from "./PaymentModal";
+import { decryptQueryParam } from "@/lib/slug/slug";
 
 const BoostListingPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const listingId = searchParams.get("listingId");
+  const listingId = decryptQueryParam(searchParams.get("listingId"));
 
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
