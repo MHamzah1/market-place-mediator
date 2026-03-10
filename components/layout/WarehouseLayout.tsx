@@ -29,6 +29,7 @@ import {
   FiActivity,
   FiGrid,
   FiSearch,
+  FiMap,
 } from "react-icons/fi";
 import { BsBuilding, BsBarChartFill } from "react-icons/bs";
 
@@ -93,6 +94,7 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
     { icon: FiHome, label: "Dashboard", href: "/warehouse/dashboard" },
     { icon: BsBuilding, label: "Showroom", href: "/warehouse/showrooms" },
     { icon: FiGrid, label: "Showroom View", href: "/warehouse/showroom-view" },
+    { icon: FiMap, label: "Showroom Map", href: "/warehouse/showroom-map" },
     { icon: FiTruck, label: "Kendaraan", href: "/warehouse/vehicles" },
     { icon: FiClipboard, label: "Inspeksi", href: "/warehouse/inspections" },
     { icon: FiMapPin, label: "Zona Gudang", href: "/warehouse/zones" },
