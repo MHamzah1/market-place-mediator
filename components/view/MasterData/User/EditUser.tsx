@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter, useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -32,6 +32,7 @@ import {
 import Alert from "@/components/feature/alert/alert";
 import { cn } from "@/lib/utils";
 import { decryptSlug, isValidSlug } from "@/lib/slug/slug";
+import PhoneInputField from "@/components/ui/phone-input-field";
 
 // ============================================
 // Validation Schema
@@ -52,7 +53,7 @@ const userSchema = z.object({
       {
         message:
           "Password minimal 6 karakter dan harus mengandung huruf besar, huruf kecil, dan angka",
-      }
+      },
     ),
   fullName: z
     .string()
@@ -60,8 +61,8 @@ const userSchema = z.object({
     .min(3, "Nama minimal 3 karakter"),
   phoneNumber: z
     .string()
-    .min(1, "Nomor telepon wajib diisi")
-    .regex(/^[\d+]+$/, "Format nomor telepon tidak valid"),
+    .min(5, "Nomor telepon wajib diisi (minimal 3 digit setelah 62)")
+    .regex(/^62\d+$/, "Format nomor telepon tidak valid"),
   whatsappNumber: z.string().optional(),
   location: z.string().optional(),
   role: z.enum(["customer", "admin", "salesman"], {
@@ -82,7 +83,7 @@ export default function EditUser() {
   const isDarkMode = theme === "dark";
 
   const { selectedUsers, loading, error } = useSelector(
-    (state: RootState) => state.Users
+    (state: RootState) => state.Users,
   );
 
   const [showPassword, setShowPassword] = useState(false);
@@ -93,6 +94,7 @@ export default function EditUser() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting, isDirty },
     reset,
     setValue,
@@ -102,8 +104,8 @@ export default function EditUser() {
       email: "",
       password: "",
       fullName: "",
-      phoneNumber: "",
-      whatsappNumber: "",
+      phoneNumber: "62",
+      whatsappNumber: "62",
       location: "",
       role: "customer",
     },
@@ -157,8 +159,10 @@ export default function EditUser() {
     if (selectedUsers) {
       setValue("email", selectedUsers.email || "");
       setValue("fullName", selectedUsers.fullName || "");
-      setValue("phoneNumber", selectedUsers.phoneNumber || "");
-      setValue("whatsappNumber", selectedUsers.whatsappNumber || "");
+      const phone = selectedUsers.phoneNumber || "62";
+      setValue("phoneNumber", phone.startsWith("62") ? phone : "62" + phone);
+      const wa = selectedUsers.whatsappNumber || "62";
+      setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
       // Password tidak di-set karena tidak dikirim dari API
@@ -173,7 +177,7 @@ export default function EditUser() {
 
     const confirmed = await Alert.confirmSave(
       "Simpan Perubahan?",
-      "Apakah Anda yakin ingin menyimpan perubahan ini?"
+      "Apakah Anda yakin ingin menyimpan perubahan ini?",
     );
 
     if (!confirmed) return;
@@ -199,7 +203,7 @@ export default function EditUser() {
         updateUsers({
           id: userId,
           UsersData: payload,
-        })
+        }),
       ).unwrap();
 
       Alert.closeLoading();
@@ -209,7 +213,7 @@ export default function EditUser() {
       Alert.closeLoading();
       await Alert.error(
         "Gagal!",
-        error?.message || "Gagal memperbarui data user"
+        error?.message || "Gagal memperbarui data user",
       );
     }
   };
@@ -227,13 +231,15 @@ export default function EditUser() {
       "Reset Form?",
       "Form akan dikembalikan ke data awal.",
       "Ya, Reset",
-      "Batal"
+      "Batal",
     );
     if (confirmed && selectedUsers) {
       setValue("email", selectedUsers.email || "");
       setValue("fullName", selectedUsers.fullName || "");
-      setValue("phoneNumber", selectedUsers.phoneNumber || "");
-      setValue("whatsappNumber", selectedUsers.whatsappNumber || "");
+      const phone = selectedUsers.phoneNumber || "62";
+      setValue("phoneNumber", phone.startsWith("62") ? phone : "62" + phone);
+      const wa = selectedUsers.whatsappNumber || "62";
+      setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
       setValue("password", "");
@@ -269,7 +275,7 @@ export default function EditUser() {
       <label
         className={cn(
           "block text-sm font-semibold",
-          isDarkMode ? "text-slate-300" : "text-slate-700"
+          isDarkMode ? "text-slate-300" : "text-slate-700",
         )}
       >
         {label}
@@ -279,7 +285,7 @@ export default function EditUser() {
         <div
           className={cn(
             "absolute left-3 top-1/2 -translate-y-1/2",
-            isDarkMode ? "text-slate-500" : "text-gray-400"
+            isDarkMode ? "text-slate-500" : "text-gray-400",
           )}
         >
           <Icon size={20} />
@@ -295,8 +301,8 @@ export default function EditUser() {
             error
               ? "border-red-500 bg-red-500/10"
               : isDarkMode
-              ? "bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
-              : "bg-white border-slate-300 text-slate-900 placeholder:text-gray-400"
+                ? "bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                : "bg-white border-slate-300 text-slate-900 placeholder:text-gray-400",
           )}
           {...register(name)}
         />
@@ -305,7 +311,7 @@ export default function EditUser() {
         <p
           className={cn(
             "text-xs",
-            isDarkMode ? "text-slate-400" : "text-slate-500"
+            isDarkMode ? "text-slate-400" : "text-slate-500",
           )}
         >
           {helperText}
@@ -342,7 +348,7 @@ export default function EditUser() {
         <div
           className={cn(
             "p-4 rounded-full",
-            isDarkMode ? "bg-red-500/20" : "bg-red-100"
+            isDarkMode ? "bg-red-500/20" : "bg-red-100",
           )}
         >
           <AlertTriangle className="w-12 h-12 text-red-500" />
@@ -350,7 +356,7 @@ export default function EditUser() {
         <h2
           className={cn(
             "text-xl font-bold",
-            isDarkMode ? "text-white" : "text-slate-900"
+            isDarkMode ? "text-white" : "text-slate-900",
           )}
         >
           ID User Tidak Valid
@@ -377,7 +383,7 @@ export default function EditUser() {
         <div
           className={cn(
             "p-4 rounded-full",
-            isDarkMode ? "bg-red-500/20" : "bg-red-100"
+            isDarkMode ? "bg-red-500/20" : "bg-red-100",
           )}
         >
           <AlertTriangle className="w-12 h-12 text-red-500" />
@@ -385,7 +391,7 @@ export default function EditUser() {
         <h2
           className={cn(
             "text-xl font-bold",
-            isDarkMode ? "text-white" : "text-slate-900"
+            isDarkMode ? "text-white" : "text-slate-900",
           )}
         >
           Gagal Memuat Data
@@ -417,7 +423,7 @@ export default function EditUser() {
               "p-2 rounded-xl transition-all duration-200",
               isDarkMode
                 ? "bg-slate-800 hover:bg-slate-700 text-slate-300"
-                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700",
             )}
           >
             <ArrowLeft size={24} />
@@ -429,7 +435,7 @@ export default function EditUser() {
             <p
               className={cn(
                 "text-sm mt-1",
-                isDarkMode ? "text-slate-400" : "text-slate-600"
+                isDarkMode ? "text-slate-400" : "text-slate-600",
               )}
             >
               {selectedUsers?.fullName || selectedUsers?.email || "User"}
@@ -445,7 +451,7 @@ export default function EditUser() {
             "rounded-2xl border backdrop-blur-sm p-6 lg:p-8",
             isDarkMode
               ? "bg-slate-800/50 border-slate-700/50"
-              : "bg-white border-slate-200 shadow-lg"
+              : "bg-white border-slate-200 shadow-lg",
           )}
         >
           {/* Section: Informasi Akun */}
@@ -453,7 +459,7 @@ export default function EditUser() {
             <h2
               className={cn(
                 "text-lg font-bold mb-4 flex items-center gap-2",
-                isDarkMode ? "text-white" : "text-slate-900"
+                isDarkMode ? "text-white" : "text-slate-900",
               )}
             >
               <Shield size={20} className="text-cyan-400" />
@@ -473,14 +479,14 @@ export default function EditUser() {
                 <label
                   className={cn(
                     "block text-sm font-semibold",
-                    isDarkMode ? "text-slate-300" : "text-slate-700"
+                    isDarkMode ? "text-slate-300" : "text-slate-700",
                   )}
                 >
                   Password Baru
                   <span
                     className={cn(
                       "text-xs font-normal ml-2",
-                      isDarkMode ? "text-slate-500" : "text-slate-400"
+                      isDarkMode ? "text-slate-500" : "text-slate-400",
                     )}
                   >
                     (Kosongkan jika tidak ingin mengubah)
@@ -490,7 +496,7 @@ export default function EditUser() {
                   <div
                     className={cn(
                       "absolute left-3 top-1/2 -translate-y-1/2",
-                      isDarkMode ? "text-slate-500" : "text-gray-400"
+                      isDarkMode ? "text-slate-500" : "text-gray-400",
                     )}
                   >
                     <Lock size={20} />
@@ -504,8 +510,8 @@ export default function EditUser() {
                       errors.password
                         ? "border-red-500 bg-red-500/10"
                         : isDarkMode
-                        ? "bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
-                        : "bg-white border-slate-300 text-slate-900 placeholder:text-gray-400"
+                          ? "bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                          : "bg-white border-slate-300 text-slate-900 placeholder:text-gray-400",
                     )}
                     {...register("password")}
                   />
@@ -516,7 +522,7 @@ export default function EditUser() {
                       "absolute right-3 top-1/2 -translate-y-1/2",
                       isDarkMode
                         ? "text-slate-500 hover:text-slate-300"
-                        : "text-gray-400 hover:text-gray-600"
+                        : "text-gray-400 hover:text-gray-600",
                     )}
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -536,7 +542,7 @@ export default function EditUser() {
             <h2
               className={cn(
                 "text-lg font-bold mb-4 flex items-center gap-2",
-                isDarkMode ? "text-white" : "text-slate-900"
+                isDarkMode ? "text-white" : "text-slate-900",
               )}
             >
               <User size={20} className="text-cyan-400" />
@@ -551,20 +557,36 @@ export default function EditUser() {
                 required
                 error={errors.fullName?.message}
               />
-              <InputField
-                label="Nomor Telepon"
+              <Controller
                 name="phoneNumber"
-                icon={Phone}
-                placeholder="+628123456789"
-                required
-                error={errors.phoneNumber?.message}
+                control={control}
+                render={({ field }) => (
+                  <PhoneInputField
+                    label="Nomor Telepon"
+                    name="phoneNumber"
+                    value={field.value}
+                    onValueChange={(val) => field.onChange(val)}
+                    icon={Phone}
+                    placeholder="8123456789"
+                    required
+                    error={errors.phoneNumber?.message}
+                  />
+                )}
               />
-              <InputField
-                label="Nomor WhatsApp"
+              <Controller
                 name="whatsappNumber"
-                icon={MessageCircle}
-                placeholder="628123456789 (opsional)"
-                error={errors.whatsappNumber?.message}
+                control={control}
+                render={({ field }) => (
+                  <PhoneInputField
+                    label="Nomor WhatsApp"
+                    name="whatsappNumber"
+                    value={field.value}
+                    onValueChange={(val) => field.onChange(val)}
+                    icon={MessageCircle}
+                    placeholder="8123456789 (opsional)"
+                    error={errors.whatsappNumber?.message}
+                  />
+                )}
               />
               <InputField
                 label="Lokasi"
@@ -581,7 +603,7 @@ export default function EditUser() {
             <h2
               className={cn(
                 "text-lg font-bold mb-4 flex items-center gap-2",
-                isDarkMode ? "text-white" : "text-slate-900"
+                isDarkMode ? "text-white" : "text-slate-900",
               )}
             >
               <Shield size={20} className="text-cyan-400" />
@@ -591,7 +613,7 @@ export default function EditUser() {
               <label
                 className={cn(
                   "block text-sm font-semibold",
-                  isDarkMode ? "text-slate-300" : "text-slate-700"
+                  isDarkMode ? "text-slate-300" : "text-slate-700",
                 )}
               >
                 Role<span className="text-red-500 ml-1">*</span>
@@ -623,7 +645,7 @@ export default function EditUser() {
                       "relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
                       isDarkMode
                         ? "bg-slate-800/50 hover:bg-slate-700/50"
-                        : "bg-slate-50 hover:bg-slate-100"
+                        : "bg-slate-50 hover:bg-slate-100",
                     )}
                   >
                     <input
@@ -635,7 +657,7 @@ export default function EditUser() {
                     <div
                       className={cn(
                         "w-full peer-checked:border-cyan-500",
-                        "peer-checked:ring-2 peer-checked:ring-cyan-500/50"
+                        "peer-checked:ring-2 peer-checked:ring-cyan-500/50",
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -647,7 +669,7 @@ export default function EditUser() {
                             role.color === "blue" &&
                               "bg-blue-500/20 text-blue-400",
                             role.color === "purple" &&
-                              "bg-purple-500/20 text-purple-400"
+                              "bg-purple-500/20 text-purple-400",
                           )}
                         >
                           <Shield size={20} />
@@ -656,7 +678,7 @@ export default function EditUser() {
                           <p
                             className={cn(
                               "font-semibold",
-                              isDarkMode ? "text-white" : "text-slate-900"
+                              isDarkMode ? "text-white" : "text-slate-900",
                             )}
                           >
                             {role.label}
@@ -664,7 +686,7 @@ export default function EditUser() {
                           <p
                             className={cn(
                               "text-xs",
-                              isDarkMode ? "text-slate-400" : "text-slate-500"
+                              isDarkMode ? "text-slate-400" : "text-slate-500",
                             )}
                           >
                             {role.desc}
@@ -695,7 +717,7 @@ export default function EditUser() {
                 "px-6 py-3 rounded-xl font-semibold transition-all duration-200",
                 isDarkMode
                   ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300",
               )}
             >
               Reset Form
@@ -707,7 +729,7 @@ export default function EditUser() {
                 "px-6 py-3 rounded-xl font-semibold transition-all duration-200",
                 isDarkMode
                   ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300",
               )}
             >
               Batal
@@ -719,7 +741,7 @@ export default function EditUser() {
                 "px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700",
                 "rounded-xl font-semibold flex items-center justify-center gap-2",
                 "transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 text-white",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
               )}
             >
               {isSubmitting || loading ? (

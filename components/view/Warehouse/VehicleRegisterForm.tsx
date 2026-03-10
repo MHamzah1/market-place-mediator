@@ -14,7 +14,11 @@ import { FiArrowLeft, FiSave, FiUpload, FiX } from "react-icons/fi";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import PaginatedSelectField from "@/components/ui/paginated-select-field";
-import { CurrencyInputField, InputField } from "@/components/ui";
+import {
+  CurrencyInputField,
+  InputField,
+  PhoneInputField,
+} from "@/components/ui";
 
 // ── helper types ──────────────────────────────────────────────
 interface BrandItem {
@@ -76,8 +80,8 @@ const VehicleRegisterForm = () => {
     fuelType: "bensin",
     askingPrice: 0,
     sellerName: "",
-    sellerPhone: "",
-    sellerWhatsapp: "",
+    sellerPhone: "62",
+    sellerWhatsapp: "62",
     sellerKtp: "",
     description: "",
     condition: "bekas",
@@ -568,20 +572,20 @@ const VehicleRegisterForm = () => {
               onChange={handleChange}
               required
             />
-            <InputField
+            <PhoneInputField
               label="Telepon Penjual"
               name="sellerPhone"
               value={form.sellerPhone}
               onChange={handleChange}
-              placeholder="08123456789"
+              placeholder="8123456789"
               required
             />
-            <InputField
+            <PhoneInputField
               label="WhatsApp Penjual"
               name="sellerWhatsapp"
-              value={form.sellerWhatsapp || ""}
+              value={form.sellerWhatsapp || "62"}
               onChange={handleChange}
-              placeholder="628123456789"
+              placeholder="8123456789"
             />
             <InputField
               label="KTP Penjual"

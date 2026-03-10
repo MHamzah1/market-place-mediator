@@ -15,7 +15,11 @@ import { FiArrowLeft, FiSave, FiUpload, FiX } from "react-icons/fi";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import PaginatedSelectField from "@/components/ui/paginated-select-field";
-import { CurrencyInputField, InputField } from "@/components/ui";
+import {
+  CurrencyInputField,
+  InputField,
+  PhoneInputField,
+} from "@/components/ui";
 import { encryptSlug } from "@/lib/slug/slug";
 
 // ── helper types ──────────────────────────────────────────────
@@ -81,8 +85,8 @@ const VehicleEditForm = ({ id }: VehicleEditFormProps) => {
     fuelType: "bensin",
     askingPrice: 0,
     sellerName: "",
-    sellerPhone: "",
-    sellerWhatsapp: "",
+    sellerPhone: "62",
+    sellerWhatsapp: "62",
     sellerKtp: "",
     description: "",
     condition: "bekas",
@@ -129,8 +133,16 @@ const VehicleEditForm = ({ id }: VehicleEditFormProps) => {
         fuelType: selectedVehicle.fuelType ?? "bensin",
         askingPrice: selectedVehicle.askingPrice ?? 0,
         sellerName: selectedVehicle.sellerName ?? "",
-        sellerPhone: selectedVehicle.sellerPhone ?? "",
-        sellerWhatsapp: selectedVehicle.sellerWhatsapp ?? "",
+        sellerPhone: selectedVehicle.sellerPhone
+          ? selectedVehicle.sellerPhone.startsWith("62")
+            ? selectedVehicle.sellerPhone
+            : "62" + selectedVehicle.sellerPhone
+          : "62",
+        sellerWhatsapp: selectedVehicle.sellerWhatsapp
+          ? selectedVehicle.sellerWhatsapp.startsWith("62")
+            ? selectedVehicle.sellerWhatsapp
+            : "62" + selectedVehicle.sellerWhatsapp
+          : "62",
         sellerKtp: selectedVehicle.sellerKtp ?? "",
         description: selectedVehicle.description ?? "",
         condition: selectedVehicle.condition ?? "bekas",
@@ -144,14 +156,18 @@ const VehicleEditForm = ({ id }: VehicleEditFormProps) => {
       if (selectedVehicle.carModelId) {
         setSelectedModelId(selectedVehicle.carModelId);
       }
-      
+
       const baseUrl =
         process.env.NEXT_PUBLIC_API_URL_IMAGES ||
         "http://localhost:8080/uploads/";
 
       // Populate existing images as previews
       if (selectedVehicle.images && selectedVehicle.images.length > 0) {
-        setImagePreviews(selectedVehicle.images.map(img => img.startsWith('http') ? img : baseUrl + img));
+        setImagePreviews(
+          selectedVehicle.images.map((img) =>
+            img.startsWith("http") ? img : baseUrl + img,
+          ),
+        );
       }
 
       setInitialized(true);
@@ -237,13 +253,13 @@ const VehicleEditForm = ({ id }: VehicleEditFormProps) => {
   const handleRemoveImage = (index: number) => {
     const url = imagePreviews[index];
     if (url.startsWith("blob:")) {
-        URL.revokeObjectURL(url);
-        // Map preview index back to file index.
-        // Assuming file preview always appended at the end of existing images.
-        // This logic is slightly naive if you intermix existing and new, 
-        // but normally new ones are just pushed to the end.
+      URL.revokeObjectURL(url);
+      // Map preview index back to file index.
+      // Assuming file preview always appended at the end of existing images.
+      // This logic is slightly naive if you intermix existing and new,
+      // but normally new ones are just pushed to the end.
     }
-    
+
     // Simplification for edit form: clearing everything from the list
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
     // Rebuild imageFiles based on blob matches (since we only upload new files)
@@ -648,20 +664,20 @@ const VehicleEditForm = ({ id }: VehicleEditFormProps) => {
               onChange={handleChange}
               required
             />
-            <InputField
+            <PhoneInputField
               label="Telepon Penjual"
               name="sellerPhone"
               value={form.sellerPhone}
               onChange={handleChange}
-              placeholder="08123456789"
+              placeholder="8123456789"
               required
             />
-            <InputField
+            <PhoneInputField
               label="WhatsApp Penjual"
               name="sellerWhatsapp"
-              value={form.sellerWhatsapp || ""}
+              value={form.sellerWhatsapp || "62"}
               onChange={handleChange}
-              placeholder="628123456789"
+              placeholder="8123456789"
             />
             <InputField
               label="KTP Penjual"

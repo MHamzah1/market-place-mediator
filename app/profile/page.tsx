@@ -22,13 +22,18 @@ import {
   updateUsers,
   clearError,
 } from "@/lib/state/slice/user/userSlice";
-import { Button, SelectField, TextField } from "@/components/ui";
+import {
+  Button,
+  SelectField,
+  TextField,
+  PhoneInputField,
+} from "@/components/ui";
 
 // Validation Schema
 const profileSchema = z.object({
   email: z.string().email("Email tidak valid"),
   fullName: z.string().min(3, "Nama minimal 3 karakter"),
-  phoneNumber: z.string().min(10, "Nomor telepon minimal 10 digit"),
+  phoneNumber: z.string().min(5, "Nomor telepon minimal 3 digit setelah 62"),
   whatsappNumber: z.string().optional(),
   location: z.string().optional(),
   role: z.enum(["customer", "admin", "salesman"]),
@@ -40,7 +45,7 @@ const ProfilePage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const { selectedUsers, loading, error } = useSelector(
-    (state: RootState) => state.Users
+    (state: RootState) => state.Users,
   );
   const [isEditing, setIsEditing] = useState(false);
 
@@ -54,8 +59,8 @@ const ProfilePage = () => {
     defaultValues: {
       email: "",
       fullName: "",
-      phoneNumber: "",
-      whatsappNumber: "",
+      phoneNumber: "62",
+      whatsappNumber: "62",
       location: "",
       role: "customer",
     },
@@ -79,11 +84,13 @@ const ProfilePage = () => {
   // Update form ketika selectedUsers berubah
   useEffect(() => {
     if (selectedUsers) {
+      const phone = selectedUsers.phoneNumber || "62";
+      const wa = selectedUsers.whatsappNumber || "62";
       reset({
         email: selectedUsers.email || "",
         fullName: selectedUsers.fullName || "",
-        phoneNumber: selectedUsers.phoneNumber || "",
-        whatsappNumber: selectedUsers.whatsappNumber || "",
+        phoneNumber: phone.startsWith("62") ? phone : "62" + phone,
+        whatsappNumber: wa.startsWith("62") ? wa : "62" + wa,
         location: selectedUsers.location || "",
         role: selectedUsers.role || "customer",
       });
@@ -101,7 +108,7 @@ const ProfilePage = () => {
         updateUsers({
           id: userInfo.id,
           UsersData: data,
-        })
+        }),
       ).unwrap();
 
       toast.success("Profile berhasil diupdate!");
@@ -118,11 +125,13 @@ const ProfilePage = () => {
   const handleCancel = () => {
     setIsEditing(false);
     if (selectedUsers) {
+      const phone = selectedUsers.phoneNumber || "62";
+      const wa = selectedUsers.whatsappNumber || "62";
       reset({
         email: selectedUsers.email || "",
         fullName: selectedUsers.fullName || "",
-        phoneNumber: selectedUsers.phoneNumber || "",
-        whatsappNumber: selectedUsers.whatsappNumber || "",
+        phoneNumber: phone.startsWith("62") ? phone : "62" + phone,
+        whatsappNumber: wa.startsWith("62") ? wa : "62" + wa,
         location: selectedUsers.location || "",
         role: selectedUsers.role || "customer",
       });
@@ -243,11 +252,13 @@ const ProfilePage = () => {
                   name="phoneNumber"
                   control={control}
                   render={({ field }) => (
-                    <TextField
-                      {...field}
+                    <PhoneInputField
                       label="Nomor Telepon"
-                      placeholder="+628123456789"
-                      leftIcon={Phone}
+                      name="phoneNumber"
+                      value={field.value}
+                      onValueChange={(val) => field.onChange(val)}
+                      icon={Phone}
+                      placeholder="8123456789"
                       error={errors.phoneNumber?.message}
                       disabled={!isEditing}
                       required
@@ -260,11 +271,13 @@ const ProfilePage = () => {
                   name="whatsappNumber"
                   control={control}
                   render={({ field }) => (
-                    <TextField
-                      {...field}
+                    <PhoneInputField
                       label="Nomor WhatsApp"
-                      placeholder="628123456789"
-                      leftIcon={Phone}
+                      name="whatsappNumber"
+                      value={field.value}
+                      onValueChange={(val) => field.onChange(val)}
+                      icon={Phone}
+                      placeholder="8123456789"
                       error={errors.whatsappNumber?.message}
                       disabled={!isEditing}
                     />

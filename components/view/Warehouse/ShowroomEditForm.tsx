@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
+import PhoneInputField from "@/components/ui/phone-input-field";
 
 interface ShowroomEditFormProps {
   id: string;
@@ -33,8 +34,8 @@ const ShowroomEditForm = ({ id }: ShowroomEditFormProps) => {
     address: "",
     city: "",
     province: "",
-    phone: "",
-    whatsapp: "",
+    phone: "62",
+    whatsapp: "62",
     logo: "",
   });
 
@@ -55,8 +56,16 @@ const ShowroomEditForm = ({ id }: ShowroomEditFormProps) => {
             address: selectedShowroom.address || "",
             city: selectedShowroom.city || "",
             province: selectedShowroom.province || "",
-            phone: selectedShowroom.phone || "",
-            whatsapp: selectedShowroom.whatsapp || "",
+            phone: selectedShowroom.phone
+              ? selectedShowroom.phone.startsWith("62")
+                ? selectedShowroom.phone
+                : "62" + selectedShowroom.phone
+              : "62",
+            whatsapp: selectedShowroom.whatsapp
+              ? selectedShowroom.whatsapp.startsWith("62")
+                ? selectedShowroom.whatsapp
+                : "62" + selectedShowroom.whatsapp
+              : "62",
             logo: selectedShowroom.logo || "",
           };
         }
@@ -149,25 +158,48 @@ const ShowroomEditForm = ({ id }: ShowroomEditFormProps) => {
             placeholder: "DKI Jakarta",
             required: true,
           },
-          { label: "Telepon", name: "phone", placeholder: "021-12345678" },
-          { label: "WhatsApp", name: "whatsapp", placeholder: "08123456789" },
+          {
+            label: "Telepon",
+            name: "phone",
+            placeholder: "021-12345678",
+            isPhone: true,
+          },
+          {
+            label: "WhatsApp",
+            name: "whatsapp",
+            placeholder: "08123456789",
+            isPhone: true,
+          },
           { label: "Logo URL", name: "logo", placeholder: "https://..." },
         ].map((field) => (
           <div key={field.name}>
-            <label
-              className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
-            >
-              {field.label}
-            </label>
-            <input
-              type="text"
-              name={field.name}
-              value={form[field.name as keyof typeof form]}
-              onChange={handleChange}
-              placeholder={field.placeholder}
-              required={field.required}
-              className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"} border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent text-sm`}
-            />
+            {(field as any).isPhone ? (
+              <PhoneInputField
+                label={field.label}
+                name={field.name}
+                value={form[field.name as keyof typeof form]}
+                onChange={handleChange}
+                placeholder="8123456789"
+                required={field.required}
+              />
+            ) : (
+              <>
+                <label
+                  className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+                >
+                  {field.label}
+                </label>
+                <input
+                  type="text"
+                  name={field.name}
+                  value={form[field.name as keyof typeof form]}
+                  onChange={handleChange}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"} border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent text-sm`}
+                />
+              </>
+            )}
           </div>
         ))}
 

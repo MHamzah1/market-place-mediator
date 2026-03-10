@@ -18,11 +18,9 @@ import {
   FiUpload,
 } from "react-icons/fi";
 import { AiOutlineWhatsApp } from "react-icons/ai";
+import PhoneInputField from "@/components/ui/phone-input-field";
 import { BsSpeedometer2, BsFuelPump } from "react-icons/bs";
-import {
-  TbColorSwatch,
-  TbFileDescription,
-} from "react-icons/tb";
+import { TbColorSwatch, TbFileDescription } from "react-icons/tb";
 import toast from "react-hot-toast";
 import PaginatedSelectField from "@/components/ui/paginated-select-field";
 
@@ -64,7 +62,7 @@ const CreateListingPage = () => {
     condition: "bekas",
     ownershipStatus: "Tangan Pertama",
     taxStatus: "Pajak Hidup",
-    sellerWhatsapp: "",
+    sellerWhatsapp: "62",
   });
 
   // Cascaded select state (same pattern as VehicleRegisterForm)
@@ -90,9 +88,10 @@ const CreateListingPage = () => {
 
   useEffect(() => {
     if (userInfo?.whatsappNumber) {
+      const wa = userInfo.whatsappNumber;
       setFormData((prev) => ({
         ...prev,
-        sellerWhatsapp: userInfo.whatsappNumber ?? "",
+        sellerWhatsapp: wa.startsWith("62") ? wa : "62" + wa,
       }));
     }
   }, [userInfo]);
@@ -206,7 +205,8 @@ const CreateListingPage = () => {
       if (!selectedBrandId) newErrors.brandId = "Brand harus dipilih";
       if (!selectedModelId) newErrors.carModelId = "Model harus dipilih";
       if (!formData.variantId) newErrors.variantId = "Varian harus dipilih";
-      if (!formData.yearPriceId) newErrors.yearPriceId = "Tahun harga harus dipilih";
+      if (!formData.yearPriceId)
+        newErrors.yearPriceId = "Tahun harga harus dipilih";
       if (!formData.color) newErrors.color = "Warna harus diisi";
     }
 
@@ -308,13 +308,15 @@ const CreateListingPage = () => {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
 
-  const inputClass = `w-full px-4 py-3 rounded-xl border transition-all ${isDarkMode
-    ? "bg-slate-800 border-slate-700 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-    : "bg-white border-gray-200 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-    }`;
+  const inputClass = `w-full px-4 py-3 rounded-xl border transition-all ${
+    isDarkMode
+      ? "bg-slate-800 border-slate-700 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+      : "bg-white border-gray-200 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+  }`;
 
-  const labelClass = `block text-sm font-semibold mb-2 ${isDarkMode ? "text-slate-300" : "text-gray-700"
-    }`;
+  const labelClass = `block text-sm font-semibold mb-2 ${
+    isDarkMode ? "text-slate-300" : "text-gray-700"
+  }`;
 
   const errorClass = "text-red-500 text-xs mt-1";
 
@@ -329,19 +331,21 @@ const CreateListingPage = () => {
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode
-        ? "bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800"
-        : "bg-gradient-to-b from-gray-50 via-white to-gray-100"
-        }`}
+      className={`min-h-screen ${
+        isDarkMode
+          ? "bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800"
+          : "bg-gradient-to-b from-gray-50 via-white to-gray-100"
+      }`}
     >
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className={`flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 text-sm sm:text-base ${isDarkMode
-            ? "text-slate-400 hover:text-white"
-            : "text-gray-600 hover:text-gray-900"
-            } transition-colors`}
+          className={`flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 text-sm sm:text-base ${
+            isDarkMode
+              ? "text-slate-400 hover:text-white"
+              : "text-gray-600 hover:text-gray-900"
+          } transition-colors`}
         >
           <FiArrowLeft className="text-base sm:text-lg" />
           Kembali
@@ -350,14 +354,16 @@ const CreateListingPage = () => {
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <h1
-            className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-1.5 sm:mb-2 ${isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+            className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-1.5 sm:mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
           >
             Jual Mobil Anda
           </h1>
           <p
-            className={`text-sm sm:text-base ${isDarkMode ? "text-slate-400" : "text-gray-600"
-              }`}
+            className={`text-sm sm:text-base ${
+              isDarkMode ? "text-slate-400" : "text-gray-600"
+            }`}
           >
             Isi detail mobil untuk mulai menjual
           </p>
@@ -368,17 +374,19 @@ const CreateListingPage = () => {
           {steps.map((s, index) => (
             <div
               key={s.number}
-              className={`flex flex-col items-center ${index < steps.length - 1 ? "flex-1 min-w-0" : "flex-shrink-0"
-                }`}
+              className={`flex flex-col items-center ${
+                index < steps.length - 1 ? "flex-1 min-w-0" : "flex-shrink-0"
+              }`}
             >
               <div className="flex items-center w-full">
                 <div
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold transition-all text-sm sm:text-base flex-shrink-0 ${step >= s.number
-                    ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                    : isDarkMode
-                      ? "bg-slate-800 text-slate-500"
-                      : "bg-gray-200 text-gray-500"
-                    }`}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold transition-all text-sm sm:text-base flex-shrink-0 ${
+                    step >= s.number
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                      : isDarkMode
+                        ? "bg-slate-800 text-slate-500"
+                        : "bg-gray-200 text-gray-500"
+                  }`}
                 >
                   {step > s.number ? (
                     <FiCheck className="text-sm sm:text-base" />
@@ -388,24 +396,26 @@ const CreateListingPage = () => {
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-0.5 sm:h-1 mx-1 sm:mx-2 ${step > s.number
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600"
-                      : isDarkMode
-                        ? "bg-slate-800"
-                        : "bg-gray-200"
-                      }`}
+                    className={`flex-1 h-0.5 sm:h-1 mx-1 sm:mx-2 ${
+                      step > s.number
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-600"
+                        : isDarkMode
+                          ? "bg-slate-800"
+                          : "bg-gray-200"
+                    }`}
                   />
                 )}
               </div>
               <span
-                className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 text-center ${step >= s.number
-                  ? isDarkMode
-                    ? "text-cyan-400"
-                    : "text-blue-600"
-                  : isDarkMode
-                    ? "text-slate-500"
-                    : "text-gray-500"
-                  }`}
+                className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 text-center ${
+                  step >= s.number
+                    ? isDarkMode
+                      ? "text-cyan-400"
+                      : "text-blue-600"
+                    : isDarkMode
+                      ? "text-slate-500"
+                      : "text-gray-500"
+                }`}
               >
                 {s.title}
               </span>
@@ -415,17 +425,19 @@ const CreateListingPage = () => {
 
         {/* Form Card */}
         <div
-          className={`rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 ${isDarkMode
-            ? "bg-slate-800/50 border border-slate-700"
-            : "bg-white shadow-xl border border-gray-100"
-            }`}
+          className={`rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 ${
+            isDarkMode
+              ? "bg-slate-800/50 border border-slate-700"
+              : "bg-white shadow-xl border border-gray-100"
+          }`}
         >
           {/* Step 1: Car Info */}
           {step === 1 && (
             <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
               >
                 Informasi Mobil
               </h2>
@@ -489,10 +501,16 @@ const CreateListingPage = () => {
                       }
                     }}
                     apiUrl="/CarModels"
-                    queryParams={selectedBrandId ? { brandId: selectedBrandId } : {}}
-                    getLabel={(item) => (item as { modelName: string }).modelName}
+                    queryParams={
+                      selectedBrandId ? { brandId: selectedBrandId } : {}
+                    }
+                    getLabel={(item) =>
+                      (item as { modelName: string }).modelName
+                    }
                     getValue={(item) => (item as { id: string }).id}
-                    placeholder={selectedBrandId ? "Pilih model..." : "Pilih merek dulu"}
+                    placeholder={
+                      selectedBrandId ? "Pilih model..." : "Pilih merek dulu"
+                    }
                     disabled={!selectedBrandId}
                     required
                   />
@@ -527,13 +545,20 @@ const CreateListingPage = () => {
                       }
                     }}
                     apiUrl="/variants"
-                    queryParams={selectedModelId ? { modelId: selectedModelId } : {}}
+                    queryParams={
+                      selectedModelId ? { modelId: selectedModelId } : {}
+                    }
                     getLabel={(item) => {
-                      const v = item as { variantName: string; transmissionType?: string };
+                      const v = item as {
+                        variantName: string;
+                        transmissionType?: string;
+                      };
                       return `${v.variantName}${v.transmissionType ? ` (${v.transmissionType})` : ""}`;
                     }}
                     getValue={(item) => (item as { id: string }).id}
-                    placeholder={selectedModelId ? "Pilih varian..." : "Pilih model dulu"}
+                    placeholder={
+                      selectedModelId ? "Pilih varian..." : "Pilih model dulu"
+                    }
                     disabled={!selectedModelId}
                     required
                   />
@@ -555,7 +580,7 @@ const CreateListingPage = () => {
                         basePrice: string;
                       };
                       setDisplayYearPrice(
-                        `${yp.year} — Rp ${Number(yp.basePrice).toLocaleString("id-ID")}`
+                        `${yp.year} — Rp ${Number(yp.basePrice).toLocaleString("id-ID")}`,
                       );
                       setFormData((prev) => ({
                         ...prev,
@@ -566,13 +591,21 @@ const CreateListingPage = () => {
                       }
                     }}
                     apiUrl="/year-prices"
-                    queryParams={formData.variantId ? { variantId: formData.variantId } : {}}
+                    queryParams={
+                      formData.variantId
+                        ? { variantId: formData.variantId }
+                        : {}
+                    }
                     getLabel={(item) => {
                       const yp = item as { year: number; basePrice: string };
                       return `${yp.year} — Rp ${Number(yp.basePrice).toLocaleString("id-ID")}`;
                     }}
                     getValue={(item) => (item as { id: string }).id}
-                    placeholder={formData.variantId ? "Pilih tahun..." : "Pilih varian dulu"}
+                    placeholder={
+                      formData.variantId
+                        ? "Pilih tahun..."
+                        : "Pilih varian dulu"
+                    }
                     disabled={!formData.variantId}
                     required
                   />
@@ -614,8 +647,6 @@ const CreateListingPage = () => {
                   </select>
                 </div>
               </div>
-
-
             </div>
           )}
 
@@ -623,8 +654,9 @@ const CreateListingPage = () => {
           {step === 2 && (
             <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
               >
                 Harga & Kilometer
               </h2>
@@ -714,8 +746,9 @@ const CreateListingPage = () => {
           {step === 3 && (
             <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
               >
                 Lokasi & Deskripsi
               </h2>
@@ -773,8 +806,9 @@ const CreateListingPage = () => {
                     <p className={errorClass}>{errors.description}</p>
                   )}
                   <span
-                    className={`text-xs ${isDarkMode ? "text-slate-500" : "text-gray-400"
-                      }`}
+                    className={`text-xs ${
+                      isDarkMode ? "text-slate-500" : "text-gray-400"
+                    }`}
                   >
                     {formData.description.length}/50 karakter minimum
                   </span>
@@ -787,8 +821,9 @@ const CreateListingPage = () => {
           {step === 4 && (
             <div className="space-y-4 sm:space-y-6">
               <h2
-                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
               >
                 Foto & Kontak
               </h2>
@@ -802,14 +837,15 @@ const CreateListingPage = () => {
 
                 {/* Drag & Drop Zone */}
                 <div
-                  className={`relative border-2 border-dashed rounded-xl transition-all ${dragActive
-                    ? "border-cyan-500 bg-cyan-500/10"
-                    : errors.images
-                      ? "border-red-400"
-                      : isDarkMode
-                        ? "border-slate-600 hover:border-slate-500"
-                        : "border-gray-300 hover:border-gray-400"
-                    }`}
+                  className={`relative border-2 border-dashed rounded-xl transition-all ${
+                    dragActive
+                      ? "border-cyan-500 bg-cyan-500/10"
+                      : errors.images
+                        ? "border-red-400"
+                        : isDarkMode
+                          ? "border-slate-600 hover:border-slate-500"
+                          : "border-gray-300 hover:border-gray-400"
+                  }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
@@ -827,30 +863,34 @@ const CreateListingPage = () => {
 
                   <label
                     htmlFor="image-upload"
-                    className={`flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer ${imageFiles.length >= MAX_FILES
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                      }`}
+                    className={`flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer ${
+                      imageFiles.length >= MAX_FILES
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     <FiUpload
-                      className={`text-3xl sm:text-4xl mb-2 sm:mb-3 ${dragActive
-                        ? "text-cyan-500"
-                        : isDarkMode
-                          ? "text-slate-500"
-                          : "text-gray-400"
-                        }`}
+                      className={`text-3xl sm:text-4xl mb-2 sm:mb-3 ${
+                        dragActive
+                          ? "text-cyan-500"
+                          : isDarkMode
+                            ? "text-slate-500"
+                            : "text-gray-400"
+                      }`}
                     />
                     <p
-                      className={`text-xs sm:text-sm font-medium mb-1 text-center ${isDarkMode ? "text-slate-300" : "text-gray-700"
-                        }`}
+                      className={`text-xs sm:text-sm font-medium mb-1 text-center ${
+                        isDarkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
                     >
                       {dragActive
                         ? "Lepaskan file di sini"
                         : "Drag & drop gambar atau klik untuk upload"}
                     </p>
                     <p
-                      className={`text-[10px] sm:text-xs text-center ${isDarkMode ? "text-slate-500" : "text-gray-500"
-                        }`}
+                      className={`text-[10px] sm:text-xs text-center ${
+                        isDarkMode ? "text-slate-500" : "text-gray-500"
+                      }`}
                     >
                       JPG, PNG, WEBP (Max {MAX_FILE_SIZE_MB}MB per file)
                     </p>
@@ -890,8 +930,9 @@ const CreateListingPage = () => {
                         )}
                         {/* File info */}
                         <div
-                          className={`absolute top-1 sm:top-2 right-1 sm:right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs ${isDarkMode ? "bg-slate-800/80" : "bg-white/80"
-                            }`}
+                          className={`absolute top-1 sm:top-2 right-1 sm:right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs ${
+                            isDarkMode ? "bg-slate-800/80" : "bg-white/80"
+                          }`}
                         >
                           {formatFileSize(imageFiles[idx]?.size || 0)}
                         </div>
@@ -902,18 +943,21 @@ const CreateListingPage = () => {
                     {imageFiles.length < MAX_FILES && (
                       <label
                         htmlFor="image-upload"
-                        className={`aspect-square rounded-lg sm:rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${isDarkMode
-                          ? "border-slate-600 hover:border-cyan-500 hover:bg-cyan-500/10"
-                          : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
-                          }`}
+                        className={`aspect-square rounded-lg sm:rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+                          isDarkMode
+                            ? "border-slate-600 hover:border-cyan-500 hover:bg-cyan-500/10"
+                            : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                        }`}
                       >
                         <FiPlus
-                          className={`text-xl sm:text-2xl mb-0.5 sm:mb-1 ${isDarkMode ? "text-slate-500" : "text-gray-400"
-                            }`}
+                          className={`text-xl sm:text-2xl mb-0.5 sm:mb-1 ${
+                            isDarkMode ? "text-slate-500" : "text-gray-400"
+                          }`}
                         />
                         <span
-                          className={`text-[10px] sm:text-xs ${isDarkMode ? "text-slate-500" : "text-gray-500"
-                            }`}
+                          className={`text-[10px] sm:text-xs ${
+                            isDarkMode ? "text-slate-500" : "text-gray-500"
+                          }`}
                         >
                           Tambah
                         </span>
@@ -923,8 +967,9 @@ const CreateListingPage = () => {
                 )}
 
                 <p
-                  className={`text-xs sm:text-sm mt-2 sm:mt-3 ${isDarkMode ? "text-slate-500" : "text-gray-500"
-                    }`}
+                  className={`text-xs sm:text-sm mt-2 sm:mt-3 ${
+                    isDarkMode ? "text-slate-500" : "text-gray-500"
+                  }`}
                 >
                   {imageFiles.length}/{MAX_FILES} gambar dipilih. Foto pertama
                   akan menjadi foto utama.
@@ -937,20 +982,19 @@ const CreateListingPage = () => {
                   <AiOutlineWhatsApp className="inline mr-2 text-green-500" />
                   Nomor WhatsApp
                 </label>
-                <input
-                  type="text"
+                <PhoneInputField
                   name="sellerWhatsapp"
                   value={formData.sellerWhatsapp}
                   onChange={handleChange}
-                  placeholder="6281234567890"
-                  className={inputClass}
+                  placeholder="8123456789"
                 />
                 {errors.sellerWhatsapp && (
                   <p className={errorClass}>{errors.sellerWhatsapp}</p>
                 )}
                 <p
-                  className={`text-xs sm:text-sm mt-2 ${isDarkMode ? "text-slate-500" : "text-gray-500"
-                    }`}
+                  className={`text-xs sm:text-sm mt-2 ${
+                    isDarkMode ? "text-slate-500" : "text-gray-500"
+                  }`}
                 >
                   Format: 628xxxxxxxxxx (tanpa + atau spasi)
                 </p>
@@ -960,17 +1004,19 @@ const CreateListingPage = () => {
 
           {/* Navigation Buttons */}
           <div
-            className={`flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t ${isDarkMode ? "border-slate-700" : "border-gray-200"
-              }`}
+            className={`flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t ${
+              isDarkMode ? "border-slate-700" : "border-gray-200"
+            }`}
           >
             {step > 1 ? (
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${isDarkMode
-                  ? "bg-slate-800 text-white hover:bg-slate-700"
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  }`}
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
+                  isDarkMode
+                    ? "bg-slate-800 text-white hover:bg-slate-700"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
               >
                 <FiArrowLeft className="text-base sm:text-lg" />
                 Sebelumnya

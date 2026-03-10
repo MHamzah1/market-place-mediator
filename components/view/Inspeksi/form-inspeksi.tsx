@@ -21,6 +21,7 @@ import {
 } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 import toast from "react-hot-toast";
+import PhoneInputField from "@/components/ui/phone-input-field";
 
 const InspeksiPage = () => {
   const { theme } = useTheme();
@@ -131,7 +132,7 @@ Terima kasih telah menggunakan layanan CarMediator!
       setTimeout(() => {
         setFormData({
           nama: "",
-          noTelepon: "",
+          noTelepon: "62",
           email: "",
           merekMobil: "",
           modelMobil: "",
@@ -522,13 +523,11 @@ Terima kasih telah menggunakan layanan CarMediator!
                       <label className={labelClass}>
                         No. Telepon <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="tel"
+                      <PhoneInputField
                         name="noTelepon"
                         value={formData.noTelepon}
                         onChange={handleInputChange}
-                        placeholder="08xxxxxxxxxx"
-                        className={inputClass}
+                        placeholder="8123456789"
                         required
                       />
                     </div>

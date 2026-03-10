@@ -18,6 +18,7 @@ export { default as NumberField } from "./number-field";
 export { default as Button } from "./button";
 export { default as CurrencyInputField } from "./currency-input-field";
 export { default as InputField } from "./input-field";
+export { default as PhoneInputField } from "./phone-input-field";
 
 // Types
 export type { TextFieldProps } from "./text-field";
@@ -32,3 +33,4 @@ export type { NumberFieldProps } from "./number-field";
 export type { ButtonProps } from "./button";
 export type { CurrencyInputFieldProps } from "./currency-input-field";
 export type { InputFieldProps } from "./input-field";
+export type { PhoneInputFieldProps } from "./phone-input-field";
