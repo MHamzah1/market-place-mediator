@@ -92,6 +92,7 @@ const WarehouseLayout = ({ children }: { children: React.ReactNode }) => {
   const menuItems: MenuItem[] = [
     { icon: FiHome, label: "Dashboard", href: "/warehouse/dashboard" },
     { icon: BsBuilding, label: "Showroom", href: "/warehouse/showrooms" },
+    { icon: FiGrid, label: "Showroom View", href: "/warehouse/showroom-view" },
     { icon: FiTruck, label: "Kendaraan", href: "/warehouse/vehicles" },
     { icon: FiClipboard, label: "Inspeksi", href: "/warehouse/inspections" },
     { icon: FiMapPin, label: "Zona Gudang", href: "/warehouse/zones" },

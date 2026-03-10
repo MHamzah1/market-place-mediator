@@ -325,6 +325,107 @@ export interface VehicleQueryParams {
   perPage?: number;
 }
 
+// Showroom View types
+export interface ShowroomViewVehicle {
+  id: string;
+  barcode: string;
+  brandName: string;
+  modelName: string;
+  year: number;
+  color: string;
+  transmission: string;
+  fuelType: string;
+  mileage: number;
+  askingPrice: string;
+  licensePlate: string;
+  status: VehicleStatus;
+  condition: string | null;
+  ownershipStatus: string | null;
+  taxStatus: string | null;
+  images: string[] | null;
+  thumbnail: string | null;
+  description: string | null;
+  sellerName: string;
+  listingId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  location: { city: string; province: string } | null;
+  currentZone: { id: string; code: string; name: string; type: string } | null;
+  latestInspection: {
+    id: string;
+    result: string;
+    documentStatus: string;
+    inspectedAt: string;
+  } | null;
+  activeRepair: {
+    id: string;
+    repairType: string;
+    status: string;
+  } | null;
+  actions: ShowroomViewAction[];
+}
+
+export interface ShowroomViewAction {
+  key: string;
+  label: string;
+  method: string;
+  endpoint: string;
+  description: string;
+}
+
+export interface ShowroomViewData {
+  showroom: {
+    id: string;
+    name: string;
+    code: string;
+    city: string;
+    province: string;
+    logo: string;
+  };
+  vehicles: ShowroomViewVehicle[];
+  statusCounts: Record<string, number>;
+  zones: Array<{
+    id: string;
+    code: string;
+    name: string;
+    type: string;
+    capacity: number;
+    currentCount: number;
+  }>;
+}
+
+export interface ShowroomViewVehicleDetail {
+  vehicle: WarehouseVehicle & {
+    showroom?: Showroom;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    seller?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    variant?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    yearPrice?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    carModel?: any;
+  };
+  currentZone: { id: string; code: string; name: string; type: string } | null;
+  inspections: VehicleInspection[];
+  placementHistory: VehiclePlacement[];
+  repairs: RepairOrder[];
+  adminPayment: AdminPayment | null;
+  purchases: PurchaseTransaction[];
+  stockLogs: StockLog[];
+  actions: ShowroomViewAction[];
+}
+
+export interface ShowroomViewQueryParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  status?: string;
+  zoneType?: string;
+  sortDirection?: string;
+  sortBy?: string;
+}
+
 // ============================================================
 // STATE
 // ============================================================
@@ -365,6 +466,11 @@ export interface WarehouseState {
   stockLogs: StockLog[];
   stockSummary: StockSummary | null;
 
+  // Showroom View
+  showroomView: ShowroomViewData | null;
+  showroomViewVehicleDetail: ShowroomViewVehicleDetail | null;
+  showroomViewLoading: boolean;
+
   // UI State
   loading: boolean;
   actionLoading: boolean;
@@ -393,6 +499,9 @@ const initialState: WarehouseState = {
   selectedPurchase: null,
   stockLogs: [],
   stockSummary: null,
+  showroomView: null,
+  showroomViewVehicleDetail: null,
+  showroomViewLoading: false,
   loading: false,
   actionLoading: false,
   error: null,
@@ -593,18 +702,21 @@ export const registerVehicle = createAsyncThunk<
     formData.append("askingPrice", String(data.askingPrice));
     formData.append("sellerName", data.sellerName);
     formData.append("sellerPhone", data.sellerPhone);
-    
+
     // Optional fields
-    if (data.sellerWhatsapp) formData.append("sellerWhatsapp", data.sellerWhatsapp);
+    if (data.sellerWhatsapp)
+      formData.append("sellerWhatsapp", data.sellerWhatsapp);
     if (data.sellerKtp) formData.append("sellerKtp", data.sellerKtp);
     if (data.description) formData.append("description", data.description);
     if (data.condition) formData.append("condition", data.condition);
-    if (data.ownershipStatus) formData.append("ownershipStatus", data.ownershipStatus);
+    if (data.ownershipStatus)
+      formData.append("ownershipStatus", data.ownershipStatus);
     if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
     if (data.locationCity) formData.append("locationCity", data.locationCity);
-    if (data.locationProvince) formData.append("locationProvince", data.locationProvince);
+    if (data.locationProvince)
+      formData.append("locationProvince", data.locationProvince);
     if (data.notes) formData.append("notes", data.notes);
-    
+
     // Images
     if (data.images && data.images.length > 0) {
       data.images.forEach((file) => {
@@ -641,18 +753,21 @@ export const updateVehicle = createAsyncThunk<
     formData.append("askingPrice", String(data.askingPrice));
     formData.append("sellerName", data.sellerName);
     formData.append("sellerPhone", data.sellerPhone);
-    
+
     // Optional fields
-    if (data.sellerWhatsapp) formData.append("sellerWhatsapp", data.sellerWhatsapp);
+    if (data.sellerWhatsapp)
+      formData.append("sellerWhatsapp", data.sellerWhatsapp);
     if (data.sellerKtp) formData.append("sellerKtp", data.sellerKtp);
     if (data.description) formData.append("description", data.description);
     if (data.condition) formData.append("condition", data.condition);
-    if (data.ownershipStatus) formData.append("ownershipStatus", data.ownershipStatus);
+    if (data.ownershipStatus)
+      formData.append("ownershipStatus", data.ownershipStatus);
     if (data.taxStatus) formData.append("taxStatus", data.taxStatus);
     if (data.locationCity) formData.append("locationCity", data.locationCity);
-    if (data.locationProvince) formData.append("locationProvince", data.locationProvince);
+    if (data.locationProvince)
+      formData.append("locationProvince", data.locationProvince);
     if (data.notes) formData.append("notes", data.notes);
-    
+
     // Images
     if (data.images && data.images.length > 0) {
       data.images.forEach((file) => {
@@ -1044,6 +1159,93 @@ export const fetchStockSummary = createAsyncThunk<
 });
 
 // ============================================================
+// ASYNC THUNKS — SHOWROOM VIEW
+// ============================================================
+
+export const fetchShowroomView = createAsyncThunk<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  { showroomId: string; params?: ShowroomViewQueryParams },
+  { rejectValue: string }
+>(
+  "warehouse/fetchShowroomView",
+  async ({ showroomId, params }, { rejectWithValue }) => {
+    try {
+      const res = await instanceAxios.get(
+        `/warehouse/showroom-view/${showroomId}`,
+        {
+          params: params || {},
+          headers: getHeaders(),
+        },
+      );
+      return res.data;
+    } catch (e) {
+      const err = e as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        err.response?.data?.message || "Gagal mengambil showroom view",
+      );
+    }
+  },
+);
+
+export const fetchShowroomViewVehicle = createAsyncThunk<
+  ShowroomViewVehicleDetail,
+  string,
+  { rejectValue: string }
+>(
+  "warehouse/fetchShowroomViewVehicle",
+  async (vehicleId, { rejectWithValue }) => {
+    try {
+      const res = await instanceAxios.get(
+        `/warehouse/showroom-view/vehicle/${vehicleId}`,
+        { headers: getHeaders() },
+      );
+      return res.data?.data ?? res.data;
+    } catch (e) {
+      const err = e as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        err.response?.data?.message || "Gagal mengambil detail kendaraan",
+      );
+    }
+  },
+);
+
+export const markVehicleReadyAndPlace = createAsyncThunk<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  { vehicleId: string; zoneId: string },
+  { rejectValue: string }
+>(
+  "warehouse/markVehicleReadyAndPlace",
+  async ({ vehicleId, zoneId }, { rejectWithValue }) => {
+    try {
+      // Step 1: Update status to ready
+      await instanceAxios.patch(
+        `/warehouse/vehicles/${vehicleId}/status`,
+        {},
+        {
+          params: { status: "ready" },
+          headers: getHeaders(),
+        },
+      );
+      // Step 2: Place in ready zone
+      const res = await instanceAxios.post(
+        `/warehouse/vehicles/${vehicleId}/place`,
+        { zoneId },
+        { headers: getHeaders() },
+      );
+      return res.data?.data ?? res.data;
+    } catch (e) {
+      const err = e as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        err.response?.data?.message ||
+          "Gagal mengubah status dan menempatkan kendaraan",
+      );
+    }
+  },
+);
+
+// ============================================================
 // SLICE
 // ============================================================
 
@@ -1065,6 +1267,9 @@ const warehouseSlice = createSlice({
     },
     setSelectedShowroom: (state, action: PayloadAction<Showroom>) => {
       state.selectedShowroom = action.payload;
+    },
+    clearShowroomViewVehicle: (state) => {
+      state.showroomViewVehicleDetail = null;
     },
   },
   extraReducers: (builder) => {
@@ -1326,6 +1531,48 @@ const warehouseSlice = createSlice({
       .addCase(fetchStockSummary.fulfilled, (state, action) => {
         state.stockSummary = action.payload;
       });
+
+    // ---- SHOWROOM VIEW ----
+    builder
+      .addCase(fetchShowroomView.pending, (state) => {
+        state.showroomViewLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchShowroomView.fulfilled, (state, action) => {
+        state.showroomViewLoading = false;
+        state.showroomView = action.payload?.data ?? action.payload;
+        if (action.payload?.pagination)
+          state.pagination = action.payload.pagination;
+      })
+      .addCase(fetchShowroomView.rejected, (state, action) => {
+        state.showroomViewLoading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(fetchShowroomViewVehicle.pending, (state) => {
+        state.showroomViewLoading = true;
+      })
+      .addCase(fetchShowroomViewVehicle.fulfilled, (state, action) => {
+        state.showroomViewLoading = false;
+        state.showroomViewVehicleDetail = action.payload;
+      })
+      .addCase(fetchShowroomViewVehicle.rejected, (state, action) => {
+        state.showroomViewLoading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(markVehicleReadyAndPlace.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(markVehicleReadyAndPlace.fulfilled, (state) => {
+        state.actionLoading = false;
+        state.successMessage =
+          "Kendaraan siap jual & ditempatkan di zona ready!";
+      })
+      .addCase(markVehicleReadyAndPlace.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
@@ -1335,6 +1582,7 @@ export const {
   clearSelectedVehicle,
   clearSelectedShowroom,
   setSelectedShowroom,
+  clearShowroomViewVehicle,
 } = warehouseSlice.actions;
 
 export default warehouseSlice.reducer;
