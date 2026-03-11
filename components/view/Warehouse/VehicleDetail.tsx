@@ -9,6 +9,7 @@ import {
   createAdminPayment,
   simulateAdminPayment,
   payAdminFee,
+  placeVehicleByZoneType,
   fetchInspectionsByVehicle,
   fetchRepairsByVehicle,
   fetchZonesByShowroom,
@@ -201,31 +202,33 @@ const VehicleDetail = ({ id }: { id: string }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2 w-full md:w-auto">
-            {vehicle.status === "inspecting" && (
-              <Link
-                href={generateUrlWithEncryptedParams(
-                  "/warehouse/inspections/create",
-                  { vehicleId: vehicle.id },
-                )}
-                className="flex flex-1 md:flex-none justify-center items-center gap-2 px-5 py-2.5 rounded-xl bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-500/30 transition-colors border border-yellow-500/30"
-              >
-                <FiClipboard /> Mulai Inspeksi
-              </Link>
-            )}
-            {(vehicle.status === "registered" ||
-              vehicle.status === "pending_payment") && (
-              <button
-                onClick={() => setIsPaymentModalOpen(true)}
-                disabled={actionLoading}
-                className="flex flex-1 md:flex-none justify-center items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
-              >
-                <FiDollarSign /> Bayar Tagihan Admin
-              </button>
-            )}
-            {(vehicle.status === "in_warehouse" ||
-              vehicle.status === "in_repair") && (
-              <>
+          <div className="flex flex-col gap-3 w-full md:w-auto">
+            {/* Primary Actions */}
+            <div className="flex flex-wrap gap-2">
+              {vehicle.status === "inspecting" && (
+                <Link
+                  href={generateUrlWithEncryptedParams(
+                    "/warehouse/inspections/create",
+                    { vehicleId: vehicle.id },
+                  )}
+                  className="flex flex-1 md:flex-none justify-center items-center gap-2 px-5 py-2.5 rounded-xl bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-500/30 transition-colors border border-yellow-500/30"
+                >
+                  <FiClipboard /> Mulai Inspeksi
+                </Link>
+              )}
+              {(vehicle.status === "registered" ||
+                vehicle.status === "pending_payment") && (
+                <button
+                  onClick={() => setIsPaymentModalOpen(true)}
+                  disabled={actionLoading}
+                  className="flex flex-1 md:flex-none justify-center items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
+                >
+                  <FiDollarSign /> Bayar Tagihan Admin
+                </button>
+              )}
+              {(vehicle.status === "in_warehouse" ||
+                vehicle.status === "in_repair" ||
+                vehicle.status === "registered") && (
                 <Link
                   href={generateUrlWithEncryptedParams(
                     "/warehouse/repairs/create",
@@ -235,37 +238,29 @@ const VehicleDetail = ({ id }: { id: string }) => {
                 >
                   <FiTool /> Repair Order
                 </Link>
+              )}
+              {vehicle.status === "ready" && (
                 <button
-                  onClick={() => {
-                    const readyZone = zones.find((z) => z.type === "ready");
-                    if (readyZone) {
-                      dispatch(
-                        markVehicleReadyAndPlace({
-                          vehicleId: vehicle.id,
-                          zoneId: readyZone.id,
-                        }),
-                      );
-                    } else {
-                      toast.error(
-                        "Zona ready belum tersedia. Silakan buat zona ready terlebih dahulu.",
-                      );
-                    }
-                  }}
+                  onClick={() => dispatch(publishVehicle(vehicle.id))}
                   disabled={actionLoading}
-                  className="flex flex-1 md:flex-none justify-center items-center gap-2 px-5 py-2.5 rounded-xl bg-green-500/20 text-green-600 dark:text-green-400 font-semibold text-sm hover:bg-green-500/30 transition-colors border border-green-500/30 disabled:opacity-50"
+                  className="flex flex-1 md:flex-none justify-center items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
                 >
-                  <FiCheck /> Sudah Siap Jual
+                  <FiExternalLink /> Publish ke Marketplace
                 </button>
-              </>
-            )}
-            {vehicle.status === "ready" && (
-              <button
-                onClick={() => dispatch(publishVehicle(vehicle.id))}
-                disabled={actionLoading}
-                className="flex flex-1 md:flex-none justify-center items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
-              >
-                <FiExternalLink /> Publish ke Marketplace
-              </button>
+              )}
+            </div>
+
+            {/* Zone Placement Select */}
+            {vehicle.status !== "sold" && vehicle.status !== "listed" && (
+              <ZonePlacementSelect
+                isDark={isDark}
+                actionLoading={actionLoading}
+                onMove={(zoneType) =>
+                  dispatch(
+                    placeVehicleByZoneType({ vehicleId: vehicle.id, zoneType }),
+                  )
+                }
+              />
             )}
           </div>
         </div>
@@ -885,6 +880,119 @@ const VehicleDetail = ({ id }: { id: string }) => {
           formatPrice={formatPrice}
         />
       )}
+    </div>
+  );
+};
+
+// ============================
+// ZONE PLACEMENT SELECT
+// ============================
+const ZONE_OPTIONS = [
+  {
+    value: "ready",
+    label: "Gudang Ready Jual",
+    emoji: "🟢",
+    desc: "Siap dijual / display",
+  },
+  {
+    value: "light_repair",
+    label: "Gudang Repair Ringan",
+    emoji: "🟡",
+    desc: "Service ringan, detailing",
+  },
+  {
+    value: "heavy_repair",
+    label: "Gudang Repair Berat",
+    emoji: "🟠",
+    desc: "Perbaikan mesin, body",
+  },
+  {
+    value: "holding",
+    label: "Gudang Holding",
+    emoji: "🔵",
+    desc: "Menunggu keputusan",
+  },
+  {
+    value: "showroom_display",
+    label: "Display Showroom",
+    emoji: "🟣",
+    desc: "Pajang di showroom",
+  },
+];
+
+const ZonePlacementSelect = ({
+  isDark,
+  actionLoading,
+  onMove,
+}: {
+  isDark: boolean;
+  actionLoading: boolean;
+  onMove: (zoneType: string) => void;
+}) => {
+  const [selected, setSelected] = useState("");
+
+  return (
+    <div className="flex items-center gap-2 w-full md:w-auto">
+      <div className="relative flex-1 md:flex-none md:w-56">
+        <FiMapPin
+          className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? "text-slate-500" : "text-slate-400"}`}
+          size={14}
+        />
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          className={`w-full pl-8 pr-8 py-2 rounded-xl text-sm font-medium appearance-none cursor-pointer border transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${
+            isDark
+              ? "bg-slate-800 border-slate-700 text-slate-200 hover:border-slate-600"
+              : "bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+          } ${!selected ? (isDark ? "text-slate-500" : "text-slate-400") : ""}`}
+        >
+          <option value="" disabled>
+            Pindahkan ke zona...
+          </option>
+          {ZONE_OPTIONS.map((z) => (
+            <option key={z.value} value={z.value}>
+              {z.emoji} {z.label}
+            </option>
+          ))}
+        </select>
+        <div
+          className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? "text-slate-500" : "text-slate-400"}`}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M3 4.5L6 7.5L9 4.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+      <button
+        onClick={() => {
+          if (selected) {
+            onMove(selected);
+            setSelected("");
+          }
+        }}
+        disabled={!selected || actionLoading}
+        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+          selected
+            ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5"
+            : isDark
+              ? "bg-slate-800 text-slate-600 cursor-not-allowed"
+              : "bg-slate-100 text-slate-400 cursor-not-allowed"
+        } disabled:opacity-50 disabled:transform-none disabled:shadow-none`}
+      >
+        {actionLoading ? (
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        ) : (
+          <FiMapPin size={14} />
+        )}
+        Pindahkan
+      </button>
     </div>
   );
 };

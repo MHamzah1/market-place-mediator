@@ -7,6 +7,7 @@ import {
   fetchShowroomView,
   fetchShowroomViewVehicle,
   markVehicleReadyAndPlace,
+  placeVehicleByZoneType,
   publishVehicle,
   simulateAdminPayment,
   payAdminFee,
@@ -762,6 +763,7 @@ const VehicleDetailModal = ({
   const [showPaymentPanel, setShowPaymentPanel] = useState(false);
   const [payMethod, setPayMethod] = useState("transfer_bank");
   const [payAgreed, setPayAgreed] = useState(false);
+  const [selectedZone, setSelectedZone] = useState("");
   const getImageUrl = (url: string) =>
     url?.startsWith("http") ? url : baseUrl + url;
 
@@ -1008,24 +1010,26 @@ const VehicleDetailModal = ({
                 )}
 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-2 mt-auto">
-                  {detail.actions
-                    .filter(
-                      (a) =>
-                        a.key !== "create_admin_payment" &&
-                        a.key !== "simulate_payment",
-                    )
-                    .map((action) => (
-                      <ActionButton
-                        key={action.key}
-                        action={action}
-                        vehicle={detail.vehicle}
-                        actionLoading={actionLoading}
-                      />
-                    ))}
-                  {(detail.vehicle.status === "in_warehouse" ||
-                    detail.vehicle.status === "in_repair") && (
-                    <>
+                <div className="flex flex-col gap-2 mt-auto">
+                  {/* Primary Actions Row */}
+                  <div className="flex flex-wrap gap-2">
+                    {detail.actions
+                      .filter(
+                        (a) =>
+                          a.key !== "create_admin_payment" &&
+                          a.key !== "simulate_payment",
+                      )
+                      .map((action) => (
+                        <ActionButton
+                          key={action.key}
+                          action={action}
+                          vehicle={detail.vehicle}
+                          actionLoading={actionLoading}
+                        />
+                      ))}
+                    {(detail.vehicle.status === "in_warehouse" ||
+                      detail.vehicle.status === "in_repair" ||
+                      detail.vehicle.status === "registered") && (
                       <Link
                         href={generateUrlWithEncryptedParams(
                           "/warehouse/repairs/create",
@@ -1035,58 +1039,112 @@ const VehicleDetailModal = ({
                       >
                         <FiTool /> Repair
                       </Link>
+                    )}
+                    {detail.vehicle.status === "ready" && (
                       <button
-                        onClick={() => {
-                          const readyZone = zones.find(
-                            (z) => z.type === "ready",
-                          );
-                          if (readyZone) {
-                            dispatch(
-                              markVehicleReadyAndPlace({
-                                vehicleId: detail.vehicle.id,
-                                zoneId: readyZone.id,
-                              }),
-                            );
-                          } else {
-                            toast.error("Zona ready belum tersedia.");
-                          }
-                        }}
+                        onClick={() =>
+                          dispatch(publishVehicle(detail.vehicle.id))
+                        }
                         disabled={actionLoading}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/15 text-green-600 dark:text-green-400 font-semibold text-sm hover:bg-green-500/25 transition-colors border border-green-500/30 disabled:opacity-50"
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
                       >
-                        <FiCheck /> Sudah Siap Jual
+                        <FiExternalLink /> Publish Marketplace
                       </button>
-                    </>
-                  )}
-                  {detail.vehicle.status === "ready" && (
-                    <button
-                      onClick={() =>
-                        dispatch(publishVehicle(detail.vehicle.id))
-                      }
-                      disabled={actionLoading}
-                      className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
-                    >
-                      <FiExternalLink /> Publish Marketplace
-                    </button>
-                  )}
-                  {detail.vehicle.status === "pending_payment" && (
-                    <button
-                      onClick={() => setShowPaymentPanel(true)}
-                      disabled={actionLoading}
-                      className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
-                    >
-                      <FiDollarSign /> Bayar Tagihan Admin
-                    </button>
-                  )}
-                  {detail.vehicle.status === "registered" && (
-                    <button
-                      onClick={() => setShowPaymentPanel(true)}
-                      disabled={actionLoading}
-                      className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
-                    >
-                      <FiDollarSign /> Bayar Tagihan Admin
-                    </button>
-                  )}
+                    )}
+                    {(detail.vehicle.status === "pending_payment" ||
+                      detail.vehicle.status === "registered") && (
+                      <button
+                        onClick={() => setShowPaymentPanel(true)}
+                        disabled={actionLoading}
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                      >
+                        <FiDollarSign /> Bayar Tagihan Admin
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Zone Placement Select */}
+                  {detail.vehicle.status !== "sold" &&
+                    detail.vehicle.status !== "listed" && (
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <FiMapPin
+                            className={`absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                            size={12}
+                          />
+                          <select
+                            value={selectedZone}
+                            onChange={(e) => setSelectedZone(e.target.value)}
+                            className={`w-full pl-7 pr-7 py-1.5 rounded-lg text-xs font-medium appearance-none cursor-pointer border transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ${
+                              isDark
+                                ? "bg-slate-800 border-slate-700 text-slate-200 hover:border-slate-600"
+                                : "bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+                            } ${!selectedZone ? (isDark ? "text-slate-500" : "text-slate-400") : ""}`}
+                          >
+                            <option value="" disabled>
+                              Pindahkan ke zona...
+                            </option>
+                            <option value="ready">🟢 Gudang Ready Jual</option>
+                            <option value="light_repair">
+                              🟡 Gudang Repair Ringan
+                            </option>
+                            <option value="heavy_repair">
+                              🟠 Gudang Repair Berat
+                            </option>
+                            <option value="holding">🔵 Gudang Holding</option>
+                            <option value="showroom_display">
+                              🟣 Display Showroom
+                            </option>
+                          </select>
+                          <div
+                            className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                          >
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                            >
+                              <path
+                                d="M3 4.5L6 7.5L9 4.5"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (selectedZone) {
+                              dispatch(
+                                placeVehicleByZoneType({
+                                  vehicleId: detail.vehicle.id,
+                                  zoneType: selectedZone,
+                                }),
+                              );
+                              setSelectedZone("");
+                            }
+                          }}
+                          disabled={!selectedZone || actionLoading}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                            selectedZone
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm hover:-translate-y-0.5"
+                              : isDark
+                                ? "bg-slate-800 text-slate-600"
+                                : "bg-slate-100 text-slate-400"
+                          } disabled:opacity-40 disabled:transform-none`}
+                        >
+                          {actionLoading ? (
+                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            <FiMapPin size={11} />
+                          )}
+                          Pindah
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>

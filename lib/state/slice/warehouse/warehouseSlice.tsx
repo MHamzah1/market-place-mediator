@@ -1339,6 +1339,30 @@ export const markVehicleReadyAndPlace = createAsyncThunk<
   },
 );
 
+export const placeVehicleByZoneType = createAsyncThunk<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  { vehicleId: string; zoneType: string },
+  { rejectValue: string }
+>(
+  "warehouse/placeVehicleByZoneType",
+  async ({ vehicleId, zoneType }, { rejectWithValue }) => {
+    try {
+      const res = await instanceAxios.post(
+        `/warehouse/vehicles/${vehicleId}/place-by-type`,
+        { zoneType },
+        { headers: getHeaders() },
+      );
+      return res.data?.data ?? res.data;
+    } catch (e) {
+      const err = e as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        err.response?.data?.message || "Gagal memindahkan kendaraan ke zona",
+      );
+    }
+  },
+);
+
 // ============================================================
 // SLICE
 // ============================================================
@@ -1712,6 +1736,18 @@ const warehouseSlice = createSlice({
           "Kendaraan siap jual & ditempatkan di zona ready!";
       })
       .addCase(markVehicleReadyAndPlace.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(placeVehicleByZoneType.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(placeVehicleByZoneType.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        const zoneName = action.payload?.zone?.name || "zona";
+        state.successMessage = `Kendaraan berhasil dipindahkan ke ${zoneName}!`;
+      })
+      .addCase(placeVehicleByZoneType.rejected, (state, action) => {
         state.actionLoading = false;
         state.error = action.payload as string;
       });
