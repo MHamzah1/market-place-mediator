@@ -175,6 +175,27 @@ export interface AdminPayment {
   createdAt: string;
 }
 
+export interface AdminPaymentWithDetails extends AdminPayment {
+  vehicle?: {
+    id: string;
+    brandName: string;
+    modelName: string;
+    year: number;
+    color: string;
+    licensePlate: string;
+    barcode: string;
+    askingPrice: number;
+    status: string;
+    images?: string[];
+    sellerName: string;
+  };
+  payer?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+}
+
 export interface PurchaseTransaction {
   id: string;
   warehouseVehicleId: string;
@@ -457,6 +478,7 @@ export interface WarehouseState {
 
   // Payments
   adminPayment: AdminPayment | null;
+  adminPayments: AdminPaymentWithDetails[];
 
   // Purchases
   purchases: PurchaseTransaction[];
@@ -495,6 +517,7 @@ const initialState: WarehouseState = {
   zones: [],
   repairs: [],
   adminPayment: null,
+  adminPayments: [],
   purchases: [],
   selectedPurchase: null,
   stockLogs: [],
@@ -1007,6 +1030,33 @@ export const updateRepairStatus = createAsyncThunk<
 // ASYNC THUNKS — ADMIN PAYMENT
 // ============================================================
 
+export const fetchAllAdminPayments = createAsyncThunk<
+  {
+    data: AdminPaymentWithDetails[];
+    pagination: {
+      page: number;
+      perPage: number;
+      totalRecords: number;
+      totalPages: number;
+    };
+  },
+  { showroomId?: string; status?: string; page?: number; perPage?: number },
+  { rejectValue: string }
+>("warehouse/fetchAllAdminPayments", async (params, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.get(`/warehouse/payments/all`, {
+      params,
+      headers: getHeaders(),
+    });
+    return res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal mengambil data pembayaran",
+    );
+  }
+});
+
 export const createAdminPayment = createAsyncThunk<
   AdminPayment,
   string,
@@ -1044,6 +1094,50 @@ export const fetchAdminPayment = createAsyncThunk<
     );
   }
 });
+
+export const simulateAdminPayment = createAsyncThunk<
+  AdminPayment,
+  string,
+  { rejectValue: string }
+>("warehouse/simulateAdminPayment", async (vehicleId, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.post(
+      `/warehouse/payments/${vehicleId}/simulate-payment`,
+      {},
+      { headers: getHeaders() },
+    );
+    return res.data?.data ?? res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal simulasi pembayaran",
+    );
+  }
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const payAdminFee = createAsyncThunk<
+  any,
+  { vehicleId: string; paymentMethod: string },
+  { rejectValue: string }
+>(
+  "warehouse/payAdminFee",
+  async ({ vehicleId, paymentMethod }, { rejectWithValue }) => {
+    try {
+      const res = await instanceAxios.post(
+        `/warehouse/payments/${vehicleId}/pay`,
+        { paymentMethod },
+        { headers: getHeaders() },
+      );
+      return res.data;
+    } catch (e) {
+      const err = e as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        err.response?.data?.message || "Gagal memproses pembayaran",
+      );
+    }
+  },
+);
 
 // ============================================================
 // ASYNC THUNKS — PURCHASE
@@ -1472,6 +1566,26 @@ const warehouseSlice = createSlice({
 
     // ---- PAYMENT ----
     builder
+      .addCase(fetchAllAdminPayments.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllAdminPayments.fulfilled, (state, action) => {
+        state.loading = false;
+        state.adminPayments = action.payload.data || [];
+        if (action.payload.pagination) {
+          state.pagination = {
+            page: action.payload.pagination.page,
+            perPage: action.payload.pagination.perPage,
+            total: action.payload.pagination.totalRecords,
+            totalPages: action.payload.pagination.totalPages,
+          };
+        }
+      })
+      .addCase(fetchAllAdminPayments.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
       .addCase(createAdminPayment.pending, (state) => {
         state.actionLoading = true;
       })
@@ -1486,6 +1600,34 @@ const warehouseSlice = createSlice({
       })
       .addCase(fetchAdminPayment.fulfilled, (state, action) => {
         state.adminPayment = action.payload;
+      })
+      .addCase(simulateAdminPayment.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(simulateAdminPayment.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.adminPayment = action.payload;
+        state.successMessage =
+          "Pembayaran berhasil disimulasikan! Status: PAID";
+      })
+      .addCase(simulateAdminPayment.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(payAdminFee.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(payAdminFee.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        if (action.payload?.data?.payment) {
+          state.adminPayment = action.payload.data.payment;
+        }
+        state.successMessage =
+          action.payload?.message || "Pembayaran admin berhasil!";
+      })
+      .addCase(payAdminFee.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
       });
 
     // ---- PURCHASE ----

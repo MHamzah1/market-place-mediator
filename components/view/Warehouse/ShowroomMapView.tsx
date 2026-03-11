@@ -8,6 +8,8 @@ import {
   fetchShowroomViewVehicle,
   markVehicleReadyAndPlace,
   publishVehicle,
+  simulateAdminPayment,
+  payAdminFee,
   clearSuccess,
   clearError,
   clearShowroomViewVehicle,
@@ -757,8 +759,18 @@ const VehicleDetailModal = ({
   const [activeTab, setActiveTab] = useState<
     "info" | "inspection" | "repair" | "history"
   >("info");
+  const [showPaymentPanel, setShowPaymentPanel] = useState(false);
+  const [payMethod, setPayMethod] = useState("transfer_bank");
+  const [payAgreed, setPayAgreed] = useState(false);
   const getImageUrl = (url: string) =>
     url?.startsWith("http") ? url : baseUrl + url;
+
+  const formatPrice = (n: number | string) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(Number(n));
 
   return (
     <div
@@ -997,14 +1009,20 @@ const VehicleDetailModal = ({
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2 mt-auto">
-                  {detail.actions.map((action) => (
-                    <ActionButton
-                      key={action.key}
-                      action={action}
-                      vehicle={detail.vehicle}
-                      actionLoading={actionLoading}
-                    />
-                  ))}
+                  {detail.actions
+                    .filter(
+                      (a) =>
+                        a.key !== "create_admin_payment" &&
+                        a.key !== "simulate_payment",
+                    )
+                    .map((action) => (
+                      <ActionButton
+                        key={action.key}
+                        action={action}
+                        vehicle={detail.vehicle}
+                        actionLoading={actionLoading}
+                      />
+                    ))}
                   {(detail.vehicle.status === "in_warehouse" ||
                     detail.vehicle.status === "in_repair") && (
                     <>
@@ -1049,6 +1067,24 @@ const VehicleDetailModal = ({
                       className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
                     >
                       <FiExternalLink /> Publish Marketplace
+                    </button>
+                  )}
+                  {detail.vehicle.status === "pending_payment" && (
+                    <button
+                      onClick={() => setShowPaymentPanel(true)}
+                      disabled={actionLoading}
+                      className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                    >
+                      <FiDollarSign /> Bayar Tagihan Admin
+                    </button>
+                  )}
+                  {detail.vehicle.status === "registered" && (
+                    <button
+                      onClick={() => setShowPaymentPanel(true)}
+                      disabled={actionLoading}
+                      className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                    >
+                      <FiDollarSign /> Bayar Tagihan Admin
                     </button>
                   )}
                 </div>
@@ -1098,6 +1134,240 @@ const VehicleDetailModal = ({
               {activeTab === "history" && (
                 <HistoryTab detail={detail} isDark={isDark} />
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ============ PAYMENT PANEL OVERLAY ============ */}
+        {showPaymentPanel && detail && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-2xl">
+            <div
+              className={`w-full max-w-lg mx-4 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${
+                isDark
+                  ? "bg-slate-900 border border-slate-700"
+                  : "bg-white border border-slate-200"
+              }`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Payment Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-4 relative">
+                <button
+                  onClick={() => {
+                    setShowPaymentPanel(false);
+                    setPayAgreed(false);
+                  }}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center"
+                >
+                  <FiX className="text-base" />
+                </button>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <FiDollarSign className="text-white/70 text-sm" />
+                  <span className="text-white/70 text-xs font-medium">
+                    Pembayaran
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-white">
+                  Tagihan Biaya Admin
+                </h3>
+              </div>
+
+              {/* Payment Content */}
+              <div className="overflow-y-auto flex-1 p-5 space-y-4">
+                {/* Vehicle Summary */}
+                <div
+                  className={`flex gap-3 p-3 rounded-xl border ${isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-slate-50 border-slate-200"}`}
+                >
+                  <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200 dark:bg-slate-700">
+                    {detail.vehicle.images?.[0] ? (
+                      <img
+                        src={getImageUrl(detail.vehicle.images[0])}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <TbCar className="text-slate-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`font-bold text-sm truncate ${isDark ? "text-white" : "text-slate-900"}`}
+                    >
+                      {detail.vehicle.brandName} {detail.vehicle.modelName}{" "}
+                      {detail.vehicle.year}
+                    </p>
+                    <p
+                      className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}
+                    >
+                      {detail.vehicle.licensePlate} &bull;{" "}
+                      {detail.vehicle.color}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rincian */}
+                <div
+                  className={`rounded-xl border divide-y ${isDark ? "bg-slate-800/30 border-slate-700/50 divide-slate-700/50" : "bg-white border-slate-200 divide-slate-100"}`}
+                >
+                  <div className="flex justify-between items-center px-4 py-2.5">
+                    <span
+                      className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}
+                    >
+                      Biaya Admin Warehouse
+                    </span>
+                    <span
+                      className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}
+                    >
+                      {formatPrice(2000000)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center px-4 py-2.5">
+                    <span
+                      className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}
+                    >
+                      Biaya Registrasi
+                    </span>
+                    <span className="text-sm font-medium text-emerald-500">
+                      Gratis
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center px-4 py-2.5">
+                    <span
+                      className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}
+                    >
+                      PPN (0%)
+                    </span>
+                    <span
+                      className={`text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}
+                    >
+                      {formatPrice(0)}
+                    </span>
+                  </div>
+                  <div
+                    className={`flex justify-between items-center px-4 py-3 ${isDark ? "bg-blue-500/10" : "bg-blue-50"}`}
+                  >
+                    <span
+                      className={`text-sm font-bold ${isDark ? "text-blue-300" : "text-blue-700"}`}
+                    >
+                      Total
+                    </span>
+                    <span
+                      className={`text-lg font-black ${isDark ? "text-blue-300" : "text-blue-700"}`}
+                    >
+                      {formatPrice(2000000)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Payment Method */}
+                <div>
+                  <p
+                    className={`text-xs font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}
+                  >
+                    Metode Pembayaran
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        id: "transfer_bank",
+                        label: "Transfer Bank",
+                        icon: "🏦",
+                      },
+                      { id: "ewallet", label: "E-Wallet", icon: "📱" },
+                      { id: "cash", label: "Tunai", icon: "💵" },
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => setPayMethod(m.id)}
+                        className={`p-2.5 rounded-xl border-2 text-center transition-all ${
+                          payMethod === m.id
+                            ? isDark
+                              ? "border-blue-500 bg-blue-500/10"
+                              : "border-blue-500 bg-blue-50"
+                            : isDark
+                              ? "border-slate-700 bg-slate-800/50"
+                              : "border-slate-200 bg-white"
+                        }`}
+                      >
+                        <div className="text-lg">{m.icon}</div>
+                        <p
+                          className={`text-[10px] font-bold mt-0.5 ${isDark ? "text-white" : "text-slate-900"}`}
+                        >
+                          {m.label}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Checkbox */}
+                <label
+                  className={`flex items-start gap-2.5 p-3 rounded-xl cursor-pointer ${isDark ? "bg-slate-800/30" : "bg-slate-50"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={payAgreed}
+                    onChange={() => setPayAgreed(!payAgreed)}
+                    className="mt-0.5 w-4 h-4 rounded accent-blue-600"
+                  />
+                  <span
+                    className={`text-[11px] leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}
+                  >
+                    Saya menyetujui pembayaran biaya admin{" "}
+                    <strong>{formatPrice(2000000)}</strong> untuk kendaraan{" "}
+                    <strong>
+                      {detail.vehicle.brandName} {detail.vehicle.modelName}{" "}
+                      {detail.vehicle.year}
+                    </strong>
+                    .
+                  </span>
+                </label>
+              </div>
+
+              {/* Payment Footer */}
+              <div
+                className={`px-5 py-3.5 border-t flex items-center justify-between gap-3 ${isDark ? "border-slate-800" : "border-slate-200 bg-slate-50"}`}
+              >
+                <button
+                  onClick={() => {
+                    setShowPaymentPanel(false);
+                    setPayAgreed(false);
+                  }}
+                  className={`px-4 py-2 rounded-xl font-semibold text-sm ${isDark ? "bg-slate-800 text-slate-300" : "bg-white text-slate-600 border border-slate-200"}`}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => {
+                    dispatch(
+                      payAdminFee({
+                        vehicleId: detail.vehicle.id,
+                        paymentMethod: payMethod,
+                      }),
+                    )
+                      .unwrap()
+                      .then(() => {
+                        setShowPaymentPanel(false);
+                        setPayAgreed(false);
+                      })
+                      .catch(() => {});
+                  }}
+                  disabled={!payAgreed || actionLoading}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  {actionLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{" "}
+                      Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <FiCheck /> Bayar {formatPrice(2000000)}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
