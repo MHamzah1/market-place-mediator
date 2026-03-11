@@ -762,11 +762,11 @@ const VehicleDetailModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[4.5rem] md:pt-[5rem] px-4 pb-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className={`relative w-full max-w-5xl max-h-[92vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col ${
+        className={`relative w-full max-w-5xl max-h-[calc(100vh-6rem)] rounded-2xl overflow-hidden shadow-2xl flex flex-col my-auto ${
           isDark
             ? "bg-slate-900 border border-slate-700"
             : "bg-white border border-slate-200"
@@ -776,13 +776,13 @@ const VehicleDetailModal = ({
         {/* Close */}
         <button
           onClick={onClose}
-          className={`absolute top-4 right-4 z-10 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+          className={`absolute top-3 right-3 z-20 w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-lg ${
             isDark
-              ? "bg-slate-800 hover:bg-slate-700 text-slate-400"
-              : "bg-slate-100 hover:bg-slate-200 text-slate-500"
+              ? "bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-600"
+              : "bg-white/90 hover:bg-white text-slate-600 border border-slate-200"
           }`}
         >
-          <FiX className="text-xl" />
+          <FiX className="text-lg" />
         </button>
 
         {/* Loading */}
@@ -800,7 +800,7 @@ const VehicleDetailModal = ({
               <div className="relative bg-slate-100 dark:bg-slate-950">
                 {detail.vehicle.images && detail.vehicle.images.length > 0 ? (
                   <>
-                    <div className="aspect-[16/11] overflow-hidden">
+                    <div className="aspect-[16/10] overflow-hidden">
                       <img
                         src={getImageUrl(detail.vehicle.images[imageIndex])}
                         alt={`${detail.vehicle.brandName} ${detail.vehicle.modelName}`}
@@ -858,15 +858,15 @@ const VehicleDetailModal = ({
                     )}
                   </>
                 ) : (
-                  <div className="aspect-[16/11] flex items-center justify-center">
+                  <div className="aspect-[16/10] flex items-center justify-center">
                     <FiImage className="text-6xl text-slate-400" />
                   </div>
                 )}
               </div>
 
               {/* Vehicle Info */}
-              <div className="p-6 flex flex-col">
-                <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <div className="p-5 flex flex-col overflow-y-auto">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {(() => {
                     const sc = statusConfig[detail.vehicle.status] || {
                       label: detail.vehicle.status,
@@ -876,7 +876,7 @@ const VehicleDetailModal = ({
                     };
                     return (
                       <span
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border ${sc.bg} ${sc.color}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold border ${sc.bg} ${sc.color}`}
                       >
                         <span className={`w-2 h-2 rounded-full ${sc.dot}`} />{" "}
                         {sc.label}
@@ -884,38 +884,38 @@ const VehicleDetailModal = ({
                     );
                   })()}
                   <span
-                    className={`font-mono text-xs px-2.5 py-1 rounded-lg border ${isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"}`}
+                    className={`font-mono text-[11px] px-2 py-0.5 rounded-lg border ${isDark ? "bg-slate-800 border-slate-700 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"}`}
                   >
                     {detail.vehicle.barcode}
                   </span>
                 </div>
 
                 <h2
-                  className={`text-2xl font-black mb-1 ${isDark ? "text-white" : "text-slate-900"}`}
+                  className={`text-xl font-black mb-0.5 ${isDark ? "text-white" : "text-slate-900"}`}
                 >
                   {detail.vehicle.brandName} {detail.vehicle.modelName}
                 </h2>
                 <p
-                  className={`text-lg ${isDark ? "text-emerald-400" : "text-emerald-600"}`}
+                  className={`text-base ${isDark ? "text-emerald-400" : "text-emerald-600"}`}
                 >
                   {detail.vehicle.year} &bull; {detail.vehicle.color}
                 </p>
 
-                <div className="mt-4 mb-4">
+                <div className="mt-3 mb-3">
                   <p
-                    className={`text-sm ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                    className={`text-xs ${isDark ? "text-slate-500" : "text-slate-400"}`}
                   >
                     Harga Permintaan
                   </p>
                   <p
-                    className={`text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}
+                    className={`text-2xl font-black ${isDark ? "text-white" : "text-slate-900"}`}
                   >
                     {formatPrice(detail.vehicle.askingPrice)}
                   </p>
                 </div>
 
                 <div
-                  className={`grid grid-cols-2 gap-3 p-4 rounded-xl mb-4 ${isDark ? "bg-slate-800/50" : "bg-slate-50"}`}
+                  className={`grid grid-cols-2 gap-2 p-3 rounded-xl mb-3 ${isDark ? "bg-slate-800/50" : "bg-slate-50"}`}
                 >
                   <div className="flex items-center gap-2">
                     <BsSpeedometer2 className="text-emerald-500" />
@@ -983,7 +983,7 @@ const VehicleDetailModal = ({
 
                 {detail.currentZone && (
                   <div
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg mb-4 ${isDark ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-emerald-50 border border-emerald-200"}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg mb-3 ${isDark ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-emerald-50 border border-emerald-200"}`}
                   >
                     <FiMapPin className="text-emerald-500" />
                     <span
@@ -1069,7 +1069,7 @@ const VehicleDetailModal = ({
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                    className={`flex items-center gap-2 px-5 py-3.5 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    className={`flex items-center gap-1.5 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
                       activeTab === tab.key
                         ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
                         : `border-transparent ${isDark ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"}`
@@ -1082,7 +1082,7 @@ const VehicleDetailModal = ({
             </div>
 
             {/* Tab Content */}
-            <div className="p-6">
+            <div className="p-5">
               {activeTab === "info" && (
                 <InfoTab detail={detail} isDark={isDark} />
               )}
