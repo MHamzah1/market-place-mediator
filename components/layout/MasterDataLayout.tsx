@@ -88,7 +88,7 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
       "/MasterData/User",
     ];
     const isInMasterData = masterDataPaths.some((path) =>
-      pathname?.startsWith(path)
+      pathname?.startsWith(path),
     );
 
     if (isInMasterData && !expandedMenus.includes("Master Data")) {
@@ -108,7 +108,7 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
     setExpandedMenus((prev) =>
       prev.includes(label)
         ? prev.filter((item) => item !== label)
-        : [...prev, label]
+        : [...prev, label],
     );
   };
 
@@ -163,8 +163,8 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
           sub.href
             .replace("/Table", "")
             .replace("/Add", "")
-            .replace("/Edit", "")
-        )
+            .replace("/Edit", ""),
+        ),
       );
     }
     return false;
@@ -191,9 +191,14 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
         { label: "Car Model", href: "/MasterData/CarModel/Table" },
         { label: "Variant", href: "/MasterData/Variant/Table" },
         { label: "Year Price", href: "/MasterData/YearPrice/Table" },
-        { label: "Price Adjustment", href: "/MasterData/PriceAdjustment/Table" },
+        {
+          label: "Price Adjustment",
+          href: "/MasterData/PriceAdjustment/Table",
+        },
         { label: "Specification", href: "/MasterData/Specification/Table" },
         { label: "User", href: "/MasterData/User/Table" },
+        { label: "Role User", href: "/MasterData/RoleUser/Table" },
+        { label: "Role Position", href: "/MasterData/RolePosition/Table" },
       ],
     },
     {
@@ -320,8 +325,8 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
                               : "border-cyan-500/50"
                           }`
                         : isDarkMode
-                        ? "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                          ? "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     }`}
                   >
                     {isActive && (
@@ -357,8 +362,8 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
                               : "border-cyan-500/50"
                           }`
                         : isDarkMode
-                        ? "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                          ? "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     }`}
                   >
                     {isActive && (
@@ -393,8 +398,8 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
                                 ? "bg-cyan-500/20 text-cyan-400 font-semibold"
                                 : "bg-cyan-100 text-cyan-700 font-semibold"
                               : isDarkMode
-                              ? "text-slate-400 hover:text-white hover:bg-slate-800/30"
-                              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                                ? "text-slate-400 hover:text-white hover:bg-slate-800/30"
+                                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                           }`}
                         >
                           <SubIcon
@@ -455,7 +460,7 @@ const MasterDataLayout = ({ children }: { children: React.ReactNode }) => {
                 {/* Role Badge */}
                 <span
                   className={`px-2 py-0.5 text-xs font-semibold rounded-full border capitalize ${getRoleBadgeColor(
-                    userData.role
+                    userData.role,
                   )}`}
                 >
                   {userData.role}
