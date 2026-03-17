@@ -5,15 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/state/store";
 
-// Define role types
-export type UserRole =
-  | "customer"
-  | "admin"
-  | "salesman"
-  | "showroom_owner"
-  | "warehouse_admin"
-  | "inspector"
-  | "mechanic";
+// Role type sekarang dynamic (berbasis tabel, bukan hardcoded union)
+export type UserRole = string;
 
 // Konfigurasi route berdasarkan role
 const ROLE_BASED_ROUTES = {
@@ -86,7 +79,31 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
   const [isChecking, setIsChecking] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
 
-  const userRole = userInfo?.role as UserRole | null;
+  // Prioritaskan rolePosition.roleUser.name, fallback ke legacy role string
+  const userRole: UserRole | null =
+    (userInfo?.rolePosition?.roleUser?.name ?? userInfo?.role) || null;
+
+  /**
+   * Helper function untuk redirect ke dashboard sesuai role
+   */
+  const redirectToRoleBasedDashboard = (role: UserRole | null) => {
+    if (role === "admin") {
+      router.push("/admin/dashboard");
+    } else if (role === "salesman") {
+      router.push("/salesman/dashboard");
+    } else if (role === "customer") {
+      router.push("/customer/dashboard");
+    } else if (
+      role === "showroom_owner" ||
+      role === "warehouse_admin" ||
+      role === "inspector" ||
+      role === "mechanic"
+    ) {
+      router.push("/warehouse/dashboard");
+    } else {
+      router.push("/dashboard");
+    }
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -217,32 +234,6 @@ export const useRoleBasedGuard = (): RouteGuardResult => {
 
     checkAccess();
   }, [pathname, isLoggedIn, userRole, loading, router]);
-
-  /**
-   * Helper function untuk redirect ke dashboard sesuai role
-   */
-  const redirectToRoleBasedDashboard = (role: UserRole | null) => {
-    switch (role) {
-      case "admin":
-        router.push("/admin/dashboard");
-        break;
-      case "salesman":
-        router.push("/salesman/dashboard");
-        break;
-      case "customer":
-        router.push("/customer/dashboard");
-        break;
-      case "showroom_owner":
-      case "warehouse_admin":
-      case "inspector":
-      case "mechanic":
-        router.push("/warehouse/dashboard");
-        break;
-      default:
-        router.push("/dashboard"); // Fallback
-        break;
-    }
-  };
 
   return {
     isChecking,

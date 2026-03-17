@@ -5,6 +5,15 @@ import Cookies from "js-cookie";
 import { AxiosError } from "axios";
 
 // Types
+interface RolePositionInfo {
+  id: string;
+  name: string; // e.g., "Kepala Inspeksi"
+  roleUser: {
+    id: string;
+    name: string; // e.g., "inspector"
+  };
+}
+
 interface UserInfo {
   id: string | null;
   email: string | null;
@@ -12,15 +21,8 @@ interface UserInfo {
   phoneNumber: string | null;
   whatsappNumber: string | null;
   location: string | null;
-  role:
-    | "customer"
-    | "admin"
-    | "salesman"
-    | "showroom_owner"
-    | "warehouse_admin"
-    | "inspector"
-    | "mechanic"
-    | null;
+  role: string | null; // = rolePosition.roleUser.name (atau legacy role string)
+  rolePosition: RolePositionInfo | null;
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -53,14 +55,8 @@ interface ProfileResponse {
   phoneNumber: string;
   whatsappNumber: string | null;
   location: string | null;
-  role:
-    | "customer"
-    | "admin"
-    | "salesman"
-    | "showroom_owner"
-    | "warehouse_admin"
-    | "inspector"
-    | "mechanic";
+  role: string | null;
+  rolePosition: RolePositionInfo | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -98,6 +94,8 @@ const setUserInfo = (userInfo: UserInfo): void => {
   Cookies.set("whatsappNumber", userInfo.whatsappNumber || "");
   Cookies.set("location", userInfo.location || "");
   Cookies.set("role", userInfo.role || "");
+  Cookies.set("rolePositionName", userInfo.rolePosition?.name || "");
+  Cookies.set("roleUserName", userInfo.rolePosition?.roleUser?.name || userInfo.role || "");
   Cookies.set("createdAt", userInfo.createdAt || "");
   Cookies.set("updatedAt", userInfo.updatedAt || "");
 };
@@ -111,6 +109,8 @@ const removeUserInfo = (): void => {
   Cookies.remove("whatsappNumber");
   Cookies.remove("location");
   Cookies.remove("role");
+  Cookies.remove("rolePositionName");
+  Cookies.remove("roleUserName");
   Cookies.remove("createdAt");
   Cookies.remove("updatedAt");
 };
@@ -135,7 +135,8 @@ export const fetchUserProfile = createAsyncThunk<
       phoneNumber: data.phoneNumber,
       whatsappNumber: data.whatsappNumber,
       location: data.location,
-      role: data.role,
+      role: data.rolePosition?.roleUser?.name ?? data.role ?? null,
+      rolePosition: data.rolePosition ?? null,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     };
@@ -228,17 +229,18 @@ const initialState: AuthState = {
     location:
       typeof window !== "undefined" ? Cookies.get("location") || null : null,
     role:
-      typeof window !== "undefined"
-        ? (Cookies.get("role") as
-            | "customer"
-            | "admin"
-            | "salesman"
-            | "showroom_owner"
-            | "warehouse_admin"
-            | "inspector"
-            | "mechanic"
-            | null)
-        : null,
+      typeof window !== "undefined" ? Cookies.get("role") || null : null,
+    rolePosition: (() => {
+      if (typeof window === "undefined") return null;
+      const rolePositionName = Cookies.get("rolePositionName");
+      const roleUserName = Cookies.get("roleUserName");
+      if (!rolePositionName || !roleUserName) return null;
+      return {
+        id: "",
+        name: rolePositionName,
+        roleUser: { id: "", name: roleUserName },
+      };
+    })(),
     createdAt:
       typeof window !== "undefined" ? Cookies.get("createdAt") || null : null,
     updatedAt:
@@ -263,6 +265,7 @@ const authSlice = createSlice({
         whatsappNumber: null,
         location: null,
         role: null,
+        rolePosition: null,
         createdAt: null,
         updatedAt: null,
       };

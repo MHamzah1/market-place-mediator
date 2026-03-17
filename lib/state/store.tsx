@@ -16,6 +16,8 @@ import marketplaceSlice from "./slice/marketplace/marketplaceSlice";
 import boostSlice from "./slice/boost/boostSlice";
 // Warehouse slice
 import warehouseSlice from "./slice/warehouse/warehouseSlice";
+// Role Management slice
+import roleManagementSlice from "./slice/role-management/roleManagementSlice";
 
 const store = configureStore({
   reducer: {
@@ -37,6 +39,8 @@ const store = configureStore({
     boost: boostSlice,
     // Warehouse
     warehouse: warehouseSlice,
+    // Role Management
+    roleManagement: roleManagementSlice,
   },
 });
 
