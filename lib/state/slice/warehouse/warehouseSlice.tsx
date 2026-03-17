@@ -81,12 +81,33 @@ export type InspectionResult =
   | "rejected";
 export type DocumentStatus = "complete" | "incomplete" | "invalid";
 
+export type InspectionStatus =
+  | "draft"
+  | "submitted"
+  | "approved"
+  | "rejected_by_head";
+
+export type ItemCondition = "good" | "fair" | "poor" | "damaged" | "na";
+
+export interface InspectionItem {
+  id: string;
+  inspectionId: string;
+  category: string;
+  itemName: string;
+  itemCode: string;
+  condition: ItemCondition;
+  notes?: string;
+  photos?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface VehicleInspection {
   id: string;
   warehouseVehicleId: string;
   inspectorId: string;
   inspectionType: InspectionType;
-  overallResult: InspectionResult;
+  overallResult?: InspectionResult;
   exteriorScore?: number;
   interiorScore?: number;
   engineScore?: number;
@@ -102,6 +123,14 @@ export interface VehicleInspection {
   repairNotes?: string;
   rejectionReason?: string;
   photos?: string[];
+  status?: InspectionStatus;
+  approvedById?: string;
+  approvedAt?: string;
+  approvalNotes?: string;
+  approvedBy?: { id: string; fullName: string };
+  items?: InspectionItem[];
+  inspector?: { id: string; fullName: string };
+  warehouseVehicle?: WarehouseVehicle;
   inspectedAt: string;
   createdAt: string;
   updatedAt: string;
@@ -291,21 +320,38 @@ export interface CreateVehicleData {
 export interface CreateInspectionData {
   warehouseVehicleId: string;
   inspectionType: InspectionType;
-  overallResult: InspectionResult;
+  overallResult?: InspectionResult;
   exteriorScore?: number;
   interiorScore?: number;
   engineScore?: number;
   electricalScore?: number;
   chassisScore?: number;
-  documentStatus: DocumentStatus;
-  hasBpkb: boolean;
-  hasStnk: boolean;
-  hasFaktur: boolean;
-  hasKtp: boolean;
-  hasSpareKey: boolean;
-  chassisNumberMatch: boolean;
+  documentStatus?: DocumentStatus;
+  hasBpkb?: boolean;
+  hasStnk?: boolean;
+  hasFaktur?: boolean;
+  hasKtp?: boolean;
+  hasSpareKey?: boolean;
+  chassisNumberMatch?: boolean;
   repairNotes?: string;
   rejectionReason?: string;
+}
+
+export interface CreateInspectionWithItemsData {
+  warehouseVehicleId: string;
+  inspectionType: InspectionType;
+  repairNotes?: string;
+  items: string; // JSON string of items
+  photos: File[];
+}
+
+export interface ApproveInspectionData {
+  overallResult: InspectionResult;
+  approvalNotes?: string;
+}
+
+export interface RejectInspectionData {
+  approvalNotes: string;
 }
 
 export interface CreateZoneData {
@@ -469,6 +515,8 @@ export interface WarehouseState {
 
   // Inspections
   inspections: VehicleInspection[];
+  pendingInspections: VehicleInspection[];
+  selectedInspection: VehicleInspection | null;
 
   // Zones
   zones: WarehouseZone[];
@@ -514,6 +562,8 @@ const initialState: WarehouseState = {
   vehicles: [],
   selectedVehicle: null,
   inspections: [],
+  pendingInspections: [],
+  selectedInspection: null,
   zones: [],
   repairs: [],
   adminPayment: null,
@@ -919,6 +969,112 @@ export const fetchInspectionsByVehicle = createAsyncThunk<
     }
   },
 );
+
+export const createInspectionWithItems = createAsyncThunk<
+  VehicleInspection,
+  CreateInspectionWithItemsData,
+  { rejectValue: string }
+>(
+  "warehouse/createInspectionWithItems",
+  async (data, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("warehouseVehicleId", data.warehouseVehicleId);
+      formData.append("inspectionType", data.inspectionType);
+      if (data.repairNotes) formData.append("repairNotes", data.repairNotes);
+      formData.append("items", data.items);
+      data.photos.forEach((photo) => {
+        formData.append("photos", photo);
+      });
+      const res = await instanceAxios.post("/warehouse/inspections", formData, {
+        headers: getHeadersFormData(),
+      });
+      return res.data?.data ?? res.data;
+    } catch (e) {
+      const err = e as AxiosError<ErrorResponse>;
+      return rejectWithValue(
+        err.response?.data?.message || "Gagal submit inspeksi"
+      );
+    }
+  }
+);
+
+export const fetchPendingApprovals = createAsyncThunk<
+  VehicleInspection[],
+  void,
+  { rejectValue: string }
+>("warehouse/fetchPendingApprovals", async (_, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.get(
+      "/warehouse/inspections/pending-approval",
+      { headers: getHeaders() }
+    );
+    return res.data?.data ?? res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal mengambil inspeksi pending"
+    );
+  }
+});
+
+export const fetchInspectionDetail = createAsyncThunk<
+  VehicleInspection,
+  string,
+  { rejectValue: string }
+>("warehouse/fetchInspectionDetail", async (id, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.get(`/warehouse/inspections/${id}`, {
+      headers: getHeaders(),
+    });
+    return res.data?.data ?? res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal mengambil detail inspeksi"
+    );
+  }
+});
+
+export const approveInspection = createAsyncThunk<
+  VehicleInspection,
+  { id: string; data: ApproveInspectionData },
+  { rejectValue: string }
+>("warehouse/approveInspection", async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.patch(
+      `/warehouse/inspections/${id}/approve`,
+      data,
+      { headers: getHeaders() }
+    );
+    return res.data?.data ?? res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal approve inspeksi"
+    );
+  }
+});
+
+export const rejectInspection = createAsyncThunk<
+  VehicleInspection,
+  { id: string; data: RejectInspectionData },
+  { rejectValue: string }
+>("warehouse/rejectInspection", async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.patch(
+      `/warehouse/inspections/${id}/reject`,
+      data,
+      { headers: getHeaders() }
+    );
+    return res.data?.data ?? res.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal reject inspeksi"
+    );
+  }
+});
 
 // ============================================================
 // ASYNC THUNKS — ZONE
@@ -1380,6 +1536,9 @@ const warehouseSlice = createSlice({
     clearSelectedVehicle: (state) => {
       state.selectedVehicle = null;
     },
+    clearSelectedInspection: (state) => {
+      state.selectedInspection = null;
+    },
     clearSelectedShowroom: (state) => {
       state.selectedShowroom = null;
     },
@@ -1545,6 +1704,80 @@ const warehouseSlice = createSlice({
 
       .addCase(fetchInspectionsByVehicle.fulfilled, (state, action) => {
         state.inspections = action.payload;
+      })
+
+      // New inspection with items
+      .addCase(createInspectionWithItems.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(createInspectionWithItems.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.inspections = [action.payload, ...state.inspections];
+        state.successMessage = "Inspeksi berhasil disubmit! Menunggu approval Kepala Inspeksi.";
+      })
+      .addCase(createInspectionWithItems.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Pending approvals
+      .addCase(fetchPendingApprovals.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchPendingApprovals.fulfilled, (state, action) => {
+        state.loading = false;
+        state.pendingInspections = action.payload;
+      })
+      .addCase(fetchPendingApprovals.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Inspection detail
+      .addCase(fetchInspectionDetail.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchInspectionDetail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedInspection = action.payload;
+      })
+      .addCase(fetchInspectionDetail.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Approve
+      .addCase(approveInspection.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(approveInspection.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.selectedInspection = action.payload;
+        state.pendingInspections = state.pendingInspections.filter(
+          (i) => i.id !== action.payload.id
+        );
+        state.successMessage = "Inspeksi berhasil di-approve!";
+      })
+      .addCase(approveInspection.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Reject
+      .addCase(rejectInspection.pending, (state) => {
+        state.actionLoading = true;
+      })
+      .addCase(rejectInspection.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.selectedInspection = action.payload;
+        state.pendingInspections = state.pendingInspections.filter(
+          (i) => i.id !== action.payload.id
+        );
+        state.successMessage = "Inspeksi berhasil di-reject. Inspector akan melakukan revisi.";
+      })
+      .addCase(rejectInspection.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
       });
 
     // ---- ZONE ----
@@ -1758,6 +1991,7 @@ export const {
   clearError,
   clearSuccess,
   clearSelectedVehicle,
+  clearSelectedInspection,
   clearSelectedShowroom,
   setSelectedShowroom,
   clearShowroomViewVehicle,

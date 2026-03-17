@@ -6,9 +6,16 @@ import { RootState, AppDispatch } from "@/lib/state/store";
 import {
   fetchVehicles,
   fetchInspectionsByVehicle,
+  fetchPendingApprovals,
 } from "@/lib/state/slice/warehouse/warehouseSlice";
 import Link from "next/link";
-import { FiPlus, FiClipboard } from "react-icons/fi";
+import {
+  FiPlus,
+  FiClipboard,
+  FiClock,
+  FiCheckCircle,
+  FiXCircle,
+} from "react-icons/fi";
 import { useTheme } from "@/context/ThemeContext";
 import { generateUrlWithEncryptedParams } from "@/lib/slug/slug";
 
@@ -16,15 +23,23 @@ const InspectionList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { vehicles, inspections, selectedShowroom, loading } = useSelector(
-    (state: RootState) => state.warehouse,
-  );
+  const {
+    vehicles,
+    inspections,
+    pendingInspections,
+    selectedShowroom,
+    loading,
+  } = useSelector((state: RootState) => state.warehouse);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>("");
 
   useEffect(() => {
     dispatch(
-      fetchVehicles({ showroomId: selectedShowroom?.id, status: "inspecting" }),
+      fetchVehicles({
+        showroomId: selectedShowroom?.id,
+        status: "inspecting",
+      })
     );
+    dispatch(fetchPendingApprovals());
   }, [dispatch, selectedShowroom]);
 
   useEffect(() => {
@@ -41,6 +56,31 @@ const InspectionList = () => {
       minute: "2-digit",
     });
 
+  const statusBadge = (status?: string) => {
+    switch (status) {
+      case "submitted":
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500">
+            <FiClock size={10} /> Menunggu
+          </span>
+        );
+      case "approved":
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-500">
+            <FiCheckCircle size={10} /> Approved
+          </span>
+        );
+      case "rejected_by_head":
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-500">
+            <FiXCircle size={10} /> Ditolak
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -56,12 +96,28 @@ const InspectionList = () => {
             Kelola inspeksi kendaraan warehouse
           </p>
         </div>
-        <Link
-          href="/warehouse/inspections/create"
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold text-sm shadow-lg hover:shadow-emerald-500/30 transition-all"
-        >
-          <FiPlus /> Inspeksi Baru
-        </Link>
+        <div className="flex gap-2">
+          {/* Pending Approval Button */}
+          {pendingInspections.length > 0 && (
+            <Link
+              href="/warehouse/inspections/pending"
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+                isDark
+                  ? "bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"
+                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+              }`}
+            >
+              <FiClock />
+              Pending ({pendingInspections.length})
+            </Link>
+          )}
+          <Link
+            href="/warehouse/inspections/create"
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold text-sm shadow-lg hover:shadow-emerald-500/30 transition-all"
+          >
+            <FiPlus /> Inspeksi Baru
+          </Link>
+        </div>
       </div>
 
       {/* Vehicles awaiting inspection */}
@@ -113,7 +169,7 @@ const InspectionList = () => {
                   <Link
                     href={generateUrlWithEncryptedParams(
                       "/warehouse/inspections/create",
-                      { vehicleId: v.id },
+                      { vehicleId: v.id }
                     )}
                     className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs font-medium transition-colors"
                   >
@@ -142,29 +198,45 @@ const InspectionList = () => {
                 key={insp.id}
                 className={`${isDark ? "bg-slate-700/30 border-slate-700/50" : "bg-slate-50 border-slate-200"} rounded-xl p-4 border`}
               >
-                <div className="flex justify-between">
-                  <span
-                    className={`text-sm font-semibold capitalize ${isDark ? "text-white" : "text-slate-900"}`}
-                  >
-                    {insp.inspectionType.replace("_", " ")}
-                  </span>
-                  <span
-                    className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
-                  >
-                    {formatDate(insp.inspectedAt)}
-                  </span>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span
+                      className={`text-sm font-semibold capitalize ${isDark ? "text-white" : "text-slate-900"}`}
+                    >
+                      {insp.inspectionType.replace("_", " ")}
+                    </span>
+                    <div className="flex items-center gap-2 mt-1">
+                      {statusBadge(insp.status)}
+                      {insp.overallResult && (
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                            insp.overallResult === "accepted_ready"
+                              ? "bg-green-500/20 text-green-400"
+                              : insp.overallResult === "accepted_repair"
+                                ? "bg-orange-500/20 text-orange-400"
+                                : "bg-red-500/20 text-red-400"
+                          }`}
+                        >
+                          {insp.overallResult.replace(/_/g, " ")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
+                    >
+                      {formatDate(insp.inspectedAt)}
+                    </span>
+                    {insp.items && insp.items.length > 0 && (
+                      <p
+                        className={`text-[10px] mt-0.5 ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                      >
+                        {insp.items.length} item inspeksi
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <span
-                  className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                    insp.overallResult === "accepted_ready"
-                      ? "bg-green-500/20 text-green-400"
-                      : insp.overallResult === "accepted_repair"
-                        ? "bg-orange-500/20 text-orange-400"
-                        : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {insp.overallResult.replace("_", " ")}
-                </span>
               </div>
             ))}
           </div>

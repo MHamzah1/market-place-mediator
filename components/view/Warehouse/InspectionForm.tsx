@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import {
-  createInspection,
   fetchVehicles,
   clearError,
   clearSuccess,
+  createInspectionWithItems,
 } from "@/lib/state/slice/warehouse/warehouseSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -17,11 +17,38 @@ import {
   FiSearch,
   FiTruck,
   FiCheck,
+  FiSend,
 } from "react-icons/fi";
 import { TbCar } from "react-icons/tb";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import { decryptQueryParam, encryptSlug } from "@/lib/slug/slug";
+
+import {
+  INSPECTION_CATEGORIES,
+  ItemConditionType,
+} from "./inspection/INSPECTION_TEMPLATE";
+import InspectionCategoryCard from "./inspection/InspectionCategoryCard";
+import { InspectionItemData } from "./inspection/InspectionItemRow";
+
+// Initialize all items from template with default values
+function initializeItems(): Record<string, InspectionItemData> {
+  const items: Record<string, InspectionItemData> = {};
+  INSPECTION_CATEGORIES.forEach((cat) => {
+    cat.items.forEach((item) => {
+      items[item.code] = {
+        itemCode: item.code,
+        itemName: item.name,
+        category: cat.category,
+        condition: "na" as ItemConditionType,
+        notes: "",
+        photos: [],
+        previews: [],
+      };
+    });
+  });
+  return items;
+}
 
 const InspectionForm = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,41 +61,27 @@ const InspectionForm = () => {
   const { vehicles, selectedShowroom, actionLoading, error, successMessage } =
     useSelector((state: RootState) => state.warehouse);
 
-  const [form, setForm] = useState({
-    warehouseVehicleId: vehicleIdFromUrl || "",
-    inspectionType: "initial" as "initial" | "re_inspection" | "qc",
-    overallResult: "accepted_ready" as
-      | "accepted_ready"
-      | "accepted_repair"
-      | "rejected",
-    exteriorScore: 7,
-    interiorScore: 7,
-    engineScore: 7,
-    electricalScore: 7,
-    chassisScore: 7,
-    documentStatus: "complete" as "complete" | "incomplete" | "invalid",
-    hasBpkb: true,
-    hasStnk: true,
-    hasFaktur: false,
-    hasKtp: true,
-    hasSpareKey: false,
-    chassisNumberMatch: true,
-    repairNotes: "",
-    rejectionReason: "",
-  });
-
+  const [warehouseVehicleId, setWarehouseVehicleId] = useState(
+    vehicleIdFromUrl || ""
+  );
+  const [inspectionType, setInspectionType] = useState<
+    "initial" | "re_inspection" | "qc"
+  >("initial");
+  const [repairNotes, setRepairNotes] = useState("");
   const [vehicleSearch, setVehicleSearch] = useState("");
+  const [inspectionItems, setInspectionItems] = useState<
+    Record<string, InspectionItemData>
+  >(initializeItems);
 
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL_IMAGES || "http://localhost:8080";
   const getImageUrl = (url: string) =>
     url?.startsWith("http") ? url : baseUrl + url;
 
-  // Fetch vehicles from showroom
   useEffect(() => {
     if (selectedShowroom?.id) {
       dispatch(
-        fetchVehicles({ showroomId: selectedShowroom.id, perPage: 100 }),
+        fetchVehicles({ showroomId: selectedShowroom.id, perPage: 100 })
       );
     }
   }, [dispatch, selectedShowroom]);
@@ -78,46 +91,80 @@ const InspectionForm = () => {
       toast.success(successMessage);
       dispatch(clearSuccess());
       router.push(
-        form.warehouseVehicleId
-          ? `/warehouse/vehicles/${encryptSlug(form.warehouseVehicleId)}`
-          : "/warehouse/inspections",
+        warehouseVehicleId
+          ? `/warehouse/vehicles/${encryptSlug(warehouseVehicleId)}`
+          : "/warehouse/inspections"
       );
     }
     if (error) {
       toast.error(error);
       dispatch(clearError());
     }
-  }, [successMessage, error, dispatch, router, form.warehouseVehicleId]);
+  }, [successMessage, error, dispatch, router, warehouseVehicleId]);
+
+  const handleItemChange = useCallback(
+    (itemCode: string, updated: InspectionItemData) => {
+      setInspectionItems((prev) => ({
+        ...prev,
+        [itemCode]: updated,
+      }));
+    },
+    []
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.warehouseVehicleId) {
+    if (!warehouseVehicleId) {
       toast.error("Pilih kendaraan terlebih dahulu");
       return;
     }
-    dispatch(
-      createInspection({
-        ...form,
-        exteriorScore: Number(form.exteriorScore),
-        interiorScore: Number(form.interiorScore),
-        engineScore: Number(form.engineScore),
-        electricalScore: Number(form.electricalScore),
-        chassisScore: Number(form.chassisScore),
-      }),
-    );
-  };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
-  ) => {
-    const { name, value, type } = e.target;
-    setForm({
-      ...form,
-      [name]:
-        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    // Check if at least some items are filled
+    const filledItems = Object.values(inspectionItems).filter(
+      (i) => i.condition !== "na"
+    );
+    if (filledItems.length === 0) {
+      toast.error("Isi minimal 1 item inspeksi");
+      return;
+    }
+
+    // Build items array for API
+    const itemsPayload = Object.values(inspectionItems)
+      .filter((i) => i.condition !== "na")
+      .map((i) => ({
+        category: i.category,
+        itemName: i.itemName,
+        itemCode: i.itemCode,
+        condition: i.condition,
+        notes: i.notes || "",
+      }));
+
+    // Collect all photos with item-index mapping
+    const allPhotos: File[] = [];
+    const filledItemsList = Object.values(inspectionItems).filter(
+      (i) => i.condition !== "na"
+    );
+    filledItemsList.forEach((item, idx) => {
+      item.photos.forEach((photo) => {
+        // Rename file with item index prefix for backend mapping
+        const renamedFile = new File(
+          [photo],
+          `item-${idx}-${photo.name}`,
+          { type: photo.type }
+        );
+        allPhotos.push(renamedFile);
+      });
     });
+
+    dispatch(
+      createInspectionWithItems({
+        warehouseVehicleId,
+        inspectionType,
+        repairNotes,
+        items: JSON.stringify(itemsPayload),
+        photos: allPhotos,
+      })
+    );
   };
 
   // Filter vehicles by search
@@ -134,10 +181,13 @@ const InspectionForm = () => {
     );
   });
 
-  // Get selected vehicle detail
-  const selectedVehicle = vehicles.find(
-    (v) => v.id === form.warehouseVehicleId,
-  );
+  const selectedVehicle = vehicles.find((v) => v.id === warehouseVehicleId);
+
+  // Stats
+  const allItems = Object.values(inspectionItems);
+  const filledCount = allItems.filter((i) => i.condition !== "na").length;
+  const totalCount = allItems.length;
+  const totalPhotos = allItems.reduce((acc, i) => acc + i.photos.length, 0);
 
   const cardClass = `${isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white border-slate-200 shadow-sm"} border rounded-2xl p-6`;
 
@@ -159,12 +209,12 @@ const InspectionForm = () => {
           <h1
             className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}
           >
-            Form Inspeksi
+            Form Inspeksi Kendaraan
           </h1>
           <p
             className={`text-sm mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}
           >
-            Submit hasil inspeksi kendaraan
+            Checklist inspeksi lengkap dengan foto bukti
           </p>
         </div>
       </div>
@@ -178,7 +228,6 @@ const InspectionForm = () => {
             <FiTruck className="text-emerald-500" /> Pilih Kendaraan
           </h2>
 
-          {/* Selected Vehicle Preview */}
           {selectedVehicle && (
             <div
               className={`flex items-center gap-4 p-4 rounded-xl border mb-4 ${
@@ -214,8 +263,8 @@ const InspectionForm = () => {
                 <p
                   className={`text-xs ${isDark ? "text-emerald-400/70" : "text-emerald-600"}`}
                 >
-                  {selectedVehicle.licensePlate} &bull; {selectedVehicle.color}{" "}
-                  &bull; {selectedVehicle.barcode}
+                  {selectedVehicle.licensePlate} &bull;{" "}
+                  {selectedVehicle.color} &bull; {selectedVehicle.barcode}
                 </p>
               </div>
               <FiCheck
@@ -224,7 +273,6 @@ const InspectionForm = () => {
             </div>
           )}
 
-          {/* Vehicle Search */}
           {!vehicleIdFromUrl && (
             <>
               <div className="relative mb-3">
@@ -245,7 +293,6 @@ const InspectionForm = () => {
                 />
               </div>
 
-              {/* Vehicle List */}
               <div
                 className={`rounded-xl border overflow-hidden max-h-64 overflow-y-auto ${isDark ? "border-slate-700/50" : "border-slate-200"}`}
               >
@@ -262,14 +309,12 @@ const InspectionForm = () => {
                   </div>
                 ) : (
                   filteredVehicles.map((v) => {
-                    const isSelected = form.warehouseVehicleId === v.id;
+                    const isSelected = warehouseVehicleId === v.id;
                     return (
                       <button
                         key={v.id}
                         type="button"
-                        onClick={() =>
-                          setForm({ ...form, warehouseVehicleId: v.id })
-                        }
+                        onClick={() => setWarehouseVehicleId(v.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b last:border-b-0 ${
                           isSelected
                             ? isDark
@@ -280,7 +325,6 @@ const InspectionForm = () => {
                               : "hover:bg-slate-50 border-slate-100"
                         }`}
                       >
-                        {/* Thumbnail */}
                         <div
                           className={`w-14 h-10 rounded-lg overflow-hidden flex-shrink-0 ${isDark ? "bg-slate-700" : "bg-slate-100"}`}
                         >
@@ -298,8 +342,6 @@ const InspectionForm = () => {
                             </div>
                           )}
                         </div>
-
-                        {/* Info */}
                         <div className="flex-1 min-w-0">
                           <p
                             className={`text-sm font-semibold truncate ${isDark ? "text-white" : "text-slate-900"}`}
@@ -309,11 +351,10 @@ const InspectionForm = () => {
                           <p
                             className={`text-xs truncate ${isDark ? "text-slate-500" : "text-slate-400"}`}
                           >
-                            {v.licensePlate} &bull; {v.color} &bull; {v.barcode}
+                            {v.licensePlate} &bull; {v.color} &bull;{" "}
+                            {v.barcode}
                           </p>
                         </div>
-
-                        {/* Status badge */}
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 capitalize ${
                             v.status === "registered"
@@ -327,8 +368,6 @@ const InspectionForm = () => {
                         >
                           {v.status.replace(/_/g, " ")}
                         </span>
-
-                        {/* Check */}
                         {isSelected && (
                           <FiCheck className="text-emerald-500 flex-shrink-0" />
                         )}
@@ -346,7 +385,6 @@ const InspectionForm = () => {
             </>
           )}
 
-          {/* Vehicle ID from URL (read-only) */}
           {vehicleIdFromUrl && !selectedVehicle && (
             <div>
               <label
@@ -364,214 +402,236 @@ const InspectionForm = () => {
           )}
         </div>
 
-        {/* ============ INFORMASI INSPEKSI ============ */}
-        <div className={`${cardClass} space-y-4`}>
-          <h2
-            className={`text-lg font-semibold ${isDark ? "text-white" : "text-slate-900"}`}
-          >
-            Informasi Inspeksi
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <SelectField
-              label="Tipe Inspeksi"
-              name="inspectionType"
-              value={form.inspectionType}
-              onChange={handleChange}
-              options={[
-                ["initial", "Initial"],
-                ["re_inspection", "Re-Inspection"],
-                ["qc", "Quality Control"],
-              ]}
-            />
-            <SelectField
-              label="Hasil Keseluruhan"
-              name="overallResult"
-              value={form.overallResult}
-              onChange={handleChange}
-              options={[
-                ["accepted_ready", "Diterima (Ready)"],
-                ["accepted_repair", "Diterima (Perlu Repair)"],
-                ["rejected", "Ditolak"],
-              ]}
-            />
-            <SelectField
-              label="Status Dokumen"
-              name="documentStatus"
-              value={form.documentStatus}
-              onChange={handleChange}
-              options={[
-                ["complete", "Lengkap"],
-                ["incomplete", "Tidak Lengkap"],
-                ["invalid", "Tidak Valid"],
-              ]}
-            />
-          </div>
-        </div>
-
-        {/* ============ SKOR PENILAIAN ============ */}
+        {/* ============ TIPE INSPEKSI ============ */}
         <div className={cardClass}>
           <h2
             className={`text-lg font-semibold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}
           >
-            Skor Penilaian (1-10)
+            Tipe Inspeksi
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          <div className="flex flex-wrap gap-3">
             {[
-              ["Eksterior", "exteriorScore"],
-              ["Interior", "interiorScore"],
-              ["Mesin", "engineScore"],
-              ["Listrik", "electricalScore"],
-              ["Chassis", "chassisScore"],
-            ].map(([label, name]) => (
-              <div key={name}>
-                <label
-                  className={`block text-xs font-medium mb-1 text-center ${isDark ? "text-slate-400" : "text-slate-600"}`}
-                >
-                  {label}
-                </label>
-                <input
-                  type="number"
-                  name={name}
-                  min={1}
-                  max={10}
-                  value={form[name as keyof typeof form] as number}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-3 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ============ CHECKLIST DOKUMEN ============ */}
-        <div className={cardClass}>
-          <h2
-            className={`text-lg font-semibold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}
-          >
-            Checklist Dokumen
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {[
-              ["hasBpkb", "BPKB"],
-              ["hasStnk", "STNK"],
-              ["hasFaktur", "Faktur"],
-              ["hasKtp", "KTP"],
-              ["hasSpareKey", "Kunci Cadangan"],
-              ["chassisNumberMatch", "No. Rangka Sesuai"],
-            ].map(([name, label]) => (
-              <label
-                key={name}
-                className={`flex items-center gap-2 p-3 rounded-xl cursor-pointer transition-colors ${isDark ? "bg-slate-700/30 hover:bg-slate-700/50" : "bg-slate-50 hover:bg-slate-100"}`}
+              { value: "initial", label: "Initial", desc: "Inspeksi pertama kali" },
+              { value: "re_inspection", label: "Re-Inspection", desc: "Inspeksi ulang setelah perbaikan" },
+              { value: "qc", label: "Quality Control", desc: "Pengecekan kualitas akhir" },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() =>
+                  setInspectionType(
+                    opt.value as "initial" | "re_inspection" | "qc"
+                  )
+                }
+                className={`flex-1 min-w-[140px] p-3 rounded-xl border-2 text-left transition-all ${
+                  inspectionType === opt.value
+                    ? isDark
+                      ? "border-emerald-500 bg-emerald-500/10"
+                      : "border-emerald-500 bg-emerald-50"
+                    : isDark
+                      ? "border-slate-700/50 hover:border-slate-600"
+                      : "border-slate-200 hover:border-slate-300"
+                }`}
               >
-                <input
-                  type="checkbox"
-                  name={name}
-                  checked={form[name as keyof typeof form] as boolean}
-                  onChange={handleChange}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500 accent-emerald-500"
-                />
-                <span
-                  className={`text-sm ${isDark ? "text-slate-300" : "text-slate-700"}`}
+                <p
+                  className={`text-sm font-semibold ${
+                    inspectionType === opt.value
+                      ? isDark
+                        ? "text-emerald-400"
+                        : "text-emerald-700"
+                      : isDark
+                        ? "text-white"
+                        : "text-slate-900"
+                  }`}
                 >
-                  {label}
-                </span>
-              </label>
+                  {opt.label}
+                </p>
+                <p
+                  className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+                >
+                  {opt.desc}
+                </p>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* ============ CATATAN ============ */}
-        <div className={`${cardClass} space-y-4`}>
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
+        {/* ============ CHECKLIST INSPEKSI ============ */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2
+              className={`text-lg font-semibold ${isDark ? "text-white" : "text-slate-900"}`}
             >
-              Catatan Perbaikan
-            </label>
-            <textarea
-              name="repairNotes"
-              value={form.repairNotes}
-              onChange={handleChange}
-              rows={2}
-              placeholder="Catatan jika perlu perbaikan"
-              className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"} border rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+              Checklist Inspeksi
+            </h2>
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              >
+                {filledCount}/{totalCount} item terisi
+              </span>
+              {totalPhotos > 0 && (
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${
+                    isDark
+                      ? "bg-teal-500/20 text-teal-400"
+                      : "bg-teal-50 text-teal-600"
+                  }`}
+                >
+                  {totalPhotos} foto
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Overall progress bar */}
+          <div
+            className={`w-full h-2 rounded-full overflow-hidden mb-6 ${
+              isDark ? "bg-slate-700" : "bg-slate-200"
+            }`}
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all"
+              style={{
+                width: `${totalCount > 0 ? (filledCount / totalCount) * 100 : 0}%`,
+              }}
             />
           </div>
-          {form.overallResult === "rejected" && (
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
-              >
-                Alasan Penolakan
-              </label>
-              <textarea
-                name="rejectionReason"
-                value={form.rejectionReason}
-                onChange={handleChange}
-                rows={2}
-                placeholder="Wajib diisi jika ditolak"
-                required
-                className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"} border rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-              />
-            </div>
-          )}
+
+          <div className="space-y-4">
+            {INSPECTION_CATEGORIES.map((cat) => {
+              const categoryItems = cat.items.map(
+                (item) => inspectionItems[item.code]
+              );
+              return (
+                <InspectionCategoryCard
+                  key={cat.category}
+                  template={cat}
+                  items={categoryItems}
+                  onItemChange={handleItemChange}
+                  isDark={isDark}
+                />
+              );
+            })}
+          </div>
         </div>
 
-        {/* ============ SUBMIT ============ */}
-        <button
-          type="submit"
-          disabled={actionLoading || !form.warehouseVehicleId}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* ============ CATATAN PERBAIKAN ============ */}
+        <div className={cardClass}>
+          <h2
+            className={`text-lg font-semibold mb-3 ${isDark ? "text-white" : "text-slate-900"}`}
+          >
+            Catatan Perbaikan
+          </h2>
+          <textarea
+            value={repairNotes}
+            onChange={(e) => setRepairNotes(e.target.value)}
+            rows={3}
+            placeholder="Catatan tambahan jika ada kerusakan atau perbaikan yang diperlukan..."
+            className={`w-full px-4 py-3 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"} border rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
+          />
+        </div>
+
+        {/* ============ SUMMARY & SUBMIT ============ */}
+        <div
+          className={`${cardClass} ${
+            isDark ? "bg-slate-800/80" : "bg-gradient-to-r from-slate-50 to-emerald-50"
+          }`}
         >
-          {actionLoading ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-          ) : (
-            <>
-              <FiSave /> Submit Inspeksi
-            </>
-          )}
-        </button>
+          <h2
+            className={`text-lg font-semibold mb-3 ${isDark ? "text-white" : "text-slate-900"}`}
+          >
+            Ringkasan Inspeksi
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div
+              className={`p-3 rounded-xl text-center ${
+                isDark ? "bg-slate-700/50" : "bg-white border border-slate-200"
+              }`}
+            >
+              <p
+                className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}
+              >
+                {filledCount}
+              </p>
+              <p
+                className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              >
+                Item Terisi
+              </p>
+            </div>
+            <div
+              className={`p-3 rounded-xl text-center ${
+                isDark ? "bg-slate-700/50" : "bg-white border border-slate-200"
+              }`}
+            >
+              <p
+                className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}
+              >
+                {totalPhotos}
+              </p>
+              <p
+                className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              >
+                Foto Bukti
+              </p>
+            </div>
+            <div
+              className={`p-3 rounded-xl text-center ${
+                isDark ? "bg-slate-700/50" : "bg-white border border-slate-200"
+              }`}
+            >
+              <p className="text-2xl font-bold text-green-500">
+                {allItems.filter((i) => i.condition === "good").length}
+              </p>
+              <p
+                className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              >
+                Baik
+              </p>
+            </div>
+            <div
+              className={`p-3 rounded-xl text-center ${
+                isDark ? "bg-slate-700/50" : "bg-white border border-slate-200"
+              }`}
+            >
+              <p className="text-2xl font-bold text-red-500">
+                {allItems.filter(
+                  (i) => i.condition === "poor" || i.condition === "damaged"
+                ).length}
+              </p>
+              <p
+                className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
+              >
+                Bermasalah
+              </p>
+            </div>
+          </div>
+
+          <p
+            className={`text-xs mb-4 ${isDark ? "text-slate-400" : "text-slate-500"}`}
+          >
+            Setelah submit, inspeksi akan dikirim ke Kepala Inspeksi untuk
+            di-review dan disetujui.
+          </p>
+
+          <button
+            type="submit"
+            disabled={actionLoading || !warehouseVehicleId || filledCount === 0}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {actionLoading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+            ) : (
+              <>
+                <FiSend /> Submit Inspeksi untuk Approval
+              </>
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );
 };
-
-function SelectField({
-  label,
-  name,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: string[][];
-}) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-  return (
-    <div>
-      <label
-        className={`block text-sm font-medium mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}
-      >
-        {label}
-      </label>
-      <select
-        name={name}
-        value={value}
-        onChange={onChange}
-        className={`w-full px-4 py-2.5 ${isDark ? "bg-slate-700/50 border-slate-600/50 text-white" : "bg-white border-slate-300 text-slate-900"} border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
-      >
-        {options.map(([val, lbl]) => (
-          <option key={val} value={val}>
-            {lbl}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
 
 export default InspectionForm;
