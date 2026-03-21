@@ -581,107 +581,370 @@ const VehicleDetail = ({ id }: { id: string }) => {
 
           {inspections.length === 0 ? (
             <div
-              className={`py-8 text-center rounded-xl border border-dashed ${isDark ? "border-slate-700 text-slate-500" : "border-slate-300 text-slate-400"}`}
+              className={`py-10 text-center rounded-xl border border-dashed ${isDark ? "border-slate-700 text-slate-500" : "border-slate-300 text-slate-400"}`}
             >
-              <p>Belum ada riwayat inspeksi.</p>
+              <FiClipboard className="mx-auto text-3xl mb-2 opacity-40" />
+              <p className="text-sm">Belum ada riwayat inspeksi.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {inspections.map((insp) => (
-                <div
-                  key={insp.id}
-                  className={`p-4 rounded-xl border ${isDark ? "bg-slate-700/30 border-slate-600/50" : "bg-slate-50 border-slate-100"}`}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <span
-                        className={`text-sm font-bold capitalize ${isDark ? "text-white" : "text-slate-900"}`}
-                      >
-                        {insp.inspectionType.replace("_", " ")}
-                      </span>
-                      <span
-                        className={`ml-2 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                          insp.overallResult === "accepted_ready"
-                            ? "bg-green-500/20 text-green-500 dark:text-green-400"
-                            : insp.overallResult === "accepted_repair"
-                              ? "bg-orange-500/20 text-orange-500 dark:text-orange-400"
-                              : "bg-red-500/20 text-red-500 dark:text-red-400"
-                        }`}
-                      >
-                        {insp.overallResult.replace("_", " ")}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}
+            <div className="space-y-5">
+              {inspections.map((insp, idx) => {
+                const isApproved = insp.status === "approved";
+                const isRejected = insp.status === "rejected_by_head";
+                const isSubmitted = insp.status === "submitted";
+                const totalScore = [
+                  insp.exteriorScore,
+                  insp.interiorScore,
+                  insp.engineScore,
+                  insp.electricalScore,
+                  insp.chassisScore,
+                ]
+                  .filter((s) => s != null)
+                  .reduce((a, b) => a! + b!, 0);
+                const scoreCount = [
+                  insp.exteriorScore,
+                  insp.interiorScore,
+                  insp.engineScore,
+                  insp.electricalScore,
+                  insp.chassisScore,
+                ].filter((s) => s != null).length;
+                const avgScore =
+                  scoreCount > 0
+                    ? Math.round((totalScore! / (scoreCount * 10)) * 100)
+                    : null;
+
+                return (
+                  <div
+                    key={insp.id}
+                    className={`rounded-2xl border overflow-hidden shadow-sm transition-all ${
+                      isApproved
+                        ? isDark
+                          ? "border-emerald-500/40 bg-emerald-500/5"
+                          : "border-emerald-300 bg-emerald-50/50"
+                        : isRejected
+                          ? isDark
+                            ? "border-red-500/40 bg-red-500/5"
+                            : "border-red-300 bg-red-50/50"
+                          : isDark
+                            ? "border-slate-600/50 bg-slate-700/20"
+                            : "border-slate-200 bg-white"
+                    }`}
+                  >
+                    {/* Status Banner */}
+                    <div
+                      className={`px-4 py-2.5 flex items-center justify-between ${
+                        isApproved
+                          ? "bg-emerald-500"
+                          : isRejected
+                            ? "bg-red-500"
+                            : isSubmitted
+                              ? "bg-blue-500"
+                              : "bg-slate-500"
+                      }`}
                     >
-                      {formatDate(insp.inspectedAt)}
-                    </span>
-                  </div>
-
-                  {/* Scores */}
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {[
-                      { label: "Eks", score: insp.exteriorScore },
-                      { label: "Int", score: insp.interiorScore },
-                      { label: "Msn", score: insp.engineScore },
-                      { label: "Lis", score: insp.electricalScore },
-                      { label: "Chs", score: insp.chassisScore },
-                    ].map((item, idx) => (
-                      <div
-                        key={idx}
-                        className={`px-2 py-1 rounded-md text-xs font-medium ${isDark ? "bg-slate-800 text-slate-300" : "bg-white border text-slate-700"}`}
-                      >
-                        {item.label}:{" "}
-                        <strong
-                          className={isDark ? "text-white" : "text-slate-900"}
-                        >
-                          {item.score ?? "-"}
-                        </strong>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white text-xs font-bold uppercase tracking-widest">
+                          {isApproved
+                            ? "✓ Disetujui Kepala Inspeksi"
+                            : isRejected
+                              ? "✗ Ditolak Kepala Inspeksi"
+                              : isSubmitted
+                                ? "⏳ Menunggu Review"
+                                : "📝 Draft"}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/80 text-[10px] font-medium">
+                          Inspeksi #{inspections.length - idx}
+                        </span>
+                        {insp.overallResult && (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white`}
+                          >
+                            {insp.overallResult === "accepted_ready"
+                              ? "Siap Jual"
+                              : insp.overallResult === "accepted_repair"
+                                ? "Perlu Perbaikan"
+                                : "Ditolak"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-                  {/* Documents Checklist */}
-                  <div className="flex flex-wrap gap-1.5 text-[10px] font-bold uppercase">
-                    {insp.hasBpkb && (
-                      <span className="px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                        BPKB ✓
-                      </span>
-                    )}
-                    {insp.hasStnk && (
-                      <span className="px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                        STNK ✓
-                      </span>
-                    )}
-                    {insp.hasFaktur && (
-                      <span className="px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                        Faktur ✓
-                      </span>
-                    )}
-                    {insp.hasKtp && (
-                      <span className="px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                        KTP ✓
-                      </span>
-                    )}
-                    {insp.hasSpareKey && (
-                      <span className="px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                        Kunci Cadangan ✓
-                      </span>
-                    )}
-                  </div>
+                    <div className="p-4 space-y-4">
+                      {/* Inspector & Date Row */}
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${isDark ? "bg-slate-700 text-slate-300" : "bg-slate-200 text-slate-600"}`}
+                          >
+                            <FiUser className="text-xs" />
+                          </div>
+                          <div>
+                            <p
+                              className={`text-xs font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}
+                            >
+                              {insp.inspector?.fullName ?? "Inspektor"}
+                            </p>
+                            <p
+                              className={`text-[10px] capitalize ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                            >
+                              {insp.inspectionType?.replace(/_/g, " ") ?? "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`text-[10px] font-medium ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                        >
+                          <FiCalendar className="inline mr-1" />
+                          {formatDate(insp.inspectedAt)}
+                        </span>
+                      </div>
 
-                  {insp.repairNotes && (
-                    <p className="text-xs text-orange-600 dark:text-orange-400 mt-3 font-medium">
-                      Perbaikan Diperlukan: {insp.repairNotes}
-                    </p>
-                  )}
-                  {insp.rejectionReason && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-3 font-medium">
-                      Alasan Tolak: {insp.rejectionReason}
-                    </p>
-                  )}
-                </div>
-              ))}
+                      {/* Score Bar */}
+                      {avgScore !== null && (
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <span
+                              className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-500"}`}
+                            >
+                              Skor Rata-rata
+                            </span>
+                            <span
+                              className={`text-sm font-bold ${
+                                avgScore >= 75
+                                  ? "text-emerald-500"
+                                  : avgScore >= 50
+                                    ? "text-yellow-500"
+                                    : "text-red-500"
+                              }`}
+                            >
+                              {avgScore}%
+                            </span>
+                          </div>
+                          <div
+                            className={`h-2 rounded-full overflow-hidden ${isDark ? "bg-slate-700" : "bg-slate-200"}`}
+                          >
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                avgScore >= 75
+                                  ? "bg-emerald-500"
+                                  : avgScore >= 50
+                                    ? "bg-yellow-500"
+                                    : "bg-red-500"
+                              }`}
+                              style={{ width: `${avgScore}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Score Grid */}
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {[
+                          { label: "Eksterior", short: "Eks", score: insp.exteriorScore },
+                          { label: "Interior", short: "Int", score: insp.interiorScore },
+                          { label: "Mesin", short: "Msn", score: insp.engineScore },
+                          { label: "Kelistrikan", short: "Lis", score: insp.electricalScore },
+                          { label: "Rangka", short: "Chs", score: insp.chassisScore },
+                        ].map((item, i) => (
+                          <div
+                            key={i}
+                            title={item.label}
+                            className={`flex flex-col items-center py-2 rounded-xl text-center ${isDark ? "bg-slate-800/70" : "bg-slate-100"}`}
+                          >
+                            <span
+                              className={`text-[9px] font-semibold uppercase ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                            >
+                              {item.short}
+                            </span>
+                            <span
+                              className={`text-sm font-bold mt-0.5 ${
+                                item.score == null
+                                  ? isDark
+                                    ? "text-slate-600"
+                                    : "text-slate-400"
+                                  : item.score >= 7
+                                    ? "text-emerald-500"
+                                    : item.score >= 5
+                                      ? "text-yellow-500"
+                                      : "text-red-500"
+                              }`}
+                            >
+                              {item.score ?? "—"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Documents */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { label: "BPKB", has: insp.hasBpkb },
+                          { label: "STNK", has: insp.hasStnk },
+                          { label: "Faktur", has: insp.hasFaktur },
+                          { label: "KTP", has: insp.hasKtp },
+                          { label: "Kunci Cadangan", has: insp.hasSpareKey },
+                        ].map((doc) => (
+                          <span
+                            key={doc.label}
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              doc.has
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                : isDark
+                                  ? "bg-slate-800 text-slate-600 border-slate-700"
+                                  : "bg-slate-100 text-slate-400 border-slate-200 line-through"
+                            }`}
+                          >
+                            {doc.has ? "✓" : "✗"} {doc.label}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Repair / Rejection notes from inspector */}
+                      {insp.repairNotes && (
+                        <div
+                          className={`flex gap-2 p-3 rounded-xl ${isDark ? "bg-orange-500/10 border border-orange-500/20" : "bg-orange-50 border border-orange-200"}`}
+                        >
+                          <FiTool className="text-orange-500 shrink-0 mt-0.5 text-sm" />
+                          <div>
+                            <p className="text-[10px] font-bold uppercase text-orange-500 mb-0.5">
+                              Catatan Perbaikan
+                            </p>
+                            <p
+                              className={`text-xs ${isDark ? "text-orange-300" : "text-orange-700"}`}
+                            >
+                              {insp.repairNotes}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {insp.rejectionReason && (
+                        <div
+                          className={`flex gap-2 p-3 rounded-xl ${isDark ? "bg-red-500/10 border border-red-500/20" : "bg-red-50 border border-red-200"}`}
+                        >
+                          <FiX className="text-red-500 shrink-0 mt-0.5 text-sm" />
+                          <div>
+                            <p className="text-[10px] font-bold uppercase text-red-500 mb-0.5">
+                              Alasan Penolakan (Inspektor)
+                            </p>
+                            <p
+                              className={`text-xs ${isDark ? "text-red-300" : "text-red-700"}`}
+                            >
+                              {insp.rejectionReason}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── Kepala Inspeksi Decision ── */}
+                      {(isApproved || isRejected) && (
+                        <div
+                          className={`rounded-xl border-2 overflow-hidden ${
+                            isApproved
+                              ? isDark
+                                ? "border-emerald-500/50"
+                                : "border-emerald-300"
+                              : isDark
+                                ? "border-red-500/50"
+                                : "border-red-300"
+                          }`}
+                        >
+                          {/* Header */}
+                          <div
+                            className={`flex items-center gap-2 px-3 py-2 ${
+                              isApproved
+                                ? "bg-emerald-500/15"
+                                : "bg-red-500/15"
+                            }`}
+                          >
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${isApproved ? "bg-emerald-500" : "bg-red-500"}`}
+                            >
+                              {isApproved ? "✓" : "✗"}
+                            </div>
+                            <p
+                              className={`text-xs font-bold uppercase tracking-wider ${isApproved ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
+                            >
+                              {isApproved
+                                ? "Disetujui oleh Kepala Inspeksi"
+                                : "Ditolak oleh Kepala Inspeksi"}
+                            </p>
+                          </div>
+
+                          {/* Body */}
+                          <div
+                            className={`px-3 py-3 space-y-2 ${isDark ? "bg-slate-800/40" : "bg-white"}`}
+                          >
+                            {/* Approver info */}
+                            {insp.approvedBy && (
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                                    isApproved
+                                      ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                      : "bg-red-500/20 text-red-600 dark:text-red-400"
+                                  }`}
+                                >
+                                  {insp.approvedBy.fullName
+                                    .charAt(0)
+                                    .toUpperCase()}
+                                </div>
+                                <div>
+                                  <p
+                                    className={`text-xs font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}
+                                  >
+                                    {insp.approvedBy.fullName}
+                                  </p>
+                                  {insp.approvedAt && (
+                                    <p
+                                      className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}
+                                    >
+                                      {formatDate(insp.approvedAt)}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Approval notes */}
+                            {insp.approvalNotes && (
+                              <div
+                                className={`p-2.5 rounded-lg text-xs italic ${
+                                  isApproved
+                                    ? isDark
+                                      ? "bg-emerald-500/10 text-emerald-300"
+                                      : "bg-emerald-50 text-emerald-700"
+                                    : isDark
+                                      ? "bg-red-500/10 text-red-300"
+                                      : "bg-red-50 text-red-700"
+                                }`}
+                              >
+                                "{insp.approvalNotes}"
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Waiting for review */}
+                      {isSubmitted && (
+                        <div
+                          className={`flex items-center gap-2 p-3 rounded-xl border ${isDark ? "bg-blue-500/10 border-blue-500/20" : "bg-blue-50 border-blue-200"}`}
+                        >
+                          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                          <p
+                            className={`text-xs font-medium ${isDark ? "text-blue-400" : "text-blue-600"}`}
+                          >
+                            Menunggu review dari Kepala Inspeksi
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -736,7 +999,7 @@ const VehicleDetail = ({ id }: { id: string }) => {
                                 : "bg-slate-500/20 text-slate-500 dark:text-slate-400"
                         }`}
                       >
-                        {r.status.replace("_", " ")}
+                        {r.status?.replace(/_/g, " ") ?? "-"}
                       </span>
                     </div>
                     <span

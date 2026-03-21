@@ -21,6 +21,7 @@ import {
   MessageCircle,
   Loader2,
   AlertTriangle,
+  Briefcase,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { AppDispatch, RootState } from "@/lib/state/store";
@@ -33,6 +34,7 @@ import Alert from "@/components/feature/alert/alert";
 import { cn } from "@/lib/utils";
 import { decryptSlug, isValidSlug } from "@/lib/slug/slug";
 import PhoneInputField from "@/components/ui/phone-input-field";
+import PaginatedSelectField from "@/components/ui/paginated-select-field";
 
 // ============================================
 // Validation Schema
@@ -91,12 +93,17 @@ export default function EditUser() {
   const [isValidId, setIsValidId] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // Role position cascading state
+  const [selectedRoleUserId, setSelectedRoleUserId] = useState("");
+  const [selectedRoleUserName, setSelectedRoleUserName] = useState("");
+  const [selectedRolePositionId, setSelectedRolePositionId] = useState("");
+  const [selectedRolePositionName, setSelectedRolePositionName] = useState("");
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting, isDirty },
-    reset,
     setValue,
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -123,7 +130,6 @@ export default function EditUser() {
       return;
     }
 
-    // Validasi dan decrypt slug
     if (!isValidSlug(slug)) {
       setIsValidId(false);
       setIsInitialLoading(false);
@@ -141,12 +147,10 @@ export default function EditUser() {
     setUserId(decryptedId);
     setIsValidId(true);
 
-    // Fetch user data
     dispatch(getUsersById(decryptedId)).finally(() => {
       setIsInitialLoading(false);
     });
 
-    // Cleanup
     return () => {
       dispatch(clearSelectedUsers());
     };
@@ -165,7 +169,24 @@ export default function EditUser() {
       setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
-      // Password tidak di-set karena tidak dikirim dari API
+
+      // Pre-fill role position from nested data
+      const rp = selectedUsers.rolePosition as any;
+      if (rp) {
+        setSelectedRolePositionId(rp.id || "");
+        setSelectedRolePositionName(rp.name || "");
+        // If roleUser is nested inside rolePosition
+        const ru = rp.roleUser ?? rp.RoleUser;
+        if (ru) {
+          setSelectedRoleUserId(ru.id || "");
+          setSelectedRoleUserName(ru.name || "");
+        } else if (rp.roleUserId) {
+          setSelectedRoleUserId(rp.roleUserId);
+        }
+      } else if (selectedUsers.rolePositionId) {
+        // Only ID available — set it so it shows; user can pick role user to filter
+        setSelectedRolePositionId(selectedUsers.rolePositionId as string);
+      }
     }
   }, [selectedUsers, setValue]);
 
@@ -192,9 +213,9 @@ export default function EditUser() {
         whatsappNumber: data.whatsappNumber || null,
         location: data.location || null,
         role: data.role,
+        rolePositionId: selectedRolePositionId || null,
       };
 
-      // Hanya kirim password jika diisi
       if (data.password && data.password.length > 0) {
         payload.password = data.password;
       }
@@ -243,6 +264,24 @@ export default function EditUser() {
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
       setValue("password", "");
+
+      // Reset role position to original
+      const rp = selectedUsers.rolePosition as any;
+      if (rp) {
+        setSelectedRolePositionId(rp.id || "");
+        setSelectedRolePositionName(rp.name || "");
+        const ru = rp.roleUser ?? rp.RoleUser;
+        if (ru) {
+          setSelectedRoleUserId(ru.id || "");
+          setSelectedRoleUserName(ru.name || "");
+        }
+      } else {
+        setSelectedRoleUserId("");
+        setSelectedRoleUserName("");
+        setSelectedRolePositionId((selectedUsers.rolePositionId as string) || "");
+        setSelectedRolePositionName("");
+      }
+
       Alert.toast.info("Form berhasil direset");
     }
   };
@@ -594,6 +633,68 @@ export default function EditUser() {
                 icon={MapPin}
                 placeholder="Kota/Alamat (opsional)"
                 error={errors.location?.message}
+              />
+            </div>
+          </div>
+
+          {/* Section: Jabatan */}
+          <div className="mb-8">
+            <h2
+              className={cn(
+                "text-lg font-bold mb-4 flex items-center gap-2",
+                isDarkMode ? "text-white" : "text-slate-900",
+              )}
+            >
+              <Briefcase size={20} className="text-cyan-400" />
+              Jabatan{" "}
+              <span
+                className={cn(
+                  "text-xs font-normal",
+                  isDarkMode ? "text-slate-500" : "text-slate-400",
+                )}
+              >
+                (opsional)
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PaginatedSelectField
+                label="Kategori Role"
+                apiUrl="/role-users"
+                value={selectedRoleUserId}
+                displayValue={selectedRoleUserName}
+                getLabel={(item: any) => item.name}
+                getValue={(item: any) => item.id}
+                placeholder="Pilih kategori role..."
+                onChange={(id, item: any) => {
+                  setSelectedRoleUserId(id);
+                  setSelectedRoleUserName(item?.name ?? "");
+                  // Clear position when role user changes
+                  setSelectedRolePositionId("");
+                  setSelectedRolePositionName("");
+                }}
+              />
+              <PaginatedSelectField
+                label="Jabatan"
+                apiUrl="/role-positions"
+                queryParams={
+                  selectedRoleUserId
+                    ? { roleUserId: selectedRoleUserId }
+                    : undefined
+                }
+                value={selectedRolePositionId}
+                displayValue={selectedRolePositionName}
+                getLabel={(item: any) => item.name}
+                getValue={(item: any) => item.id}
+                placeholder={
+                  selectedRoleUserId
+                    ? "Pilih jabatan..."
+                    : "Pilih kategori role dulu"
+                }
+                disabled={!selectedRoleUserId}
+                onChange={(id, item: any) => {
+                  setSelectedRolePositionId(id);
+                  setSelectedRolePositionName(item?.name ?? "");
+                }}
               />
             </div>
           </div>

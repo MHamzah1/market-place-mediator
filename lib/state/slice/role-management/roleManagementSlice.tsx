@@ -154,6 +154,27 @@ export const getAllRolePositions = createAsyncThunk<
   }
 });
 
+export const getRolePositionsPaged = createAsyncThunk<
+  RolePosition[],
+  { page?: number; perPage?: number; search?: string; isActive?: boolean } | void,
+  { rejectValue: string }
+>("roleManagement/getRolePositionsPaged", async (params, { rejectWithValue }) => {
+  try {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.perPage) query.set("perPage", String(params.perPage));
+    if (params?.search) query.set("search", params.search);
+    if (params?.isActive !== undefined) query.set("isActive", String(params.isActive));
+    const qs = query.toString() ? `?${query.toString()}` : "";
+    const res = await instanceAxios.get(`/role-positions/paged${qs}`, {
+      headers: getHeaders(),
+    });
+    return res.data?.data ?? res.data;
+  } catch (error) {
+    return handleError(error, rejectWithValue);
+  }
+});
+
 export const getRolePositionById = createAsyncThunk<
   RolePosition,
   string,
@@ -323,6 +344,14 @@ const roleManagementSlice = createSlice({
         state.rolePositions = action.payload;
       })
       .addCase(getAllRolePositions.rejected, rejected)
+
+      // getRolePositionsPaged
+      .addCase(getRolePositionsPaged.pending, pending)
+      .addCase(getRolePositionsPaged.fulfilled, (state, action) => {
+        state.loading = false;
+        state.rolePositions = action.payload;
+      })
+      .addCase(getRolePositionsPaged.rejected, rejected)
 
       // getRolePositionById
       .addCase(getRolePositionById.pending, pending)

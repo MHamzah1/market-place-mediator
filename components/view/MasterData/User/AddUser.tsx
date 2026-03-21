@@ -19,11 +19,13 @@ import {
   Eye,
   EyeOff,
   MessageCircle,
+  Briefcase,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import { createUsers } from "@/lib/state/slice/user/userSlice";
 import PhoneInputField from "@/components/ui/phone-input-field";
+import PaginatedSelectField from "@/components/ui/paginated-select-field";
 import Alert from "@/components/feature/alert/alert";
 import { cn } from "@/lib/utils";
 
@@ -52,9 +54,6 @@ const userSchema = z.object({
     .regex(/^62\d+$/, "Format nomor telepon tidak valid"),
   whatsappNumber: z.string().optional(),
   location: z.string().optional(),
-  role: z.enum(["customer", "admin", "salesman"], {
-    error: "Role wajib dipilih",
-  }),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -71,6 +70,12 @@ export default function AddUser() {
   const { loading } = useSelector((state: RootState) => state.Users);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Role position cascading state
+  const [selectedRoleUserId, setSelectedRoleUserId] = useState("");
+  const [selectedRoleUserName, setSelectedRoleUserName] = useState("");
+  const [selectedRolePositionId, setSelectedRolePositionId] = useState("");
+  const [selectedRolePositionName, setSelectedRolePositionName] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -86,7 +91,6 @@ export default function AddUser() {
       phoneNumber: "62",
       whatsappNumber: "62",
       location: "",
-      role: "customer",
     },
   });
 
@@ -104,15 +108,18 @@ export default function AddUser() {
     try {
       Alert.loading("Menyimpan data...");
 
-      const payload = {
+      const payload: any = {
         email: data.email,
         password: data.password,
         fullName: data.fullName,
         phoneNumber: data.phoneNumber,
         whatsappNumber: data.whatsappNumber || null,
         location: data.location || null,
-        role: data.role,
       };
+
+      if (selectedRolePositionId) {
+        payload.rolePositionId = selectedRolePositionId;
+      }
 
       await dispatch(createUsers(payload)).unwrap();
 
@@ -144,6 +151,10 @@ export default function AddUser() {
     );
     if (confirmed) {
       reset();
+      setSelectedRoleUserId("");
+      setSelectedRoleUserName("");
+      setSelectedRolePositionId("");
+      setSelectedRolePositionName("");
       Alert.toast.info("Form berhasil direset");
     }
   };
@@ -407,7 +418,7 @@ export default function AddUser() {
             </div>
           </div>
 
-          {/* Section: Role */}
+          {/* Section: Jabatan */}
           <div className="mb-8">
             <h2
               className={cn(
@@ -415,105 +426,57 @@ export default function AddUser() {
                 isDarkMode ? "text-white" : "text-slate-900",
               )}
             >
-              <Shield size={20} className="text-cyan-400" />
-              Role & Akses
-            </h2>
-            <div className="space-y-2">
-              <label
+              <Briefcase size={20} className="text-cyan-400" />
+              Jabatan{" "}
+              <span
                 className={cn(
-                  "block text-sm font-semibold",
-                  isDarkMode ? "text-slate-300" : "text-slate-700",
+                  "text-xs font-normal",
+                  isDarkMode ? "text-slate-500" : "text-slate-400",
                 )}
               >
-                Role<span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  {
-                    value: "customer",
-                    label: "Customer",
-                    desc: "Pengguna biasa",
-                    color: "green",
-                  },
-                  {
-                    value: "salesman",
-                    label: "Salesman",
-                    desc: "Tim penjualan",
-                    color: "blue",
-                  },
-                  {
-                    value: "admin",
-                    label: "Admin",
-                    desc: "Akses penuh",
-                    color: "purple",
-                  },
-                ].map((role) => (
-                  <label
-                    key={role.value}
-                    className={cn(
-                      "relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
-                      isDarkMode
-                        ? "bg-slate-800/50 hover:bg-slate-700/50"
-                        : "bg-slate-50 hover:bg-slate-100",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      value={role.value}
-                      className="sr-only peer"
-                      {...register("role")}
-                    />
-                    <div
-                      className={cn(
-                        "w-full peer-checked:border-cyan-500",
-                        "peer-checked:ring-2 peer-checked:ring-cyan-500/50",
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center",
-                            role.color === "green" &&
-                              "bg-green-500/20 text-green-400",
-                            role.color === "blue" &&
-                              "bg-blue-500/20 text-blue-400",
-                            role.color === "purple" &&
-                              "bg-purple-500/20 text-purple-400",
-                          )}
-                        >
-                          <Shield size={20} />
-                        </div>
-                        <div>
-                          <p
-                            className={cn(
-                              "font-semibold",
-                              isDarkMode ? "text-white" : "text-slate-900",
-                            )}
-                          >
-                            {role.label}
-                          </p>
-                          <p
-                            className={cn(
-                              "text-xs",
-                              isDarkMode ? "text-slate-400" : "text-slate-500",
-                            )}
-                          >
-                            {role.desc}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full border-2 peer-checked:bg-cyan-500 peer-checked:border-cyan-500 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100" />
-                    </div>
-                  </label>
-                ))}
-              </div>
-              {errors.role && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <span>⚠</span> {errors.role.message}
-                </p>
-              )}
+                (opsional)
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PaginatedSelectField
+                label="Kategori Role"
+                apiUrl="/role-users"
+                value={selectedRoleUserId}
+                displayValue={selectedRoleUserName}
+                getLabel={(item: any) => item.name}
+                getValue={(item: any) => item.id}
+                placeholder="Pilih kategori role..."
+                onChange={(id, item: any) => {
+                  setSelectedRoleUserId(id);
+                  setSelectedRoleUserName(item?.name ?? "");
+                  // Clear position when role user changes
+                  setSelectedRolePositionId("");
+                  setSelectedRolePositionName("");
+                }}
+              />
+              <PaginatedSelectField
+                label="Jabatan"
+                apiUrl="/role-positions"
+                queryParams={
+                  selectedRoleUserId
+                    ? { roleUserId: selectedRoleUserId }
+                    : undefined
+                }
+                value={selectedRolePositionId}
+                displayValue={selectedRolePositionName}
+                getLabel={(item: any) => item.name}
+                getValue={(item: any) => item.id}
+                placeholder={
+                  selectedRoleUserId
+                    ? "Pilih jabatan..."
+                    : "Pilih kategori role dulu"
+                }
+                disabled={!selectedRoleUserId}
+                onChange={(id, item: any) => {
+                  setSelectedRolePositionId(id);
+                  setSelectedRolePositionName(item?.name ?? "");
+                }}
+              />
             </div>
           </div>
 

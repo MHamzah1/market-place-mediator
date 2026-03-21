@@ -25,6 +25,7 @@ import { createUsers } from "@/lib/state/slice/user/userSlice";
 import { AppDispatch, RootState } from "@/lib/state/store";
 import { useTheme } from "@/context/ThemeContext";
 import { MediatorLogo } from "@/components/ui/mediatorLogo";
+import PaginatedSelectField from "@/components/ui/paginated-select-field";
 
 // Schema validasi dengan Zod
 const registerSchema = z
@@ -42,6 +43,7 @@ const registerSchema = z
       .max(13, "Nomor WhatsApp maksimal 13 digit (tanpa +62)")
       .regex(/^[0-9]+$/, "Nomor WhatsApp hanya boleh angka"),
     location: z.string().min(3, "Lokasi minimal 3 karakter"),
+    rolePositionId: z.string().min(1, "Pilih jabatan terlebih dahulu"),
     password: z
       .string()
       .min(8, "Password minimal 8 karakter")
@@ -77,6 +79,10 @@ const RegisterComponent = () => {
     (state: RootState) => state.Users,
   );
 
+  const [selectedRoleUserId, setSelectedRoleUserId] = useState("");
+  const [selectedRoleUserName, setSelectedRoleUserName] = useState("");
+  const [selectedRolePositionName, setSelectedRolePositionName] = useState("");
+
   // Gunakan useTheme hook dari context
   const { theme, toggleTheme } = useTheme();
   const isDarkMode = theme === "dark";
@@ -86,6 +92,7 @@ const RegisterComponent = () => {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
@@ -111,7 +118,7 @@ const RegisterComponent = () => {
         phoneNumber: normalizeTo62(data.phoneNumber),
         whatsappNumber: normalizeTo62(data.whatsappNumber),
         location: data.location,
-        role: "salesman", // Semua user default menjadi salesman
+        rolePositionId: data.rolePositionId,
       };
       await dispatch(createUsers(payload)).unwrap();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -404,6 +411,56 @@ const RegisterComponent = () => {
                   {errors.location && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.location.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Role User */}
+                <PaginatedSelectField
+                  label="Tipe Pengguna"
+                  value={selectedRoleUserId}
+                  displayValue={selectedRoleUserName}
+                  apiUrl="/role-users"
+                  getLabel={(item) => (item as { name: string }).name}
+                  getValue={(item) => (item as { id: string }).id}
+                  onChange={(id, item) => {
+                    setSelectedRoleUserId(id);
+                    setSelectedRoleUserName((item as { name: string }).name);
+                    // reset position when role user changes
+                    setSelectedRolePositionName("");
+                    setValue("rolePositionId", "");
+                  }}
+                  placeholder="Pilih Tipe Pengguna"
+                  required
+                />
+
+                {/* Role Position */}
+                <div>
+                  <PaginatedSelectField
+                    label="Jabatan"
+                    value=""
+                    displayValue={selectedRolePositionName}
+                    apiUrl="/role-positions"
+                    queryParams={
+                      selectedRoleUserId
+                        ? { roleUserId: selectedRoleUserId }
+                        : undefined
+                    }
+                    getLabel={(item) => (item as { name: string }).name}
+                    getValue={(item) => (item as { id: string }).id}
+                    onChange={(id, item) => {
+                      setSelectedRolePositionName(
+                        (item as { name: string }).name,
+                      );
+                      setValue("rolePositionId", id, { shouldValidate: true });
+                    }}
+                    placeholder="Pilih Jabatan"
+                    disabled={!selectedRoleUserId}
+                    required
+                  />
+                  {errors.rolePositionId && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.rolePositionId.message}
                     </p>
                   )}
                 </div>

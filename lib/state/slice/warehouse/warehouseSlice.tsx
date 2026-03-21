@@ -604,6 +604,63 @@ export const fetchShowrooms = createAsyncThunk<
   }
 });
 
+export const searchShowrooms = createAsyncThunk<
+  Showroom[],
+  string,
+  { rejectValue: string }
+>("warehouse/searchShowrooms", async (q, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.get("/warehouse/showrooms/search", {
+      params: { q },
+      headers: getHeaders(),
+    });
+    return res.data?.data ?? [];
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal mencari showroom",
+    );
+  }
+});
+
+export const joinShowroom = createAsyncThunk<
+  Showroom,
+  string,
+  { rejectValue: string }
+>("warehouse/joinShowroom", async (showroomId, { rejectWithValue }) => {
+  try {
+    const res = await instanceAxios.post(
+      `/warehouse/showrooms/${showroomId}/join`,
+      {},
+      { headers: getHeaders() },
+    );
+    return res.data?.data;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal bergabung dengan showroom",
+    );
+  }
+});
+
+export const leaveShowroom = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>("warehouse/leaveShowroom", async (showroomId, { rejectWithValue }) => {
+  try {
+    await instanceAxios.delete(`/warehouse/showrooms/${showroomId}/leave`, {
+      headers: getHeaders(),
+    });
+    return showroomId;
+  } catch (e) {
+    const err = e as AxiosError<ErrorResponse>;
+    return rejectWithValue(
+      err.response?.data?.message || "Gagal keluar dari showroom",
+    );
+  }
+});
+
 export const fetchShowroomDetail = createAsyncThunk<
   Showroom,
   string,
@@ -1608,6 +1665,24 @@ const warehouseSlice = createSlice({
           (s) => s.id !== action.payload,
         );
         state.successMessage = "Showroom berhasil dihapus!";
+      })
+
+      .addCase(joinShowroom.fulfilled, (state, action) => {
+        state.successMessage = `Berhasil bergabung dengan showroom!`;
+        // fetchShowrooms will refresh the list
+      })
+      .addCase(joinShowroom.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
+      .addCase(leaveShowroom.fulfilled, (state, action) => {
+        state.showrooms = state.showrooms.filter(
+          (s) => s.id !== action.payload,
+        );
+        state.successMessage = "Berhasil keluar dari showroom!";
+      })
+      .addCase(leaveShowroom.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
 
     // ---- VEHICLE ----
