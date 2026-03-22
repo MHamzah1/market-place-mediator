@@ -50,7 +50,7 @@ const userSchema = z.object({
     .min(3, "Nama minimal 3 karakter"),
   phoneNumber: z
     .string()
-    .min(5, "Nomor telepon wajib diisi (minimal 3 digit setelah 62)")
+    .min(5, "Nomor telepon wajib diisi (minimal 3 digit setelah +62)")
     .regex(/^62\d+$/, "Format nomor telepon tidak valid"),
   whatsappNumber: z.string().optional(),
   location: z.string().optional(),
@@ -88,8 +88,8 @@ export default function AddUser() {
       email: "",
       password: "",
       fullName: "",
-      phoneNumber: "62",
-      whatsappNumber: "62",
+      phoneNumber: "+62",
+      whatsappNumber: "+62",
       location: "",
     },
   });
@@ -115,6 +115,7 @@ export default function AddUser() {
         phoneNumber: data.phoneNumber,
         whatsappNumber: data.whatsappNumber || null,
         location: data.location || null,
+        role: data.role,
       };
 
       if (selectedRolePositionId) {

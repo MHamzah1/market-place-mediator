@@ -63,7 +63,7 @@ const userSchema = z.object({
     .min(3, "Nama minimal 3 karakter"),
   phoneNumber: z
     .string()
-    .min(5, "Nomor telepon wajib diisi (minimal 3 digit setelah 62)")
+    .min(5, "Nomor telepon wajib diisi (minimal 3 digit setelah +62)")
     .regex(/^62\d+$/, "Format nomor telepon tidak valid"),
   whatsappNumber: z.string().optional(),
   location: z.string().optional(),
@@ -111,8 +111,8 @@ export default function EditUser() {
       email: "",
       password: "",
       fullName: "",
-      phoneNumber: "62",
-      whatsappNumber: "62",
+      phoneNumber: "+62",
+      whatsappNumber: "+62",
       location: "",
       role: "customer",
     },
@@ -163,10 +163,10 @@ export default function EditUser() {
     if (selectedUsers) {
       setValue("email", selectedUsers.email || "");
       setValue("fullName", selectedUsers.fullName || "");
-      const phone = selectedUsers.phoneNumber || "62";
-      setValue("phoneNumber", phone.startsWith("62") ? phone : "62" + phone);
-      const wa = selectedUsers.whatsappNumber || "62";
-      setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
+      const phone = selectedUsers.phoneNumber || "+62";
+      setValue("phoneNumber", phone.startsWith("+62") ? phone : "+62" + phone);
+      const wa = selectedUsers.whatsappNumber || "+62";
+      setValue("whatsappNumber", wa.startsWith("+62") ? wa : "+62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
 
@@ -257,10 +257,10 @@ export default function EditUser() {
     if (confirmed && selectedUsers) {
       setValue("email", selectedUsers.email || "");
       setValue("fullName", selectedUsers.fullName || "");
-      const phone = selectedUsers.phoneNumber || "62";
-      setValue("phoneNumber", phone.startsWith("62") ? phone : "62" + phone);
-      const wa = selectedUsers.whatsappNumber || "62";
-      setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
+      const phone = selectedUsers.phoneNumber || "+62";
+      setValue("phoneNumber", phone.startsWith("+62") ? phone : "+62" + phone);
+      const wa = selectedUsers.whatsappNumber || "+62";
+      setValue("whatsappNumber", wa.startsWith("+62") ? wa : "+62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
       setValue("password", "");
@@ -278,7 +278,9 @@ export default function EditUser() {
       } else {
         setSelectedRoleUserId("");
         setSelectedRoleUserName("");
-        setSelectedRolePositionId((selectedUsers.rolePositionId as string) || "");
+        setSelectedRolePositionId(
+          (selectedUsers.rolePositionId as string) || "",
+        );
         setSelectedRolePositionName("");
       }
 
