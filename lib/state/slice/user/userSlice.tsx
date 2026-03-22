@@ -11,7 +11,19 @@ export interface Users {
   phoneNumber?: string;
   whatsappNumber?: string | null;
   location?: string | null;
-  role?: "customer" | "admin" | "salesman";
+  role?: string | null;
+  rolePositionId?: string | null;
+  rolePosition?: {
+    id: string;
+    name: string;
+    description?: string;
+    isActive?: boolean;
+    roleUserId?: string;
+    roleUser?: {
+      id: string;
+      name: string;
+    };
+  } | null;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: any;

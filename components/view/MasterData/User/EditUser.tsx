@@ -111,8 +111,8 @@ export default function EditUser() {
       email: "",
       password: "",
       fullName: "",
-      phoneNumber: "+62",
-      whatsappNumber: "+62",
+      phoneNumber: "62",
+      whatsappNumber: "62",
       location: "",
       role: "customer",
     },
@@ -163,10 +163,10 @@ export default function EditUser() {
     if (selectedUsers) {
       setValue("email", selectedUsers.email || "");
       setValue("fullName", selectedUsers.fullName || "");
-      const phone = selectedUsers.phoneNumber || "+62";
-      setValue("phoneNumber", phone.startsWith("+62") ? phone : "+62" + phone);
-      const wa = selectedUsers.whatsappNumber || "+62";
-      setValue("whatsappNumber", wa.startsWith("+62") ? wa : "+62" + wa);
+      const phone = (selectedUsers.phoneNumber || "62").replace(/^\+/, "");
+      setValue("phoneNumber", phone.startsWith("62") ? phone : "62" + phone);
+      const wa = (selectedUsers.whatsappNumber || "62").replace(/^\+/, "");
+      setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
 
@@ -209,10 +209,9 @@ export default function EditUser() {
       const payload: any = {
         email: data.email,
         fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        whatsappNumber: data.whatsappNumber || null,
+        phoneNumber: data.phoneNumber ? "+" + data.phoneNumber.replace(/^\+/, "") : null,
+        whatsappNumber: data.whatsappNumber ? data.whatsappNumber.replace(/^\+/, "") : null,
         location: data.location || null,
-        role: data.role,
         rolePositionId: selectedRolePositionId || null,
       };
 
@@ -257,10 +256,10 @@ export default function EditUser() {
     if (confirmed && selectedUsers) {
       setValue("email", selectedUsers.email || "");
       setValue("fullName", selectedUsers.fullName || "");
-      const phone = selectedUsers.phoneNumber || "+62";
-      setValue("phoneNumber", phone.startsWith("+62") ? phone : "+62" + phone);
-      const wa = selectedUsers.whatsappNumber || "+62";
-      setValue("whatsappNumber", wa.startsWith("+62") ? wa : "+62" + wa);
+      const phone = (selectedUsers.phoneNumber || "62").replace(/^\+/, "");
+      setValue("phoneNumber", phone.startsWith("62") ? phone : "62" + phone);
+      const wa = (selectedUsers.whatsappNumber || "62").replace(/^\+/, "");
+      setValue("whatsappNumber", wa.startsWith("62") ? wa : "62" + wa);
       setValue("location", selectedUsers.location || "");
       setValue("role", selectedUsers.role || "customer");
       setValue("password", "");
@@ -702,114 +701,6 @@ export default function EditUser() {
           </div>
 
           {/* Section: Role */}
-          <div className="mb-8">
-            <h2
-              className={cn(
-                "text-lg font-bold mb-4 flex items-center gap-2",
-                isDarkMode ? "text-white" : "text-slate-900",
-              )}
-            >
-              <Shield size={20} className="text-cyan-400" />
-              Role & Akses
-            </h2>
-            <div className="space-y-2">
-              <label
-                className={cn(
-                  "block text-sm font-semibold",
-                  isDarkMode ? "text-slate-300" : "text-slate-700",
-                )}
-              >
-                Role<span className="text-red-500 ml-1">*</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  {
-                    value: "customer",
-                    label: "Customer",
-                    desc: "Pengguna biasa",
-                    color: "green",
-                  },
-                  {
-                    value: "salesman",
-                    label: "Salesman",
-                    desc: "Tim penjualan",
-                    color: "blue",
-                  },
-                  {
-                    value: "admin",
-                    label: "Admin",
-                    desc: "Akses penuh",
-                    color: "purple",
-                  },
-                ].map((role) => (
-                  <label
-                    key={role.value}
-                    className={cn(
-                      "relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
-                      isDarkMode
-                        ? "bg-slate-800/50 hover:bg-slate-700/50"
-                        : "bg-slate-50 hover:bg-slate-100",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      value={role.value}
-                      className="sr-only peer"
-                      {...register("role")}
-                    />
-                    <div
-                      className={cn(
-                        "w-full peer-checked:border-cyan-500",
-                        "peer-checked:ring-2 peer-checked:ring-cyan-500/50",
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center",
-                            role.color === "green" &&
-                              "bg-green-500/20 text-green-400",
-                            role.color === "blue" &&
-                              "bg-blue-500/20 text-blue-400",
-                            role.color === "purple" &&
-                              "bg-purple-500/20 text-purple-400",
-                          )}
-                        >
-                          <Shield size={20} />
-                        </div>
-                        <div>
-                          <p
-                            className={cn(
-                              "font-semibold",
-                              isDarkMode ? "text-white" : "text-slate-900",
-                            )}
-                          >
-                            {role.label}
-                          </p>
-                          <p
-                            className={cn(
-                              "text-xs",
-                              isDarkMode ? "text-slate-400" : "text-slate-500",
-                            )}
-                          >
-                            {role.desc}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full border-2 peer-checked:bg-cyan-500 peer-checked:border-cyan-500 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100" />
-                    </div>
-                  </label>
-                ))}
-              </div>
-              {errors.role && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <span>⚠</span> {errors.role.message}
-                </p>
-              )}
-            </div>
-          </div>
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-slate-700/50">

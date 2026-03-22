@@ -99,16 +99,16 @@ const UserTable = () => {
 
   const columns: Column<Users>[] = [
     {
-      key: "name",
+      key: "fullName",
       header: "User",
       render: (item: Users) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-            {getInitials(item.name)}
+            {getInitials(item.fullName)}
           </div>
           <div>
             <p className="font-semibold text-slate-900 dark:text-white">
-              {item.name || "-"}
+              {item.fullName || "-"}
             </p>
             <p className="text-xs text-slate-500">{item.email || "-"}</p>
           </div>
@@ -116,13 +116,13 @@ const UserTable = () => {
       ),
     },
     {
-      key: "phone",
+      key: "phoneNumber",
       header: "No. Telepon",
       render: (item: Users) => (
         <div>
-          <p className="font-medium">{item.phone || "-"}</p>
-          {item.whatsapp && (
-            <p className="text-xs text-green-600">WA: {item.whatsapp}</p>
+          <p className="font-medium">{item.phoneNumber || "-"}</p>
+          {item.whatsappNumber && (
+            <p className="text-xs text-green-600">WA: {item.whatsappNumber}</p>
           )}
         </div>
       ),
@@ -137,17 +137,29 @@ const UserTable = () => {
       ),
     },
     {
-      key: "role",
-      header: "Role",
-      render: (item: Users) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(
-            item.role ?? ""
-          )}`}
-        >
-          {item.role || "-"}
-        </span>
-      ),
+      key: "rolePosition",
+      header: "Jabatan",
+      render: (item: Users) => {
+        const roleName = item.rolePosition?.roleUser?.name;
+        const positionName = item.rolePosition?.name;
+        return (
+          <div>
+            {roleName && (
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(
+                  roleName
+                )}`}
+              >
+                {roleName}
+              </span>
+            )}
+            {positionName && (
+              <p className="text-xs text-slate-500 mt-1">{positionName}</p>
+            )}
+            {!roleName && !positionName && <span>-</span>}
+          </div>
+        );
+      },
     },
     {
       key: "createdAt",
@@ -176,7 +188,7 @@ const UserTable = () => {
         <FiEdit2 className="w-4 h-4" />
       </button>
       <button
-        onClick={() => handleDelete(String(item.id), item.name || "User")}
+        onClick={() => handleDelete(String(item.id), item.fullName || "User")}
         className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors dark:hover:bg-red-900"
         title="Hapus"
       >

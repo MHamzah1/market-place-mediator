@@ -112,15 +112,11 @@ export default function AddUser() {
         email: data.email,
         password: data.password,
         fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        whatsappNumber: data.whatsappNumber || null,
+        phoneNumber: data.phoneNumber ? "+" + data.phoneNumber.replace(/^\+/, "") : null,
+        whatsappNumber: data.whatsappNumber ? data.whatsappNumber.replace(/^\+/, "") : null,
         location: data.location || null,
-        role: data.role,
+        rolePositionId: selectedRolePositionId || null,
       };
-
-      if (selectedRolePositionId) {
-        payload.rolePositionId = selectedRolePositionId;
-      }
 
       await dispatch(createUsers(payload)).unwrap();
 
