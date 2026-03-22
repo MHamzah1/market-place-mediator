@@ -89,24 +89,28 @@ export const getAllUsers = createAsyncThunk<
 >(
   "Users/getAllUsers",
   async (
-    { page = 1, perPage = 10, isInfiniteScroll = false },
-    { rejectWithValue, getState }
+    { page = 1, perPage = 10, search, isInfiniteScroll = false },
+    { rejectWithValue }
   ) => {
     try {
-      const currentState = getState().Users;
-      if (currentState.loadedPages.includes(page)) {
-        console.log("data already loaded for page Users", page);
-        return null;
-      }
+      const params: any = { page, perPage };
+      if (search) params.search = search;
+
       const response = await instanceAxios.get(`/users`, {
-        params: { page, perPage },
+        params,
         headers: getHeaders(),
       });
+
+      const res = response.data;
       return {
-        data: response.data.data,
-        pagination: response.data.pagination,
-        page,
-        meta: { arg: { page, isInfiniteScroll } },
+        data: res.data,
+        pagination: {
+          totalRecords: res.total,
+          totalPages: res.lastPage,
+          currentPage: res.page,
+        },
+        page: res.page,
+        meta: { arg: { page: res.page, isInfiniteScroll } },
       };
     } catch (error) {
       const axiosError = error as AxiosError<ErrorResponse>;
