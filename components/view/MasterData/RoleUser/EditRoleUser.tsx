@@ -14,6 +14,7 @@ import {
   updateRoleUser,
   clearRoleManagementSuccess,
   clearRoleManagementError,
+  setSelectedRoleUser,
 } from "@/lib/state/slice/role-management/roleManagementSlice";
 import Alert from "@/components/feature/alert/alert";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,9 @@ export default function EditRoleUser({ slug }: { slug: string }) {
 
   useEffect(() => {
     if (id) dispatch(getRoleUserById(id));
+    return () => {
+      dispatch(setSelectedRoleUser(null));
+    };
   }, [id, dispatch]);
 
   useEffect(() => {

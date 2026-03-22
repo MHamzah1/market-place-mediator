@@ -24,6 +24,7 @@ import {
   updateRolePosition,
   clearRoleManagementSuccess,
   clearRoleManagementError,
+  setSelectedRolePosition,
 } from "@/lib/state/slice/role-management/roleManagementSlice";
 import Alert from "@/components/feature/alert/alert";
 import { cn } from "@/lib/utils";
@@ -100,6 +101,10 @@ export default function EditRolePosition({ slug }: { slug: string }) {
     };
 
     fetchData();
+
+    return () => {
+      dispatch(setSelectedRolePosition(null));
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 

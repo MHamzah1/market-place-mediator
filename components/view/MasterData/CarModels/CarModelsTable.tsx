@@ -74,53 +74,55 @@ const CarModelsTable = () => {
     }
   };
 
-  const getBodyTypeBadge = (bodyType: string) => {
-    const colors: Record<string, string> = {
-      SUV: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-      Sedan: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-      Hatchback: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-      MPV: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
-      Pickup: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-      Coupe: "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
-    };
-    return colors[bodyType] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+  const formatCurrency = (value: number | string | undefined) => {
+    if (!value) return "-";
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(num);
   };
 
   const columns: Column<CarModels>[] = [
     {
-      key: "modelCode",
-      header: "Kode",
-      render: (item: CarModels) => (
-        <span className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-          {item.modelCode || "-"}
-        </span>
-      ),
-    },
-    {
       key: "modelName",
-      header: "Nama Model",
+      header: "Model",
       render: (item: CarModels) => (
-        <div>
-          <p className="font-semibold text-slate-900 dark:text-white">{item.modelName}</p>
-          <p className="text-xs text-slate-500">{item.brandName || "-"}</p>
+        <div className="flex items-center gap-3">
+          {item.imageUrl ? (
+            <img
+              src={item.imageUrl}
+              alt={item.modelName}
+              className="w-10 h-10 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs">
+              N/A
+            </div>
+          )}
+          <div>
+            <p className="font-semibold text-slate-900 dark:text-white">{item.modelName}</p>
+            <p className="text-xs text-slate-500">{item.brand?.name || "-"}</p>
+          </div>
         </div>
       ),
     },
     {
-      key: "bodyType",
-      header: "Tipe Body",
+      key: "description",
+      header: "Deskripsi",
       render: (item: CarModels) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getBodyTypeBadge(item.bodyType || "")}`}>
-          {item.bodyType || "-"}
+        <span className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+          {item.description || "-"}
         </span>
       ),
     },
     {
-      key: "yearStart",
-      header: "Tahun Produksi",
+      key: "basePrice",
+      header: "Harga Dasar",
       render: (item: CarModels) => (
-        <span className="text-sm text-slate-600 dark:text-slate-400">
-          {item.yearStart || "-"} - {item.yearEnd || "Sekarang"}
+        <span className="text-sm font-medium text-slate-900 dark:text-white">
+          {formatCurrency(item.basePrice)}
         </span>
       ),
     },
